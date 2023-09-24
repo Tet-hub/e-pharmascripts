@@ -34,7 +34,6 @@ const ProductScreen = ({ navigation, route }) => {
           "products",
           "createdBy"
         );
-
         setProductData(productData);
       } catch (error) {
         console.error("Error fetching branches:", error);
@@ -44,16 +43,14 @@ const ProductScreen = ({ navigation, route }) => {
     fetchProducts();
   }, [sellerId]);
 
-  const handleProductDetailScreen = () => {
-    navigation.navigate("ProductDetailScreen");
-  };
-
   const renderProducts = ({ item }) => {
     return (
       <View style={[styles.productContainer, { width: cardWidth }]}>
         <TouchableOpacity
           style={styles.productCard}
-          onPress={handleProductDetailScreen}
+          onPress={() =>
+            navigation.navigate("ProductDetailScreen", { productId: item.id })
+          }
         >
           <View style={styles.imageContainer}>
             <Image source={{ uri: item.img }} style={styles.image} />

@@ -10,11 +10,11 @@ import {
 } from "firebase/firestore/lite";
 import { db } from "../firebase/firebase";
 
-export const fetchUserData = async (userId, collectionName) => {
+export const fetchUserData = async (id, collectionName) => {
   try {
-    const userDoc = doc(collection(db, collectionName), userId);
+    const userDoc = doc(collection(db, collectionName), id);
     const userSnapshot = await getDoc(userDoc);
-    console.log("userId from backend", userDoc);
+    // console.log("userId from backend", userSnapshot);
     if (userSnapshot.exists()) {
       return userSnapshot.data();
     } else {
