@@ -7,7 +7,7 @@ import {
   query,
   where,
   getDocs,
-} from "firebase/firestore/lite";
+} from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
 export const fetchUserData = async (id, collectionName) => {

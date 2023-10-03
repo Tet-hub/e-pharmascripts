@@ -24,14 +24,13 @@ const imageHeight = height * 0.18; // Adjust as needed
 const cardWidth = (width - 30) / 2;
 const BranchesScreen = ({ navigation, route }) => {
   const [branches, setBranches] = useState([]);
-  const branchName = route.params?.name;
+  const companyName = route.params?.name;
 
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        console.log(branchName);
         const branchesData = await fetchBranchesData(
-          branchName,
+          companyName,
           "sellers",
           "companyName"
         );
@@ -43,14 +42,17 @@ const BranchesScreen = ({ navigation, route }) => {
     };
 
     fetchBranches();
-  }, [branchName]);
+  }, [companyName]);
 
-  console.log("sellers");
-  const handleProductScreen = () => {
-    navigation.navigate("ProductScreen", {
-      name: item.companyName,
-      branch: item.branch,
-    });
+  // const handleProductScreen = () => {
+  //   navigation.navigate("ProductScreen", {
+  //     name: item.companyName,
+  //     branch: item.branch,
+  //   });
+  // };
+  const extractBranchName = (branch) => {
+    const match = branch.match(/\(([^)]+)\)/);
+    return match ? branch.replace(match[0], "").trim() : branch;
   };
 
   const renderBranchItem = ({ item }) => (
@@ -59,13 +61,15 @@ const BranchesScreen = ({ navigation, route }) => {
         <Text style={styles.ratingText}>{item.rating}★</Text>
         <Image source={{ uri: item.img }} style={styles.image} />
         <Text style={styles.pharmacyName}>{item.companyName}</Text>
-        <Text style={styles.branchName}>{`(${item.branch})`}</Text>
+        <Text style={styles.branchName}>{`(${extractBranchName(
+          item.branch
+        )})`}</Text>
         <View style={styles.viewButtonContainer}>
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("ProductScreen", {
                 name: item.companyName,
-                branch: item.branch,
+                branch: extractBranchName(item.branch),
                 sellerId: item.id,
               })
             }

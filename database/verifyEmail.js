@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs } from "firebase/firestore/lite";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
 export const checkUserExists = async (email) => {

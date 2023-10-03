@@ -13,24 +13,24 @@ import {
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import { fetchUserData } from "../database/backend";
+
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get("window").height;
-const ProductDetailScreen = ({ navigation, route }) => {
-  // const deviceHeight = Dimensions.get("window").height;
 
-  // const deviceWidth = Dimensions.get("window").width;
+const ProductDetailScreen = ({ navigation, route }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [selectedQuantity, setSelectedQuantity] = useState(1); // New state variable
   const [item, setProductData] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const productId = route.params?.productId;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productId = route.params?.productId;
         if (productId) {
           const productData = await fetchUserData(productId, "products");
-          if (item) {
+          if (productData) {
             setProductData(productData);
           }
         }
@@ -45,130 +45,139 @@ const ProductDetailScreen = ({ navigation, route }) => {
   }, []);
 
   const handleIncrement = () => {
-    setQuantity(quantity + 1);
+    if (quantity < item.stock) {
+      // Check if quantity is less than available stock
+      setQuantity(quantity + 1);
+      setSelectedQuantity(selectedQuantity + 1); // Update selected quantity
+    }
   };
+
   const handleDecrement = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
+      setSelectedQuantity(selectedQuantity - 1); // Update selected quantity
     }
   };
-  // const { width: deviceWidth } = Dimensions.get("window");
-  const scrollableContentHeight = deviceHeight - 50; // Adjust margin as needed
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={[styles.scrollableContent, { height: scrollableContentHeight }]}
-      >
-        <View style={[styles.container, { height: deviceHeight }]}>
-          <View style={styles.imageContainer}>
-            {item && item.img ? (
-              <Image
-                source={{ uri: item.img }}
-                style={[
-                  styles.image,
-                  { width: deviceWidth, height: (deviceWidth * 2) / 3 },
-                ]}
+      <ScrollView contentContainerStyle={styles.scrollableContent}>
+        <View style={styles.imageContainer}>
+          {item && item.img ? (
+            <Image
+              source={{ uri: item.img }}
+              style={[
+                styles.image,
+                { width: deviceWidth, height: (deviceWidth * 2) / 3 },
+              ]}
+            />
+          ) : (
+            <Image
+              source={require("../assets/img/default-image.jpg")}
+              style={[
+                styles.image,
+                { width: deviceWidth, height: (deviceWidth * 2) / 3 },
+              ]}
+            />
+          )}
+        </View>
+        <View style={styles.productContentContainer}>
+          <View style={styles.insideContentContainer}>
+            <View style={styles.productNameView}>
+              <Text style={styles.productNameText}>{item.productName}</Text>
+              <Text style={styles.productNameText}>{item.id}</Text>
+              <Iconify
+                icon="mdi:heart"
+                size={35}
+                color={isFavorite ? "#EC6F56" : "#8E8E8E"}
+                onPress={() => setIsFavorite(!isFavorite)}
               />
-            ) : (
-              <Image
-                source={require("../assets/img/default-image.jpg")}
-                style={[
-                  styles.image,
-                  { width: deviceWidth, height: (deviceWidth * 2) / 3 },
-                ]}
-              />
-            )}
-          </View>
-          <View style={styles.productContentContainer}>
-            <View style={styles.insideContentContainer}>
-              <View style={styles.productNameView}>
-                <Text style={styles.productNameText}>{item.productName}</Text>
-                <Iconify
-                  icon="mdi:heart"
-                  size={35}
-                  color={isFavorite ? "#EC6F56" : "#8E8E8E"}
-                  onPress={() => setIsFavorite(!isFavorite)}
-                />
-              </View>
-              {item.requiresPrescription == "Yes" ? (
-                <Text style={styles.productReq}>
-                  {" "}
-                  [ Requires Prescription ]{" "}
-                </Text>
-              ) : (
-                <Text style={styles.productReq}> </Text>
-              )}
-              <Text style={styles.productPrice}>₱ {item.price}</Text>
-              <Text style={styles.categoriesText}>
-                Categories: {item.category}{" "}
-              </Text>
-              <View style={styles.productInformationView}>
-                <Text style={styles.productInformationText}>
-                  Product Information
-                </Text>
-              </View>
-              <View style={styles.informationView}>
-                <Text style={styles.informationContent}>
-                  {"          "}
-                  {item.productInfo}
-                </Text>
-              </View>
-              <View style={styles.quantityStockRow}>
-                <View style={styles.quantityButton}>
-                  <TouchableOpacity
-                    onPress={handleDecrement}
-                    style={styles.button}
-                  >
-                    <Iconify icon="ph:minus-fill" size={22} color="black" />
-                  </TouchableOpacity>
-                  <Text style={styles.quantityText}>{quantity}</Text>
-                  <TouchableOpacity
-                    onPress={handleIncrement}
-                    style={styles.button}
-                  >
-                    <Iconify icon="ph:plus-fill" size={22} color="black" />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.stockText}>Stock: 50</Text>
-              </View>
-              <View style={styles.threeButtonsRow}>
-                <View style={styles.chatnowView}>
-                  <Iconify
-                    icon="ant-design:message-outlined"
-                    size={19}
-                    color="#EC6F56"
-                  />
-                  <Text style={styles.chatnowText}>Chat now</Text>
-                </View>
-                <View style={styles.addtocartView}>
-                  <Iconify icon="uil:cart" size={19} color="#EC6F56" />
-                  <Text style={styles.addtocartText}>Add to cart</Text>
-                </View>
-                <View style={styles.buynowView}>
-                  <Text style={styles.buynowText}>BUY NOW</Text>
-                </View>
-              </View>
             </View>
+            {item.requiresPrescription == "Yes" ? (
+              <Text style={styles.productReq}>[ Requires Prescription ]</Text>
+            ) : (
+              <Text style={styles.productReq}> </Text>
+            )}
+            <Text style={styles.productPrice}>
+              {"\u20B1"} {item.price}
+            </Text>
+            <Text style={styles.categoriesText}>
+              Categories: {item.category}
+            </Text>
+            <View style={styles.productInformationView}>
+              <Text style={styles.productInformationText}>
+                Product Information
+              </Text>
+            </View>
+            <View style={styles.informationView}>
+              <Text style={styles.informationContent}>
+                {"          "}
+                {item.productInfo}
+              </Text>
+            </View>
+            <View style={styles.quantityStockRow}>
+              <View style={styles.quantityButton}>
+                <TouchableOpacity
+                  onPress={handleDecrement}
+                  style={styles.button}
+                >
+                  <Iconify icon="ph:minus-fill" size={22} color="black" />
+                </TouchableOpacity>
+                <Text style={styles.quantityText}>{quantity}</Text>
+                <TouchableOpacity
+                  onPress={handleIncrement}
+                  style={styles.button}
+                >
+                  <Iconify icon="ph:plus-fill" size={22} color="black" />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.stockText}>Stock left: {item.stock}</Text>
+            </View>
+          </View>
+
+          <View style={styles.threeButtonsRow}>
+            <View style={styles.chatnowView}>
+              <Iconify
+                icon="ant-design:message-outlined"
+                size={19}
+                color="#EC6F56"
+              />
+              <Text style={styles.chatnowText}>Chat now</Text>
+            </View>
+            <View style={styles.addtocartView}>
+              <Iconify icon="uil:cart" size={19} color="#EC6F56" />
+              <Text style={styles.addtocartText}>Add to cart</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.buynowView}
+              onPress={() => {
+                navigation.navigate("ToValidateScreen", {
+                  productId: item.productId,
+                  quantity: quantity,
+                });
+              }}
+            >
+              <Text style={styles.buynowText}>BUY NOW</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-export default ProductDetailScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   scrollableContent: {
-    marginBottom: 13, // Add margin as needed
+    flexGrow: 1,
   },
   imageContainer: {
-    width: "100%", // Set to 100% to take the full width of the screen
+    width: "100%",
     alignSelf: "center",
     marginTop: 15,
-    paddingHorizontal: 10, // Add horizontal padding for margin
+    paddingHorizontal: 10,
   },
   image: {
     height: (deviceWidth * 2) / 3,
@@ -179,7 +188,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
-    marginBottom: 20,
   },
   insideContentContainer: {
     width: "85%",
@@ -314,10 +322,10 @@ const styles = StyleSheet.create({
   },
   threeButtonsRow: {
     flexDirection: "row",
-    marginTop: 20,
+    padding: 15,
     width: "85%",
     justifyContent: "space-between",
-    position: "absolute",
-    bottom: -80,
   },
 });
+
+export default ProductDetailScreen;

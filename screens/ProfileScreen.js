@@ -12,7 +12,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Iconify } from "react-native-iconify";
 import { Colors } from "../components/styles";
 import { StatusBar } from "expo-status-bar";
-import { useUserId } from "../src/api/userIDContext";
+// import { useUserId } from "../src/api/userIDContext";
 import { authentication } from "../firebase/firebase";
 import { getAuthToken } from "../src/api/authToken";
 import { db } from "../firebase/firebase";
@@ -24,7 +24,7 @@ const { orange } = Colors;
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [isLoading, setLoading] = useState(true);
-  const userId = useUserId(); // Assuming useUserId() returns a valid user ID
+  // const userId = useUserId(); // Assuming useUserId() returns a valid user ID
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const ProfileScreen = () => {
           }
         }
       } catch (error) {
-        console.log("error in profilescreen");
+        // console.log("error in profilescreen");
         console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);

@@ -45,7 +45,7 @@ import { authentication } from "../firebase/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { AuthContext } from "../src/api/context";
 import { saveAuthToken } from "../src/api/authToken";
-import { useUserId } from "../src/api/userIDContext";
+// import { useUserId } from "../src/api/userIDContext";
 import { checkUserExists } from "../database/verifyEmail";
 
 const Login = ({ navigation }) => {
@@ -54,18 +54,17 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const { signIn } = React.useContext(AuthContext);
-  // const [userId, setUserId] = useState("");
-  const { setUserId } = useUserId();
-  //
-  useEffect(() => {
-    // Check if there is a currently authenticated user
-    if (authentication.currentUser) {
-      // Get the user's UID
-      const userId = authentication.currentUser.uid;
-      setUserId(userId);
-      console.log(userId);
-    }
-  }, []);
+  // const { setUserId } = useUserId();
+  // //
+  // useEffect(() => {
+  //   // Check if there is a currently authenticated user
+  //   if (authentication.currentUser) {
+  //     // Get the user's UID
+  //     const userId = authentication.currentUser.uid;
+  //     setUserId(userId);
+  //     console.log(userId);
+  //   }
+  // }, []);
   //
   const SignInUser = async () => {
     try {
@@ -85,7 +84,7 @@ const Login = ({ navigation }) => {
       const user = userCredential.user;
       const userId = user.uid;
       const token = await user.getIdToken(); // Get the authentication token
-      await saveAuthToken(user.email, token, userId); // Save user's email and token to AsyncStorage
+      await saveAuthToken(user.email, token, userId); // Save user's email, token, and userId to AsyncStorage
       signIn(token); // Update the user's token in the context
       console.log("UserId fetched from login", userId);
     } catch (error) {

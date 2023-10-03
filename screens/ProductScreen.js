@@ -14,7 +14,8 @@ import {
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import { TextInput } from "react-native-gesture-handler";
-import { fetchBranchesData } from "../database/backend";
+import { fetchDocByCondition } from "../database/fetchDocByCondition";
+import { listenForItem } from "../database/component/realTimeListenerByCondition";
 const { width, height } = Dimensions.get("window");
 
 // Calculate the image dimensions based on screen size
@@ -26,21 +27,57 @@ const ProductScreen = ({ navigation, route }) => {
   const sellerId = route.params?.sellerId;
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    // Function to fetch initial data
+    const fetchInitialData = async () => {
       try {
-        // console.log(sellerId);
-        const productData = await fetchBranchesData(
-          sellerId,
-          "products",
-          "createdBy"
-        );
-        setProductData(productData);
+        const initialData = await fetchDocByCondition("products", [
+          {
+            fieldName: "createdBy",
+            operator: "==",
+            value: sellerId,
+          },
+          {
+            fieldName: "productStatus",
+            operator: "in",
+            value: ["Display", "Test", "Xyxy"],
+          },
+        ]);
+        setProductData(initialData);
       } catch (error) {
-        console.error("Error fetching branches:", error);
+        console.error("Error fetching initial data:", error);
       }
     };
 
-    fetchProducts();
+    // Function to set up real-time listener
+    const setUpRealTimeListener = () => {
+      const multipleConditions = [
+        {
+          fieldName: "createdBy",
+          operator: "==",
+          value: sellerId,
+        },
+        {
+          fieldName: "productStatus",
+          operator: "in",
+          value: ["Display", "Test", "Xyxy"],
+        },
+      ];
+
+      const unsubscribe = listenForItem(
+        "products",
+        multipleConditions,
+        (products) => {
+          setProductData(products);
+        }
+      );
+
+      // Cleanup the listener when the component unmounts
+      return () => unsubscribe();
+    };
+
+    // Fetch initial data and set up real-time listener
+    fetchInitialData();
+    setUpRealTimeListener();
   }, [sellerId]);
 
   const renderProducts = ({ item }) => {

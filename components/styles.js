@@ -14,7 +14,8 @@ export const Colors = {
   brand: "#808080",
   red: "#EB3F3F",
   black: "#000000",
-  dark: "#273B4A",
+  dark: "#222222",
+  // dark: "#424242",
   gray: "#D9D9D9",
   orange: "#EC6F56",
   bodyGray: "#F5F5F5",
@@ -95,12 +96,13 @@ export const StyledTextInput = styled.TextInput`
   padding-left: 30px;
   border-radius: 18px;
   font-size: 16px;
-  font-weight: 200;
+  font-weight: 300;
   height: 55px;
   width: 100%;
   color: ${dark};
-  border-width: 1px;
-  border-color: rgba(0, 0, 0, 0.2);
+  border-width: 2px;
+  border-color: rgba(0, 0, 0, 0.5);
+  /*border-color: black;*/
   margin-left: 0;
   text-align: left;
   margin-vertical: 8px;
