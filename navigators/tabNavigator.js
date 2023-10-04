@@ -12,10 +12,10 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 //screns
-import HomeScreen from "../screens/HomeScreen";
-import MessageScreen from "../screens/MessageScreen";
-import DiaryMaintenanceScreen from "../screens/DiaryMaintenanceScreen";
-import ShoppingCartScreen from "../screens/ShoppingCartScreen";
+import HomeScreen from "../screens/Home/HomeScreen";
+import MessageScreen from "../screens/Message/MessageScreen";
+import DiaryMaintenanceScreen from "../screens/DiaryMaintenance/DiaryMaintenanceScreen";
+import ShoppingCartScreen from "../screens/Cart/ShoppingCartScreen";
 // import TestScreen from "../screens/TestScreen";
 // import SampleScreen from "../screens/apitestscreen";
 
@@ -34,6 +34,8 @@ const styles = StyleSheet.create({
     right: 15,
   },
 });
+
+const TestImage = require("../assets/img/cymer.jpg");
 
 const CustomHeaderTitle = () => {
   const navigation = useNavigation();
@@ -77,7 +79,7 @@ const CustomHeaderTitle = () => {
           <View className="w-8 h-8 ml-5" style={{ marginTop: -4 }}>
             <View className="">
               <Image
-                source={require("../assets/img/cymer.jpg")}
+                source={TestImage}
                 className="w-full h-full rounded-full"
               />
             </View>

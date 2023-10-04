@@ -21,10 +21,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/img/ep-logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.epharmascripts.EpharmaScripts"
     },
     "web": {
       "favicon": "./assets/img/EPS-logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9c7726c5-0fef-4fe1-842b-b491eab51ce5"
+      }
     }
   }
 }

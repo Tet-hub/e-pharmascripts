@@ -29,7 +29,7 @@
     "formik": "^2.4.2",
     "nativewind": "^2.0.11",
     "react": "18.2.0",
-    "react-native": "0.71.8",
+    "react-native": "0.71.13",
     "react-native-bcrypt": "^2.4.0",
     "react-native-gesture-handler": "~2.9.0",
     "react-native-iconify": "^0.2.10",
