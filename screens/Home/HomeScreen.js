@@ -21,7 +21,7 @@ import { fetchData } from "../../database/fetchData";
 import styles from "./stylesheet";
 const { width, height } = Dimensions.get("window");
 const adsImage = require("../../assets/img/ads/ads.png");
-
+const cycy = require("../../assets/img/ads/cycy.png");
 // Calculate the image dimensions based on screen size
 const imageWidth = width; //Adjust as needed
 const imageHeight = height * 0.18; // Adjust as needed
@@ -123,7 +123,7 @@ const HomeScreen = () => {
                 marginRight: 5,
               }}
               scrollEnabled={false} // Disable swiping
-              data={[{ image: adsImage }]}
+              data={[{ image: adsImage }, { image: cycy }]}
               renderItem={({ item }) => (
                 <Image
                   source={item.image}

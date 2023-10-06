@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Checkbox } from "expo-checkbox";
 import { Formik } from "formik";
-import { Octicons, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import {
   ScrollView,
   View,
@@ -13,12 +13,8 @@ import {
 import {
   StyledContainer,
   InnerContainer,
-  SignupPageLogo,
-  SignupPageTitle,
   Subtitle,
   StyledFormArea,
-  LeftIcon,
-  StyledInputLabel,
   StyledTextInput,
   RightIcon,
   StyledButton,
@@ -30,43 +26,39 @@ import {
   TextLink,
   TextLinkContent,
 } from "../components/styles";
-
+import axios from "axios"; // Import Axios for making API requests
 //colors
 const { darkLight } = Colors;
 const { orange } = Colors;
+
 //date-time picker
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 //keyboard avoiding wrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import { BASE_URL } from "../src/api/apiURL";
 
-//firebase
-import { authentication, db } from "../firebase/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import {
-  collection,
-  getDocs,
-  doc,
-  setDoc,
-  addDoc,
-  serverTimestamp,
-  query,
-  orderBy,
-  getDoc,
-  updateDoc,
-  where,
-  getFirestore,
-} from "firebase/firestore/lite";
+// const API_URL = "http://127.0.0.1:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"";
+// const API_URL =
+// "http://10.0.2.2:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"; //for android emulator
+
+const API_URL =
+  "https://us-central1-e-pharmascripts.cloudfunctions.net/userApp";
 
 const Signup = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
   const [show, setShow] = useState(false);
   const [date, setDate] = useState(new Date(2000, 0, 1));
-  // State for the checkbox
   const [isChecked, setIsChecked] = useState(false);
-
-  //actual date of birth to be sent
-  const [dob, setDob] = useState();
+  const [dob, setDob] = useState("");
+  const [firstName, setFName] = useState("");
+  const [lastName, setLName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [allFieldsFilled, setAllFieldsFilled] = useState(false);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -78,138 +70,86 @@ const Signup = ({ navigation }) => {
   const showDatePicker = () => {
     setShow(true);
   };
-  //text input states
-  const [firstName, setFName] = useState("");
-  const [lastName, setLName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setconfirmPassword] = useState("");
-  //error message
-  const [error, setError] = useState(null);
 
-  // State variable for error message
-  useEffect(() => {
-    let timeoutId;
-    if (error) {
-      // Set a timeout to clear the error message after 3 seconds
-      timeoutId = setTimeout(() => {
-        setError(null);
-      }, 4000);
+  const handleInputChange = (field, text) => {
+    switch (field) {
+      case "firstName":
+        setFName(text);
+        break;
+      case "lastName":
+        setLName(text);
+        break;
+      case "email":
+        setEmail(text);
+        break;
+      case "phone":
+        setPhone(text);
+        break;
+      case "password":
+        setPassword(text);
+        break;
+      case "confirmPassword":
+        setConfirmPassword(text);
+        break;
+      default:
+        break;
     }
-    // Clear the timeout when the component unmounts or the error state changes
-    return () => clearTimeout(timeoutId);
-  }, [error]);
 
-  // Regular expressions for validation
-  const nameRegex = /^[A-Za-z]+$/; // Only alphabetic characters allowed
-  const emailRegex = /^\S+@\S+\.\S+$/; // Email format validation
-  const phoneRegex = /^09\d{9}$/; // Phone number format validation: starts with 09, followed by 9 digits
-  const passwordRegex = /^[A-Za-z0-9]{8,}$/; // At least 8 characters or digits
+    checkAllFieldsFilled();
+  };
 
-  //Create user
+  const checkAllFieldsFilled = () => {
+    if (
+      firstName.trim() !== "" &&
+      lastName.trim() !== "" &&
+      email.trim() !== "" &&
+      phone.trim() !== "" &&
+      password.trim() !== "" &&
+      confirmPassword.trim() !== "" &&
+      dob
+    ) {
+      setAllFieldsFilled(true);
+    } else {
+      setAllFieldsFilled(false);
+    }
+  };
+  const setErrorWithTimeout = (message, timeout = 5000) => {
+    setError(message);
+    setTimeout(() => setError(null), timeout);
+  };
   const RegisterUser = async () => {
-    const fName = firstName;
-    const lName = lastName;
-    const userEmail = email;
-    const userPhone = phone;
-    const userPassword = password;
-    const userconfirmPassword = confirmPassword;
-    const userCreatedAt = serverTimestamp(); // Add the createdAt field with the current server timestamp
-
-    const userData = {};
-
-    //check if terms and conditions is checked
     if (!isChecked) {
-      setError("Please agree to the Terms & Conditions");
+      setErrorWithTimeout("Please agree to the Terms & Conditions.");
       return;
     }
-    // Check if email already exists
-    const usersRef = collection(db, "users");
-    const emailExistsQuery = query(usersRef, where("email", "==", userEmail));
-
+    const userData = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      password,
+      confirmPassword,
+      dateOfBirth: dob,
+    };
     try {
-      const emailExistsSnapshot = await getDocs(emailExistsQuery);
-
-      if (!emailExistsSnapshot.empty) {
-        setError("Email address already exists");
-        return;
-      }
-
-      // ... continue with the rest of the code ...
-    } catch (error) {
-      console.error("Error checking email existence:", error);
-      // Handle the error as needed
-    }
-
-    // Validate and set field values in the userData object
-    if (nameRegex.test(fName)) {
-      userData.firstName = fName;
-    } else {
-      setError("Invalid First Name");
-      return;
-    }
-
-    if (nameRegex.test(lName)) {
-      userData.lastName = lName;
-    } else {
-      setError("Invalid Last Name");
-      return;
-    }
-
-    if (emailRegex.test(userEmail)) {
-      userData.email = userEmail;
-    } else {
-      setError("Invalid email address");
-      return;
-    }
-
-    if (phoneRegex.test(userPhone)) {
-      userData.phone = userPhone;
-    } else {
-      setError("Invalid phone number");
-      return;
-    }
-
-    // Validate the password
-    if (passwordRegex.test(userPassword)) {
-      userData.password = userPassword;
-    } else {
-      setError("Password should be at least 8 characters");
-      return;
-    }
-
-    // Validate the confirm password
-    if (userPassword === userconfirmPassword) {
-      userData.confirmPassword = userconfirmPassword;
-    } else {
-      setError("Password do not match");
-      return;
-    }
-
-    userData.dateOfBirth = dob;
-    userData.createdAt = userCreatedAt;
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        authentication,
-        userEmail,
-        userPassword
+      const response = await axios.post(
+        `${BASE_URL}/api/mobile/post/${"users"}`,
+        userData
       );
-      const uid = userCredential.user.uid; // Get the user ID from the UserCredential object
-
-      const db = getFirestore(); // Get the Firestore instance
-      const usersCollection = collection(db, "users"); // Replace 'users' with your actual collection name
-
-      // Set the user ID as the document ID when adding the user to Firestore
-      const userRef = doc(usersCollection, uid);
-      await setDoc(userRef, userData);
-
-      console.log("User added successfully with ID:", uid);
-      setError("User added successfully");
+      if (response.status === 200) {
+        // console.log("User added successfully");
+        console.log("User added successfully", response.data.msg);
+        setErrorWithTimeout("User added successfully");
+        navigation.navigate("Login");
+      }
     } catch (error) {
-      console.error("Error adding user:", error);
-      setError("Error adding user");
+      if (error.response && error.response.data && error.response.data.msg) {
+        console.log("Error afte from if:", error);
+        setErrorWithTimeout(error.response.data.msg); // Set the error message from the response
+      } else {
+        console.error("An error occurred during registration.", error);
+        setErrorWithTimeout("An error occurred during registration."); // Set a generic error message
+      }
     }
   };
 
@@ -219,10 +159,6 @@ const Signup = ({ navigation }) => {
         <StyledContainer>
           <StatusBar style="dark" />
           <InnerContainer>
-            {/* <SignupPageLogo
-              resizeMode="cover"
-              source={require("../assets/img/e-logo.png")}
-            /> */}
             <Subtitle style={{ marginTop: 20, marginBottom: 5 }}>
               Welcome to E-PharmaScripts
             </Subtitle>
@@ -260,31 +196,27 @@ const Signup = ({ navigation }) => {
                 <StyledFormArea style={{ marginTop: 15 }}>
                   <MyTextInput
                     icon="person"
-                    //   label="Username"
                     placeholder="First Name"
                     placeholderTextColor={darkLight}
-                    // onChangeText={handleChange("firstname")}
-                    onChangeText={(text) => setFName(text)}
+                    onChangeText={(text) =>
+                      handleInputChange("firstName", text)
+                    }
                     onBlur={handleBlur("firstname")}
                     value={firstName}
                   />
                   <MyTextInput
                     icon="person-fill"
-                    //   label="Full Name"
                     placeholder="Last Name"
                     placeholderTextColor={darkLight}
-                    // onChangeText={handleChange("lastname")}
-                    onChangeText={(text) => setLName(text)}
+                    onChangeText={(text) => handleInputChange("lastName", text)}
                     onBlur={handleBlur("lastname")}
                     value={lastName}
                   />
                   <MyTextInput
                     icon="mail"
-                    //   label="Email Address"
                     placeholder="Email"
                     placeholderTextColor={darkLight}
-                    // onChangeText={handleChange("email")}
-                    onChangeText={(email) => setEmail(email)}
+                    onChangeText={(text) => handleInputChange("email", text)}
                     onBlur={handleBlur("email")}
                     value={email}
                     keyboardType="email-address"
@@ -293,17 +225,17 @@ const Signup = ({ navigation }) => {
                     icon="device-mobile"
                     placeholder="Phone Number"
                     placeholderTextColor={darkLight}
-                    // onChangeText={handleChange("phone")}
-                    onChangeText={(number) => setPhone(number)}
+                    onChangeText={(text) => handleInputChange("phone", text)}
                     onBlur={handleBlur("phone")}
                     value={phone}
                   />
                   <MyTextInput
                     icon="calendar"
-                    //   label="Date of Birth"
                     placeholder="YYYY - MM - DD"
                     placeholderTextColor={darkLight}
-                    onChangeText={handleChange("dateOfBirth")}
+                    onChangeText={(text) =>
+                      handleInputChange("dateOfBirth", text)
+                    }
                     onBlur={handleBlur("dateOfBirth")}
                     value={dob ? dob.toDateString() : ""}
                     isDate={true}
@@ -313,11 +245,9 @@ const Signup = ({ navigation }) => {
                   />
                   <MyTextInput
                     icon="lock"
-                    //   label="Password"
                     placeholder="Enter Password"
                     placeholderTextColor={darkLight}
-                    // onChangeText={handleChange("password")}
-                    onChangeText={(text) => setPassword(text)}
+                    onChangeText={(text) => handleInputChange("password", text)}
                     onBlur={handleBlur("password")}
                     value={password}
                     secureTextEntry={hidePassword}
@@ -327,11 +257,11 @@ const Signup = ({ navigation }) => {
                   />
                   <MyTextInput
                     icon="lock"
-                    //   label="Confirm Password"
                     placeholder="Confirm Password"
                     placeholderTextColor={darkLight}
-                    // onChangeText={handleChange("confirmPassword")}
-                    onChangeText={(text) => setconfirmPassword(text)}
+                    onChangeText={(text) =>
+                      handleInputChange("confirmPassword", text)
+                    }
                     onBlur={handleBlur("confirmPassword")}
                     value={confirmPassword}
                     secureTextEntry={hidePassword}
@@ -371,17 +301,22 @@ const Signup = ({ navigation }) => {
 
                   <StyledButton
                     onPress={RegisterUser}
-                    style={{ marginTop: 20 }}
+                    style={{
+                      marginTop: 20,
+                      opacity: allFieldsFilled ? 1 : 0.7, // Set opacity based on allFieldsFilled
+                      backgroundColor: allFieldsFilled ? orange : "#ccc", // Set background color
+                    }}
+                    disabled={!allFieldsFilled} // Disable the button if not all fields are filled
                   >
                     <ButtonText>Register</ButtonText>
                   </StyledButton>
+
                   <ExtraView>
                     <Extratext>Already have an account? </Extratext>
                     <TextLink onPress={() => navigation.navigate("Login")}>
                       <TextLinkContent>Login</TextLinkContent>
                     </TextLink>
                   </ExtraView>
-                  {/* Error message */}
                 </StyledFormArea>
               )}
             </Formik>
@@ -393,7 +328,6 @@ const Signup = ({ navigation }) => {
 };
 
 const MyTextInput = ({
-  label,
   icon,
   isPassword,
   hidePassword,
@@ -408,7 +342,7 @@ const MyTextInput = ({
         <StyledTextInput
           {...props}
           placeholderTextColor="black"
-          selectionColor={orange} // Set the caret color to red
+          selectionColor={orange}
         />
       )}
       {isDate && (

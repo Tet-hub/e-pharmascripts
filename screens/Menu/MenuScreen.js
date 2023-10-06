@@ -12,8 +12,10 @@ import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../src/api/context";
 import { fetchUserData } from "../../database/backend";
 import { getAuthToken } from "../../src/api/authToken";
-import { useUserId } from "../../src/api/userIDContext";
+// import { useUserId } from "../../src/api/userIDContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./stylesheet";
+import { deleteAuthToken } from "../../src/api/authToken";
 
 const defaultImage = require("../../assets/img/default-image.jpg");
 
@@ -22,7 +24,7 @@ const MenuScreen = () => {
   const { signOut } = useContext(AuthContext);
 
   const [isLoading, setLoading] = useState(true);
-  const userId = useUserId(); // Assuming useUserId() returns a valid user ID
+  // const userId = useUserId(); // Assuming useUserId() returns a valid user ID
   const [user, setUser] = useState(null);
 
   useEffect(() => {

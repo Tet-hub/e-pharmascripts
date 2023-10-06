@@ -26,7 +26,25 @@ export const getAuthToken = async () => {
     console.log(
       "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
       email,
-      // token,
+      token,
+      userId
+    );
+    return { email, token, userId };
+  } catch (error) {
+    console.error("Error retrieving authentication token:", error);
+    return null;
+  }
+};
+
+export const deleteAuthToken = async () => {
+  try {
+    const email = await AsyncStorage.deleteItem("email");
+    const token = await AsyncStorage.deleteItem("token");
+    const userId = await AsyncStorage.deleteItem("userId");
+    console.log(
+      "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
+      email,
+      token,
       userId
     );
     return { email, token, userId };

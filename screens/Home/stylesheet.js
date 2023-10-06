@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   pharmacyCard: {
-    height: 190,
+    height: 200,
     borderRadius: 15,
     backgroundColor: "white",
     padding: 8,

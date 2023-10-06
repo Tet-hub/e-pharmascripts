@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik"; // Import Formik
 import { Octicons, Ionicons } from "@expo/vector-icons"; //Icons
-
+import { Alert } from "react-native";
 //import styles components
 import {
   StyledContainer,
@@ -31,6 +31,7 @@ import {
 } from "../components/styles";
 
 import { View, Text } from "react-native";
+import axios from "axios";
 
 //colors
 const { darkLight } = Colors;
@@ -41,62 +42,59 @@ import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
 
 //firebase
 import { authentication } from "../firebase/firebase";
-// import { auth e} from "../firebase/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { AuthContext } from "../src/api/context";
 import { saveAuthToken } from "../src/api/authToken";
-// import { useUserId } from "../src/api/userIDContext";
 import { checkUserExists } from "../database/verifyEmail";
+import { BASE_URL, EMU_URL } from "../src/api/apiURL";
+// const API_URL = "http://127.0.0.1:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"";
+// const API_URL =
+//   "http://10.0.2.2:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"; //for android emulator
 
 const Login = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
   const [error, setError] = useState(null);
-  const [email, setEmail] = useState(null);
-  const [password, setPassword] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const { signIn } = React.useContext(AuthContext);
-  // const { setUserId } = useUserId();
-  // //
-  // useEffect(() => {
-  //   // Check if there is a currently authenticated user
-  //   if (authentication.currentUser) {
-  //     // Get the user's UID
-  //     const userId = authentication.currentUser.uid;
-  //     setUserId(userId);
-  //     console.log(userId);
-  //   }
-  // }, []);
-  //
+
   const SignInUser = async () => {
     try {
-      const userExists = await checkUserExists(email);
-
-      if (!userExists) {
-        setError("Invalid Credentials");
-        return;
-      }
-
-      // If the user exists, attempt to sign in
-      const userCredential = await signInWithEmailAndPassword(
-        authentication,
-        email,
-        password
+      const response = await axios.post(
+        `${BASE_URL}/api/mobile/post/customer/login`,
+        {
+          email,
+          password,
+        }
       );
-      const user = userCredential.user;
-      const userId = user.uid;
-      const token = await user.getIdToken(); // Get the authentication token
-      await saveAuthToken(user.email, token, userId); // Save user's email, token, and userId to AsyncStorage
-      signIn(token); // Update the user's token in the context
-      console.log("UserId fetched from login", userId);
+
+      if (response.status === 200) {
+        // Login successful
+        const userId = response.data.userId;
+        const user = response.data.user;
+        const userToken = response.data.token;
+
+        await saveAuthToken(user.email, userToken, userId); // Save user's email, token, and userId to AsyncStorage
+        signIn(userToken); // Update the user's token in the context
+        console.log("UserId fetched from login", userId);
+      }
     } catch (error) {
-      if (error.code === "auth/invalid-email") {
-        setError("Invalid Credentials");
+      if (error.response && error.response.status === 401) {
+        setError("Invalid credentials");
       } else {
-        setError("Invalid Credentials");
         console.log("Error signing in:", error);
+        setError("LogIn failed!");
       }
     }
   };
 
+  // useEffect(() => {
+  //   if (error) {
+  //     Alert.alert("Error", error, [
+  //       { text: "OK", onPress: () => setError(null) },
+  //     ]);
+  //   }
+  // }, [error]);
   useEffect(() => {
     let timeoutId;
     if (error) {
@@ -121,10 +119,7 @@ const Login = ({ navigation }) => {
 
           <Formik
             initialValues={{ email: "", password: "" }}
-            onSubmit={(values) => {
-              // console.log(values);
-              // navigation.navigate("HomeScreen");
-            }}
+            onSubmit={() => SignInUser()}
           >
             {({ handleChange, handleBlur, handleSubmit, values }) => (
               <StyledFormArea>
@@ -136,6 +131,7 @@ const Login = ({ navigation }) => {
                 </View>
                 <MyTextInput
                   placeholder="Email"
+                  autoCapitalize="none"
                   placeholderTextColor={darkLight}
                   // onChangeText={handleChange("email")}
                   onChangeText={(text) => setEmail(text)}
@@ -147,6 +143,7 @@ const Login = ({ navigation }) => {
                 <MyTextInput
                   placeholder="Password"
                   placeholderTextColor={darkLight}
+                  autoCapitalize="none"
                   // onChangeText={handleChange("password")}
                   onChangeText={(text) => setPassword(text)}
                   onBlurText={handleBlur("password")}

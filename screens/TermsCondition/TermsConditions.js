@@ -6,10 +6,7 @@ const TermsConditions = () => {
     <View>
       <View>
         <Text className="px-2 mt-5 ml-2 text-lg font-bold">Notification</Text>
-        <Text
-          className="px-2 mt-2 ml-6"
-          style={{ color: "gray", fontSize: 16, marginBottom: 10 }}
-        >
+        <Text style={{ color: "gray", fontSize: 16, marginBottom: 10 }}>
           Today
         </Text>
       </View>

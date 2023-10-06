@@ -93,6 +93,7 @@ const ToValidateScreen = ({ navigation, route }) => {
 
       // Create an order object with the necessary data
       const data = {
+        orderId: docRef.id,
         userId: user.id,
         customerName: `${user.firstName} ${user.lastName}`,
         deliveryAddress: "NA", //google map api

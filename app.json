@@ -6,20 +6,14 @@
     "orientation": "portrait",
     "icon": "./assets/img/EPS.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/img/ep-logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/img/ep-logo.png",
+        "foregroundImage": "./assets/img/logo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.epharmascripts.EpharmaScripts"

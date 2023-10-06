@@ -13,7 +13,6 @@ import StoreLocatorScreen from "../screens/StoreLocator/StoreLocatorScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import BranchesScreen from "../screens/Branch/BranchesScreen";
 import ProductScreen from "../screens/Product/ProductScreen";
-import TermsConditions from "../screens/TermsCondition/TermsConditions";
 import EditProfileScreen from "../screens/EditProfile/EditProfileScreen";
 import ProfileScreen from "../screens/Profile/ProfileScreen";
 import MenuScreen from "../screens/Menu/MenuScreen";
@@ -101,13 +100,7 @@ const RootStack = () => {
             headerTintColor: "black",
           }}
         />
-        <Stack.Screen
-          name="TermsConditions"
-          component={TermsConditions}
-          options={{
-            headerShown: false,
-          }}
-        />
+     
 
         <Stack.Screen
           name="NotificationScreen"

@@ -1,16 +1,20 @@
 import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "./src/api/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TailwindProvider } from "tailwindcss-react-native";
 import RootStack from "./navigators/RootStack"; // Your main app stack
 import AuthStack from "./navigators/AuthStack"; // Your authentication stack (Login and Signup)
-import UserIdContext, { UserIdProvider } from "./src/api/userIDContext"; // Import UserIdProvider
 import { getAuthToken } from "./src/api/authToken";
+import CustomSplashScreen from "./screens/CustomSplashScreen";
+const Stack = createStackNavigator();
 
 const App = () => {
+  const [appReady, setAppReady] = useState(false);
   const [userToken, setUserToken] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
     // Check if a token is stored in AsyncStorage
@@ -43,14 +47,16 @@ const App = () => {
         // Save token to AsyncStorage
         AsyncStorage.setItem("token", token);
       },
-      signOut: () => {
-        setUserToken(null);
-        setUserId(null);
-        console.log("UserId removed successfully", userId);
-        // Clear token from AsyncStorage
-        AsyncStorage.removeItem("token").then(() => {
-          console.log("Token removed from AsyncStorage");
-        });
+      signOut: async () => {
+        try {
+          await AsyncStorage.multiRemove(["token", "email", "userId"]);
+          setUserToken(null);
+          setUserId(null);
+          setUserEmail(null);
+          console.log("Token, Email, and UserId removed successfully");
+        } catch (error) {
+          console.error("Error removing data from AsyncStorage:", error);
+        }
       },
       setUserId: (newUserId) => {
         setUserId(newUserId);
@@ -59,17 +65,29 @@ const App = () => {
     []
   );
 
+  useEffect(() => {
+    // Simulate any initialization tasks (e.g., loading data) here
+    setTimeout(() => {
+      setAppReady(true); // Signal that the app is ready to continue
+    }, 2000); // Adjust the delay as needed
+  }, []);
   return (
     <AuthContext.Provider value={authContext}>
-      <UserIdProvider value={userId}>
-        <TailwindProvider>
-          <NavigationContainer>
-            {userToken ? <RootStack /> : <AuthStack />}
-          </NavigationContainer>
-        </TailwindProvider>
-      </UserIdProvider>
+      <TailwindProvider>
+        <NavigationContainer>
+          {appReady ? (
+            userToken ? (
+              <RootStack />
+            ) : (
+              <AuthStack />
+            )
+          ) : (
+            <CustomSplashScreen />
+          )}
+        </NavigationContainer>
+      </TailwindProvider>
     </AuthContext.Provider>
   );
 };
-
+// Register your custom splash screen as the entry point
 export default App;
