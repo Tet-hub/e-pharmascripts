@@ -13,12 +13,12 @@ export const fetchDocByCondition = async (collectionName, conditions) => {
 
     const querySnapshot = await getDocs(queryRef);
 
-    const branchesData = querySnapshot.docs.map((doc) => ({
+    const collectionData = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    return branchesData;
+    return collectionData;
   } catch (error) {
     console.error("Error fetching branches:", error);
     return [];

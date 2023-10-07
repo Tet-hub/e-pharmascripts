@@ -16,9 +16,9 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
-import { filterData } from "../../components/data";
-import { fetchData } from "../../database/fetchData";
 import styles from "./stylesheet";
+import { getData } from "../../src/api/components/fetchData";
+
 const { width, height } = Dimensions.get("window");
 const adsImage = require("../../assets/img/ads/ads.png");
 const cycy = require("../../assets/img/ads/cycy.png");
@@ -29,13 +29,13 @@ const cardWidth = (width - 30) / 2;
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [mainPharmacy, setPharmacy] = useState([]);
+
   useEffect(() => {
     const fetchPharmacyData = async () => {
       try {
-        const pharmacyData = await fetchData("pharmacy");
-        // console.log("Pharmacy Data:", pharmacyData);
+        const pharmacyData = await getData("pharmacy");
         setPharmacy(pharmacyData);
-        // console.log("pharmacyData", pharmacyData);
+        console.log("sdf", pharmacyData);
       } catch (error) {
         console.error("Error fetching pharmacy data:", error);
       }

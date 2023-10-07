@@ -17,6 +17,7 @@ import { collection, query, where, getDocs } from "firebase/firestore/lite";
 import { db } from "../../firebase/firebase";
 import { fetchBranchesData } from "../../database/backend";
 import styles from "./stylesheet";
+import { EMU_URL } from "../../src/api/apiURL";
 const { width, height } = Dimensions.get("window");
 
 // Calculate the image dimensions based on screen size
@@ -25,32 +26,29 @@ const imageHeight = height * 0.18; // Adjust as needed
 const cardWidth = (width - 30) / 2;
 const BranchesScreen = ({ navigation, route }) => {
   const [branches, setBranches] = useState([]);
-  const companyName = route.params?.name;
+  const branchCompany = route.params?.name;
 
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const branchesData = await fetchBranchesData(
-          companyName,
-          "sellers",
-          "companyName"
+        // Make the API request to your Express backend
+        const response = await fetch(
+          `${EMU_URL}/api/mobile/get/api/fetchBranches?collectionName=sellers&fieldName=companyName&value=${branchCompany}`
         );
 
-        setBranches(branchesData);
+        if (response.ok) {
+          const branchesData = await response.json();
+          setBranches(branchesData);
+        } else {
+          console.error("API request failed with status:", response.status);
+        }
       } catch (error) {
         console.error("Error fetching branches:", error);
       }
     };
 
     fetchBranches();
-  }, [companyName]);
-
-  // const handleProductScreen = () => {
-  //   navigation.navigate("ProductScreen", {
-  //     name: item.companyName,
-  //     branch: item.branch,
-  //   });
-  // };
+  }, [branchCompany]);
   const extractBranchName = (branch) => {
     const match = branch.match(/\(([^)]+)\)/);
     return match ? branch.replace(match[0], "").trim() : branch;

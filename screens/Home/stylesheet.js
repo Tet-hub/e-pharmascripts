@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   pharmacyCard: {
-    height: 200,
+    height: 205,
     borderRadius: 15,
     backgroundColor: "white",
     padding: 8,
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
     paddingTop: 5,
+    height: 40,
   },
   viewButton: {
     backgroundColor: "white",

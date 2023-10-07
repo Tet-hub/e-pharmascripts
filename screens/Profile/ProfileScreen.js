@@ -14,7 +14,7 @@ import { Colors } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
 // import { useUserId } from "../src/api/userIDContext";
 import { authentication } from "../../firebase/firebase";
-import { getAuthToken } from "../../src/api/authToken";
+import { getAuthToken } from "../../src/authToken";
 import { db } from "../../firebase/firebase";
 import { collection, doc, getDoc } from "firebase/firestore/lite";
 import { fetchUserData } from "../../database/backend";

@@ -41,15 +41,9 @@ const { orange } = Colors;
 import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
 
 //firebase
-import { authentication } from "../firebase/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { AuthContext } from "../src/api/context";
-import { saveAuthToken } from "../src/api/authToken";
-import { checkUserExists } from "../database/verifyEmail";
+import { AuthContext } from "../src/context";
+import { saveAuthToken } from "../src/authToken";
 import { BASE_URL, EMU_URL } from "../src/api/apiURL";
-// const API_URL = "http://127.0.0.1:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"";
-// const API_URL =
-//   "http://10.0.2.2:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"; //for android emulator
 
 const Login = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);

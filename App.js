@@ -1,12 +1,12 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "./src/api/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TailwindProvider } from "tailwindcss-react-native";
 import RootStack from "./navigators/RootStack"; // Your main app stack
 import AuthStack from "./navigators/AuthStack"; // Your authentication stack (Login and Signup)
-import { getAuthToken } from "./src/api/authToken";
+import { AuthContext } from "./src/context";
+import { getAuthToken } from "./src/authToken";
 import CustomSplashScreen from "./screens/CustomSplashScreen";
 const Stack = createStackNavigator();
 

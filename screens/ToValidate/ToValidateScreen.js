@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { Timestamp } from "firebase/firestore";
 import { storeProductData } from "../../database/storing/storeData";
-import { getAuthToken } from "../../src/api/authToken";
+import { getAuthToken } from "../../src/authToken";
 import { updateById } from "../../database/update/updateDataById";
 import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
 import styles from "./stylesheet";
@@ -93,7 +93,6 @@ const ToValidateScreen = ({ navigation, route }) => {
 
       // Create an order object with the necessary data
       const data = {
-        orderId: docRef.id,
         userId: user.id,
         customerName: `${user.firstName} ${user.lastName}`,
         deliveryAddress: "NA", //google map api

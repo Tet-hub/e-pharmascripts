@@ -87,5 +87,4 @@ const ChatScreen = ({ route }) => {
   );
 };
 
-
 export default ChatScreen;

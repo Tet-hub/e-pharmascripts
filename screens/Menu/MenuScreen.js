@@ -9,13 +9,12 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Iconify } from "react-native-iconify";
 import React, { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../../src/api/context";
+import { AuthContext } from "../../src/context";
 import { fetchUserData } from "../../database/backend";
-import { getAuthToken } from "../../src/api/authToken";
+import { getAuthToken } from "../../src/authToken";
 // import { useUserId } from "../../src/api/userIDContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./stylesheet";
-import { deleteAuthToken } from "../../src/api/authToken";
 
 const defaultImage = require("../../assets/img/default-image.jpg");
 
