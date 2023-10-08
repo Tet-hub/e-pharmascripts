@@ -25,8 +25,8 @@ export const getAuthToken = async () => {
     const userId = await AsyncStorage.getItem("userId");
     console.log(
       "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
-      email,
-      token,
+      // email,
+      // token,
       userId
     );
     return { email, token, userId };

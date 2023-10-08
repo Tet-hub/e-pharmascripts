@@ -4,20 +4,19 @@ import SwiperFlatList from "react-native-swiper-flatlist";
 import { useNavigation } from "@react-navigation/native";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  Pressable,
   FlatList,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import styles from "./stylesheet";
-import { getData } from "../../src/api/components/fetchData";
+import axios from "axios";
+import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
 
 const { width, height } = Dimensions.get("window");
 const adsImage = require("../../assets/img/ads/ads.png");
@@ -33,11 +32,16 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchPharmacyData = async () => {
       try {
-        const pharmacyData = await getData("pharmacy");
+        //HTTP GET request to API endpoint without specifying conditions
+        const response = await axios.get(
+          `${BASE_URL}/api/mobile/get/fetch/docs/by/condition?collectionName=pharmacy`
+        );
+
+        // Extracting the data from the response
+        const pharmacyData = response.data;
         setPharmacy(pharmacyData);
-        console.log("sdf", pharmacyData);
       } catch (error) {
-        console.error("Error fetching pharmacy data:", error);
+        console.log("Error fetching pharmacy data:", error);
       }
     };
 

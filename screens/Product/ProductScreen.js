@@ -1,28 +1,28 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
   ScrollView,
-  Button,
-  Alert,
   TouchableOpacity,
   Dimensions,
   FlatList,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import { TextInput } from "react-native-gesture-handler";
-import { fetchDocByCondition } from "../../database/fetchDocByCondition";
 import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
+import buildQueryUrl from "../../src/api/components/conditionalQuery";
+import { db } from "../../firebase/firebase";
+import { getAuthToken } from "../../src/authToken";
+
+import { getFirestore, addDoc, collection } from "firebase/firestore";
 
 const { width, height } = Dimensions.get("window");
 
 // Calculate the image dimensions based on screen size
-const imageWidth = width; //Adjust as needed
-const imageHeight = height * 0.18; // Adjust as needed
+
 const cardWidth = (width - 30) / 2;
 const ProductScreen = ({ navigation, route }) => {
   const [product, setProductData] = useState([]);
@@ -32,25 +32,36 @@ const ProductScreen = ({ navigation, route }) => {
     // Function to fetch initial data
     const fetchInitialData = async () => {
       try {
-        const initialData = await fetchDocByCondition("products", [
-          {
-            fieldName: "createdBy",
-            operator: "==",
-            value: sellerId,
-          },
+        // Define the conditions array as an array of objects
+        const conditions = [
+          { fieldName: "createdBy", operator: "==", value: sellerId },
           {
             fieldName: "productStatus",
             operator: "in",
             value: ["Display", "Test", "Xyxy"],
           },
-        ]);
-        setProductData(initialData);
+        ];
+
+        // Generate the API URL with conditions
+        const apiUrl = buildQueryUrl("products", conditions);
+
+        // Make a GET request to the apiUrl
+        const response = await fetch(apiUrl, {
+          method: "GET", // Set the request method to GET
+        });
+
+        if (response.ok) {
+          const branchesData = await response.json();
+          setProductData(branchesData);
+        } else {
+          console.log("API request failed with status:", response.status);
+        }
       } catch (error) {
-        console.error("Error fetching initial data:", error);
+        console.log("Error fetching products:", error);
       }
     };
 
-    // Function to set up real-time listener
+    // // Function to set up real-time listener
     const setUpRealTimeListener = () => {
       const multipleConditions = [
         {
@@ -82,6 +93,34 @@ const ProductScreen = ({ navigation, route }) => {
     setUpRealTimeListener();
   }, [sellerId]);
 
+  const addToCart = async (productId, productName, price) => {
+    try {
+      const authToken = await getAuthToken();
+      const userId = authToken.userId; // Get userId from AsyncStorage
+      console.log("userId", userId);
+      // Define the quantity (you can set it as needed)
+      const quantity = 1;
+
+      // Reference to the user's cart
+      const cartRef = db.ref(`carts/${userId}/${productId}`);
+
+      // Check if the product is already in the cart
+      const snapshot = await cartRef.once("value");
+      const existingProduct = snapshot.val();
+
+      if (existingProduct) {
+        // Product exists in the cart, update the quantity
+        const newQuantity = existingProduct.quantity + quantity;
+        await cartRef.update({ quantity: newQuantity });
+      } else {
+        // Product doesn't exist in the cart, add it
+        await cartRef.set({ productName, price, quantity });
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
   const renderProducts = ({ item }) => {
     return (
       <View style={[styles.productContainer, { width: cardWidth }]}>
@@ -103,10 +142,14 @@ const ProductScreen = ({ navigation, route }) => {
           )}
 
           <Text style={styles.productPrice}>₱ {item.price}</Text>
-          <View style={styles.addtocartButton}>
-            <Text style={styles.addtocartText}>Add to cart</Text>
-            <Iconify icon="ion:cart-outline" size={18} color="white" />
-          </View>
+          <TouchableOpacity
+            onPress={() => addToCart(item.id, item.productName, item.price)}
+          >
+            <View style={styles.addtocartButton}>
+              <Text style={styles.addtocartText}>Add to cart</Text>
+              <Iconify icon="ion:cart-outline" size={18} color="white" />
+            </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
     );

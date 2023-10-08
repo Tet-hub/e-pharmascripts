@@ -1,29 +1,18 @@
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { View, Image, TouchableOpacity, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Iconify } from "react-native-iconify";
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../src/context";
-import { fetchUserData } from "../../database/backend";
 import { getAuthToken } from "../../src/authToken";
-// import { useUserId } from "../../src/api/userIDContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./stylesheet";
+import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
 
 const defaultImage = require("../../assets/img/default-image.jpg");
 
 const MenuScreen = () => {
   const navigation = useNavigation();
   const { signOut } = useContext(AuthContext);
-
   const [isLoading, setLoading] = useState(true);
-  // const userId = useUserId(); // Assuming useUserId() returns a valid user ID
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -33,14 +22,19 @@ const MenuScreen = () => {
         const userId = authToken.userId; // Get userId from AsyncStorage
 
         if (userId) {
-          const userData = await fetchUserData(userId, "users");
-          console.log("userId", userId);
-          if (userData) {
+          // Calling API here
+          const apiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/users/${userId}`;
+          const response = await fetch(apiUrl);
+
+          if (response.ok) {
+            const userData = await response.json();
             setUser(userData);
+          } else {
+            console.log("API request failed with status:", response.status);
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.log("Error fetching user data:", error);
       } finally {
         setLoading(false);
       }

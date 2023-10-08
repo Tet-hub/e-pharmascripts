@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
@@ -12,12 +11,8 @@ import {
   FlatList,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
-import firebase from "firebase/app";
-import { collection, query, where, getDocs } from "firebase/firestore/lite";
-import { db } from "../../firebase/firebase";
-import { fetchBranchesData } from "../../database/backend";
 import styles from "./stylesheet";
-import { EMU_URL } from "../../src/api/apiURL";
+import buildQueryUrl from "../../src/api/components/conditionalQuery";
 const { width, height } = Dimensions.get("window");
 
 // Calculate the image dimensions based on screen size
@@ -31,24 +26,33 @@ const BranchesScreen = ({ navigation, route }) => {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        // Make the API request to your Express backend
-        const response = await fetch(
-          `${EMU_URL}/api/mobile/get/api/fetchBranches?collectionName=sellers&fieldName=companyName&value=${branchCompany}`
-        );
+        // Define the conditions array
+        const conditions = [
+          { fieldName: "companyName", operator: "==", value: branchCompany },
+        ];
+
+        // Generate the API URL with conditions
+        const apiUrl = buildQueryUrl("sellers", conditions);
+
+        // GET request to the apiUrl
+        const response = await fetch(apiUrl, {
+          method: "GET", // Set the request method to GET
+        });
 
         if (response.ok) {
           const branchesData = await response.json();
           setBranches(branchesData);
         } else {
-          console.error("API request failed with status:", response.status);
+          console.log("API request failed with status:", response.status);
         }
       } catch (error) {
-        console.error("Error fetching branches:", error);
+        console.log("Error fetching branches:", error);
       }
     };
 
     fetchBranches();
   }, [branchCompany]);
+
   const extractBranchName = (branch) => {
     const match = branch.match(/\(([^)]+)\)/);
     return match ? branch.replace(match[0], "").trim() : branch;

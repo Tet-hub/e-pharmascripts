@@ -10,22 +10,14 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useState, useEffect, useContext } from "react";
 
 import { Iconify } from "react-native-iconify";
-import { Colors } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
-// import { useUserId } from "../src/api/userIDContext";
-import { authentication } from "../../firebase/firebase";
 import { getAuthToken } from "../../src/authToken";
-import { db } from "../../firebase/firebase";
-import { collection, doc, getDoc } from "firebase/firestore/lite";
-import { fetchUserData } from "../../database/backend";
-const { bodyGray } = Colors;
-const { orange } = Colors;
 import styles from "./stylesheet";
+import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [isLoading, setLoading] = useState(true);
-  // const userId = useUserId(); // Assuming useUserId() returns a valid user ID
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -35,16 +27,20 @@ const ProfileScreen = () => {
         const userId = authToken.userId; // Get userId from AsyncStorage
 
         if (userId) {
-          const userData = await fetchUserData(userId, "users");
-          // console.log("userId", userId);
-          if (userData) {
+          // Calling API here
+          const apiUrl = `${EMU_URL}/api/mobile/get/fetch/docs/by/users/${userId}`;
+          const response = await fetch(apiUrl);
+
+          if (response.ok) {
+            const userData = await response.json();
             setUser(userData);
-            // console.log("userdata", userData);
+          } else {
+            console.log("API request failed with status:", response.status);
           }
         }
       } catch (error) {
         // console.log("error in profilescreen");
-        console.error("Error fetching user data:", error);
+        console.log("Error fetching user data:", error);
       } finally {
         setLoading(false);
       }
@@ -59,7 +55,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.insideContainer}>
         <StatusBar backgroundColor="white" />
         <Text style={styles.title}>Personal Information</Text>
@@ -187,7 +183,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

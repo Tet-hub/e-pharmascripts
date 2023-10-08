@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { Checkbox } from "expo-checkbox";
 import { Formik } from "formik";
 import { Ionicons } from "@expo/vector-icons";
+import { ActivityIndicator } from "react-native";
 import {
   ScrollView,
   View,
@@ -59,6 +60,7 @@ const Signup = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -113,11 +115,13 @@ const Signup = ({ navigation }) => {
       setAllFieldsFilled(false);
     }
   };
-  const setErrorWithTimeout = (message, timeout = 5000) => {
+  const setErrorWithTimeout = (message, timeout = 8000) => {
     setError(message);
     setTimeout(() => setError(null), timeout);
   };
   const RegisterUser = async () => {
+    setIsLoading(true); // Start loading
+
     if (!isChecked) {
       setErrorWithTimeout("Please agree to the Terms & Conditions.");
       return;
@@ -150,6 +154,8 @@ const Signup = ({ navigation }) => {
         console.error("An error occurred during registration.", error);
         setErrorWithTimeout("An error occurred during registration."); // Set a generic error message
       }
+    } finally {
+      setIsLoading(false); // Done loading
     }
   };
 
@@ -215,6 +221,7 @@ const Signup = ({ navigation }) => {
                   <MyTextInput
                     icon="mail"
                     placeholder="Email"
+                    autoCapitalize="none"
                     placeholderTextColor={darkLight}
                     onChangeText={(text) => handleInputChange("email", text)}
                     onBlur={handleBlur("email")}
@@ -246,6 +253,7 @@ const Signup = ({ navigation }) => {
                   <MyTextInput
                     icon="lock"
                     placeholder="Enter Password"
+                    autoCapitalize="none"
                     placeholderTextColor={darkLight}
                     onChangeText={(text) => handleInputChange("password", text)}
                     onBlur={handleBlur("password")}
@@ -258,6 +266,7 @@ const Signup = ({ navigation }) => {
                   <MyTextInput
                     icon="lock"
                     placeholder="Confirm Password"
+                    autoCapitalize="none"
                     placeholderTextColor={darkLight}
                     onChangeText={(text) =>
                       handleInputChange("confirmPassword", text)
@@ -306,9 +315,13 @@ const Signup = ({ navigation }) => {
                       opacity: allFieldsFilled ? 1 : 0.7, // Set opacity based on allFieldsFilled
                       backgroundColor: allFieldsFilled ? orange : "#ccc", // Set background color
                     }}
-                    disabled={!allFieldsFilled} // Disable the button if not all fields are filled
+                    disabled={!allFieldsFilled || isLoading} // Disable the button if not all fields are filled or if loading
                   >
-                    <ButtonText>Register</ButtonText>
+                    {isLoading ? (
+                      <ActivityIndicator size="large" color="#ffffff" />
+                    ) : (
+                      <ButtonText>Register</ButtonText>
+                    )}
                   </StyledButton>
 
                   <ExtraView>

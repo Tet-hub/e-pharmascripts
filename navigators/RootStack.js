@@ -55,28 +55,6 @@ const styles = StyleSheet.create({
 const Stack = createStackNavigator();
 
 const RootStack = () => {
-  // const [initialRouteName, setInitialRouteName] = useState("HomeScreen");
-
-  // useEffect(() => {
-  //   // Check if the user has a token in AsyncStorage
-  //   const checkToken = async () => {
-  //     try {
-  //       const token = await AsyncStorage.getItem("token");
-  //       console.log("Token found in AsyncStorage:", token);
-
-  //       if (!token) {
-  //         // No token, navigate to Login
-  //         console.log("No token, navigating to Login Screen");
-  //         setInitialRouteName("Login");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error checking token:", error);
-  //     }
-  //   };
-
-  //   checkToken();
-  // }, []);
-
   return (
     <TailwindProvider>
       <Stack.Navigator
@@ -85,7 +63,6 @@ const RootStack = () => {
             backgroundColor: "#F5F5F5",
           },
         }}
-        // initialRouteName={initialRouteName}
       >
         <Stack.Screen
           name="HomeScreen"
@@ -100,7 +77,6 @@ const RootStack = () => {
             headerTintColor: "black",
           }}
         />
-     
 
         <Stack.Screen
           name="NotificationScreen"
@@ -256,24 +232,23 @@ const RootStack = () => {
           options={({ route }) => ({
             title: route.params.name,
             headerStyle: {
-              backgroundColor: "#EC6F56", // Set the background color to orange
+              backgroundColor: "#EC6F56",
             },
             headerTitleStyle: {
-              color: "white", // Set the text color to white
-              fontWeight: "bold", // Make the text bold
+              color: "white",
+              fontWeight: "bold",
               fontSize: 24,
             },
-            headerTintColor: "white", // Set the back button color to white
+            headerTintColor: "white",
 
             headerRight: () => (
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                {/* Display the recipient's avatar */}
                 <Image
                   source={require("../assets/img/cymer.jpg")}
                   style={{
                     width: 40,
                     height: 40,
-                    borderRadius: 20, // Make it circular
+                    borderRadius: 20,
                     marginRight: 10,
                   }}
                 />

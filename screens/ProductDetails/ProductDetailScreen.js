@@ -12,9 +12,8 @@ import {
   Dimensions,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
-import { fetchUserData } from "../../database/backend";
 import styles from "./detailsStylesheet";
-
+import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
 const deviceWidth = Dimensions.get("window").width;
 
 const ProductDetailScreen = ({ navigation, route }) => {
@@ -29,13 +28,18 @@ const ProductDetailScreen = ({ navigation, route }) => {
     const fetchData = async () => {
       try {
         if (productId) {
-          const productData = await fetchUserData(productId, "products");
-          if (productData) {
+          const apiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productId}`;
+          const response = await fetch(apiUrl);
+
+          if (response.ok) {
+            const productData = await response.json();
             setProductData(productData);
+          } else {
+            console.log("API request failed with status:", response.status);
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching product data:", error);
       } finally {
         setLoading(false);
       }

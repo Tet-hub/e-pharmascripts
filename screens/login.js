@@ -1,10 +1,8 @@
-import { useNavigation } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik"; // Import Formik
 import { Octicons, Ionicons } from "@expo/vector-icons"; //Icons
-import { Alert } from "react-native";
-//import styles components
+import { ActivityIndicator } from "react-native";
 import {
   StyledContainer,
   InnerContainer,
@@ -29,7 +27,6 @@ import {
   GoogleImage,
   Box,
 } from "../components/styles";
-
 import { View, Text } from "react-native";
 import axios from "axios";
 
@@ -51,8 +48,10 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signIn } = React.useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const SignInUser = async () => {
+    setIsLoading(true); // Start loading
     try {
       const response = await axios.post(
         `${BASE_URL}/api/mobile/post/customer/login`,
@@ -77,8 +76,10 @@ const Login = ({ navigation }) => {
         setError("Invalid credentials");
       } else {
         console.log("Error signing in:", error);
-        setError("LogIn failed!");
+        setError("Log In failed!");
       }
+    } finally {
+      setIsLoading(false); // Done loading
     }
   };
 
@@ -95,7 +96,7 @@ const Login = ({ navigation }) => {
       // Set a timeout to clear the error message after 3 seconds
       timeoutId = setTimeout(() => {
         setError(null);
-      }, 4000);
+      }, 6000);
     }
     // Clear the timeout when the component unmounts or the error state changes
     return () => clearTimeout(timeoutId);
@@ -152,8 +153,12 @@ const Login = ({ navigation }) => {
                   Forgot password?
                 </MsgBox>
                 {}
-                <StyledButton onPress={SignInUser}>
-                  <ButtonText>Login</ButtonText>
+                <StyledButton onPress={SignInUser} disabled={isLoading}>
+                  {isLoading ? (
+                    <ActivityIndicator size="large" color="#ffffff" />
+                  ) : (
+                    <ButtonText>Login</ButtonText>
+                  )}
                 </StyledButton>
                 <Text
                   className="text-center"
