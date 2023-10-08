@@ -75,9 +75,7 @@ const App = () => {
     <AuthContext.Provider value={authContext}>
       <TailwindProvider>
         <NavigationContainer>
-          <CustomSplashScreen />
-
-          {/* {appReady ? (
+          {appReady ? (
             userToken ? (
               <RootStack />
             ) : (
@@ -85,7 +83,7 @@ const App = () => {
             )
           ) : (
             <CustomSplashScreen />
-          )} */}
+          )}
         </NavigationContainer>
       </TailwindProvider>
     </AuthContext.Provider>
