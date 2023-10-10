@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
     marginTop: 15,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
   },
   image: {
     height: (deviceWidth * 2) / 3,

@@ -8,6 +8,7 @@ import AuthStack from "./navigators/AuthStack"; // Your authentication stack (Lo
 import { AuthContext } from "./src/context";
 import { getAuthToken } from "./src/authToken";
 import CustomSplashScreen from "./screens/CustomSplashScreen";
+import { ToastProvider } from "react-native-toast-notifications";
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -33,7 +34,7 @@ const App = () => {
           console.log("retrieved token and userid from app.js:", userId);
         }
       } catch (error) {
-        console.error("Error retrieving data from AsyncStorage:", error);
+        console.log("Error retrieving data from AsyncStorage:", error);
       }
     };
 
@@ -55,7 +56,7 @@ const App = () => {
           setUserEmail(null);
           console.log("Token, Email, and UserId removed successfully");
         } catch (error) {
-          console.error("Error removing data from AsyncStorage:", error);
+          console.log("Error removing data from AsyncStorage:", error);
         }
       },
       setUserId: (newUserId) => {
@@ -74,17 +75,19 @@ const App = () => {
   return (
     <AuthContext.Provider value={authContext}>
       <TailwindProvider>
-        <NavigationContainer>
-          {appReady ? (
-            userToken ? (
-              <RootStack />
+        <ToastProvider>
+          <NavigationContainer>
+            {appReady ? (
+              userToken ? (
+                <RootStack />
+              ) : (
+                <AuthStack />
+              )
             ) : (
-              <AuthStack />
-            )
-          ) : (
-            <CustomSplashScreen />
-          )}
-        </NavigationContainer>
+              <CustomSplashScreen />
+            )}
+          </NavigationContainer>
+        </ToastProvider>
       </TailwindProvider>
     </AuthContext.Provider>
   );

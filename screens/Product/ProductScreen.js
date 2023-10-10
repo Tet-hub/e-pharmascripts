@@ -14,10 +14,6 @@ import { TextInput } from "react-native-gesture-handler";
 import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
-import { db } from "../../firebase/firebase";
-import { getAuthToken } from "../../src/authToken";
-
-import { getFirestore, addDoc, collection } from "firebase/firestore";
 
 const { width, height } = Dimensions.get("window");
 
@@ -93,43 +89,10 @@ const ProductScreen = ({ navigation, route }) => {
     setUpRealTimeListener();
   }, [sellerId]);
 
-  const addToCart = async (productId, productName, price) => {
-    try {
-      const authToken = await getAuthToken();
-      const userId = authToken.userId; // Get userId from AsyncStorage
-      console.log("userId", userId);
-      // Define the quantity (you can set it as needed)
-      const quantity = 1;
-
-      // Reference to the user's cart
-      const cartRef = db.ref(`carts/${userId}/${productId}`);
-
-      // Check if the product is already in the cart
-      const snapshot = await cartRef.once("value");
-      const existingProduct = snapshot.val();
-
-      if (existingProduct) {
-        // Product exists in the cart, update the quantity
-        const newQuantity = existingProduct.quantity + quantity;
-        await cartRef.update({ quantity: newQuantity });
-      } else {
-        // Product doesn't exist in the cart, add it
-        await cartRef.set({ productName, price, quantity });
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  };
-
   const renderProducts = ({ item }) => {
     return (
       <View style={[styles.productContainer, { width: cardWidth }]}>
-        <TouchableOpacity
-          style={styles.productCard}
-          onPress={() =>
-            navigation.navigate("ProductDetailScreen", { productId: item.id })
-          }
-        >
+        <View style={styles.productCard}>
           <View style={styles.imageContainer}>
             <Image source={{ uri: item.img }} style={styles.image} />
           </View>
@@ -143,14 +106,20 @@ const ProductScreen = ({ navigation, route }) => {
 
           <Text style={styles.productPrice}>₱ {item.price}</Text>
           <TouchableOpacity
-            onPress={() => addToCart(item.id, item.productName, item.price)}
+            onPress={() =>
+              navigation.navigate("ProductDetailScreen", {
+                productId: item.id,
+                name: route.params?.name,
+                branch: route.params?.branch,
+              })
+            }
           >
             <View style={styles.addtocartButton}>
-              <Text style={styles.addtocartText}>Add to cart</Text>
-              <Iconify icon="ion:cart-outline" size={18} color="white" />
+              <Text style={styles.addtocartText}>View Product</Text>
+              <Iconify icon="ic:round-greater-than" size={18} color="white" />
             </View>
           </TouchableOpacity>
-        </TouchableOpacity>
+        </View>
       </View>
     );
   };

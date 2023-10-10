@@ -10,10 +10,13 @@ import {
   Alert,
   TouchableOpacity,
   Dimensions,
+  ToastAndroid,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import styles from "./detailsStylesheet";
 import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
+import { getAuthToken } from "../../src/authToken";
+import { useToast } from "react-native-toast-notifications";
 const deviceWidth = Dimensions.get("window").width;
 
 const ProductDetailScreen = ({ navigation, route }) => {
@@ -23,7 +26,9 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [item, setProductData] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const productId = route.params?.productId;
-
+  const sellerName = route.params?.branch;
+  const company = route.params?.name;
+  const toast = useToast();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,7 +67,63 @@ const ProductDetailScreen = ({ navigation, route }) => {
       setSelectedQuantity(selectedQuantity - 1); // Update selected quantity
     }
   };
+  const addToCart = async () => {
+    try {
+      const authToken = await getAuthToken();
+      const userId = authToken.userId;
 
+      if (!userId) {
+        console.log("User ID is undefined or null.");
+        return;
+      }
+
+      const storeItemUrl = `${EMU_URL}/api/mobile/post/items/cart`;
+
+      // Create the item object to be sent
+      const itemToAddToCart = {
+        userId,
+        productId: productId,
+        productName: item.productName,
+        price: item.price,
+        quantity,
+        sellerId: item.createdBy,
+        img: item.img,
+        requiresPrescription: item.requiresPrescription,
+        category: item.category,
+        sellerName: sellerName,
+      };
+      // console.log("item", itemToAddToCart);
+      const response = await fetch(storeItemUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(itemToAddToCart),
+      });
+      if (response.ok) {
+        console.log("Item added to cart successfully!");
+        //Adding toastAndriod success message
+        // ToastAndroid.show(
+        //   "Item added to cart successfully!",
+        //   ToastAndroid.SHORT
+        // );
+        // toast.show("Item added to cart successfully!");
+        toast.show("Item added to cart successfully!", {
+          type: "normal ",
+          placement: "bottom",
+          duration: 3000,
+          offset: 10,
+          animationType: "slide-in",
+        });
+      } else {
+        console.log("Error adding item to cart:", response.status);
+      }
+    } catch (error) {
+      console.log("Error adding to cart:", error);
+      // Optionally, you can show an error message here.
+      ToastAndroid.show("Item adding failed!", ToastAndroid.SHORT);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollableContent}>
@@ -70,10 +131,11 @@ const ProductDetailScreen = ({ navigation, route }) => {
           {item && item.img ? (
             <Image
               source={{ uri: item.img }}
-              style={[
-                styles.image,
-                { width: deviceWidth, height: (deviceWidth * 2) / 3 },
-              ]}
+              style={styles.image}
+              // style={[
+              //   styles.image,
+              //   { width: deviceWidth, height: (deviceWidth * 2) / 3 },
+              // ]}
             />
           ) : (
             <Image
@@ -140,18 +202,18 @@ const ProductDetailScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.threeButtonsRow}>
-            <View style={styles.chatnowView}>
+            <TouchableOpacity style={styles.chatnowView}>
               <Iconify
                 icon="ant-design:message-outlined"
                 size={19}
                 color="#EC6F56"
               />
               <Text style={styles.chatnowText}>Chat now</Text>
-            </View>
-            <View style={styles.addtocartView}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.addtocartView} onPress={addToCart}>
               <Iconify icon="uil:cart" size={19} color="#EC6F56" />
               <Text style={styles.addtocartText}>Add to cart</Text>
-            </View>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.buynowView}
               onPress={() => {

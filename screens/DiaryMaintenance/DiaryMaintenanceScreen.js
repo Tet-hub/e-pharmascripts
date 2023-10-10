@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Iconify } from "react-native-iconify";
 import DiarySwitchTabs from "../../components/DiarySwitchTabs";
 import styles from "./stylesheet";
+import { getAuthToken } from "../../src/authToken";
 
 const DiaryMaintenanceScreen = () => {
   const [trackerTab, setTrackerTab] = useState(1);

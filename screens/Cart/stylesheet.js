@@ -5,6 +5,11 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
   },
+  itemsContainer: {
+    width: "90%",
+    alignSelf: "center",
+    bottom: 100, //brute force padding from the checkout container
+  },
   screenTitle: {
     marginTop: 20,
     fontSize: 22,
@@ -12,6 +17,7 @@ const styles = StyleSheet.create({
   },
   selectedProductContainer: {
     height: "100%",
+    paddingTop: "30%",
   },
   productContainer: {
     flexDirection: "row",
@@ -23,7 +29,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 120,
     alignSelf: "center",
-    marginTop: 25,
+    marginTop: 15,
   },
   imageContainer: {
     marginLeft: 10,
@@ -94,10 +100,10 @@ const styles = StyleSheet.create({
   checkoutContainer: {
     backgroundColor: "white",
     position: "absolute",
-    bottom: 70,
+    bottom: 10, //brute force padding from the checkout tab navigator
     borderRadius: 20,
     width: "100%",
-    paddingVertical: 25,
+    paddingVertical: 15,
     elevation: 2,
   },
   priceContainer: {
@@ -163,6 +169,52 @@ const styles = StyleSheet.create({
     marginHorizontal: 7,
     fontSize: 14,
     fontWeight: 500,
+  },
+  totalContainer: {
+    width: "80%",
+    alignSelf: "center",
+    // marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  totalPmentText: {
+    fontSize: 12,
+    fontWeight: 600,
+    marginRight: 20,
+  },
+  totalAmountText: {
+    fontWeight: 700,
+    color: "#EC6F56",
+    fontSize: 12,
+    marginRight: 11,
+  },
+  tpContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "70%",
+  },
+  ordernowText: {
+    fontWeight: 600,
+    fontSize: 13,
+    color: "white",
+    textAlign: "center",
+  },
+  ordernowButton: {
+    backgroundColor: "#DC3642",
+    padding: 15,
+    borderRadius: 30,
+    width: "100%",
+  },
+  sellerContainer: {
+    backgroundColor: "#f0f0f0", // Background color for the seller container
+    padding: 10, // Padding around the seller container
+    marginBottom: 10, // Margin at the bottom to separate seller containers
+    // Add any other styles you want for the seller container here
+  },
+  sellerName: {
+    fontWeight: "bold", // Style for the seller's name
+    fontSize: 16, // Adjust the font size as needed
   },
 });
 

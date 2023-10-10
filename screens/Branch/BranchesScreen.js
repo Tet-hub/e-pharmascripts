@@ -78,7 +78,7 @@ const BranchesScreen = ({ navigation, route }) => {
             }
           >
             <View style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>View Pharmacy</Text>
+              <Text style={styles.viewButtonText}>View Branch</Text>
               <Iconify icon="ic:round-greater-than" size={15} color="#EC6F56" />
             </View>
           </TouchableOpacity>
