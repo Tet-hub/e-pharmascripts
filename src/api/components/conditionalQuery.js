@@ -1,4 +1,4 @@
-import { EMU_URL, BASE_URL, API_URL } from "../apiURL";
+import { BASE_URL } from "../apiURL";
 
 export default function buildQueryUrl(collectionName, conditions) {
   const apiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/condition?collectionName=${collectionName}`;

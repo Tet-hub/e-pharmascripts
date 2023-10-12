@@ -39,13 +39,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { BASE_URL } from "../src/api/apiURL";
 
-// const API_URL = "http://127.0.0.1:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"";
-// const API_URL =
-// "http://10.0.2.2:5001/e-pharmascripts/us-central1/userApp/api/mobile/post"; //for android emulator
-
-const API_URL =
-  "https://us-central1-e-pharmascripts.cloudfunctions.net/userApp";
-
 const Signup = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
   const [show, setShow] = useState(false);

@@ -28,7 +28,7 @@ const ProfileScreen = () => {
 
         if (userId) {
           // Calling API here
-          const apiUrl = `${EMU_URL}/api/mobile/get/fetch/docs/by/users/${userId}`;
+          const apiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/users/${userId}`;
           const response = await fetch(apiUrl);
 
           if (response.ok) {

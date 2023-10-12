@@ -77,20 +77,14 @@ const ProductDetailScreen = ({ navigation, route }) => {
         return;
       }
 
-      const storeItemUrl = `${EMU_URL}/api/mobile/post/items/cart`;
+      const storeItemUrl = `${BASE_URL}/api/mobile/post/items/cart`;
 
       // Create the item object to be sent
       const itemToAddToCart = {
         userId,
         productId: productId,
         productName: item.productName,
-        price: item.price,
         quantity,
-        sellerId: item.createdBy,
-        img: item.img,
-        requiresPrescription: item.requiresPrescription,
-        category: item.category,
-        sellerName: sellerName,
       };
       // console.log("item", itemToAddToCart);
       const response = await fetch(storeItemUrl, {

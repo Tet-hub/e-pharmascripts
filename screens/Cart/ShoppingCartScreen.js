@@ -1,30 +1,27 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  Dimensions,
   Image,
-  Button,
+  TouchableOpacity,
   FlatList,
+  ScrollView,
 } from "react-native";
-import React, { useState, useEffect } from "react";
 import { Iconify } from "react-native-iconify";
 import { Checkbox } from "expo-checkbox";
-import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { getAuthToken } from "../../src/authToken";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
-
+import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
+import { BASE_URL } from "../../src/api/apiURL";
 
 const ShoppingCartScreen = () => {
-  const deviceHeight = Dimensions.get("window").height;
-  const deviceWidth = Dimensions.get("window").width;
-  const [isChecked, setIsChecked] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const navigation = useNavigation();
+
   const [cartItems, setCartItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({});
   useEffect(() => {
-    // Function to fetch initial data
     const fetchCartItems = async () => {
       try {
         const authToken = await getAuthToken();
@@ -33,85 +30,131 @@ const ShoppingCartScreen = () => {
           console.log("User ID is undefined or null.");
           return;
         }
-        // Define the conditions array as an array of objects
-        const conditions = [
+
+        const cartConditions = [
           { fieldName: "userId", operator: "==", value: userId },
         ];
-
-        // Generate the API URL with conditions
-        const apiUrl = buildQueryUrl("cart", conditions);
-
-        // Make a GET request to the apiUrl
-        const response = await fetch(apiUrl, {
-          method: "GET", // Set the request method to GET
+        const cartApiUrl = buildQueryUrl("cart", cartConditions);
+        const cartResponse = await fetch(cartApiUrl, {
+          method: "GET",
         });
 
-        if (response.ok) {
-          const cartItemsData = await response.json();
-          setCartItems(cartItemsData);
-        } else {
-          console.log("API request failed with status:", response.status);
+        if (!cartResponse.ok) {
+          console.log("API request failed with status:", cartResponse.status);
+          return;
         }
+
+        const cartItemsData = await cartResponse.json();
+
+        const unsubscribe = listenForItem(
+          "cart",
+          cartConditions,
+          (updatedCartItems) => {
+            setCartItems(updatedCartItems);
+          }
+        );
+
+        const productSellerPromises = cartItemsData.map(async (cartItem) => {
+          const productDocumentId = cartItem.productId;
+          const productApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productDocumentId}`;
+          const productResponse = await fetch(productApiUrl, {
+            method: "GET",
+          });
+
+          if (!productResponse.ok) {
+            console.log(
+              "API request failed with status product:",
+              productResponse.status
+            );
+            return null;
+          }
+
+          const productData = await productResponse.json();
+          const sellerId = productData.createdBy;
+
+          const sellerInfo = await fetchSellerData(sellerId);
+
+          return { ...cartItem, productData, sellerInfo };
+        });
+
+        const cartItemsWithProductDetails = await Promise.all(
+          productSellerPromises
+        );
+        setCartItems(cartItemsWithProductDetails);
+
+        return () => unsubscribe();
       } catch (error) {
         console.log("Error fetching products:", error);
+      }
+    };
+
+    const fetchSellerData = async (sellerId) => {
+      try {
+        const sellerApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/sellers/${sellerId}`;
+        const sellerResponse = await fetch(sellerApiUrl, {
+          method: "GET",
+        });
+
+        if (!sellerResponse.ok) {
+          console.log(
+            "API request failed with status seller:",
+            sellerResponse.status
+          );
+          return null;
+        }
+
+        const sellerInfo = await sellerResponse.json();
+
+        return sellerInfo;
+      } catch (error) {
+        console.log("Error fetching seller data:", error);
+        return null;
       }
     };
 
     fetchCartItems();
   }, []);
 
-  const handleIncrement = (productId) => {
-    // Find the cart item with the matching productId
-    const updatedProductData = item.map((cartItem) => {
-      if (cartItem.id === productId) {
-        // Check if quantity is less than available stock
-        if (cartItem.quantity < cartItem.stock) {
+  const handleIncrement = (cartItemId) => {
+    const updatedCartItems = cartItems.map((cartItem) => {
+      if (cartItem.id === cartItemId) {
+        if (cartItem.quantity < cartItem.productData.stock) {
           return {
             ...cartItem,
             quantity: cartItem.quantity + 1,
-            // Update other properties if needed
           };
         }
       }
       return cartItem;
     });
 
-    // Update the product data state with the updated quantity
-    setProductData(updatedProductData);
-
-    // Update selected quantity (optional)
-    const updatedSelectedQuantity = selectedQuantity + 1;
-    setSelectedQuantity(updatedSelectedQuantity);
+    setCartItems(updatedCartItems);
   };
 
-  const handleDecrement = (productId) => {
-    // Find the cart item with the matching productId
-    const updatedProductData = item.map((cartItem) => {
-      if (cartItem.id === productId) {
-        // Check if quantity is less than available stock
-        if (cartItem.quantity > cartItem.stock) {
+  const handleDecrement = (cartItemId) => {
+    const updatedCartItems = cartItems.map((cartItem) => {
+      if (cartItem.id === cartItemId) {
+        if (cartItem.quantity > 1) {
           return {
             ...cartItem,
             quantity: cartItem.quantity - 1,
-            // Update other properties if needed
           };
         }
       }
       return cartItem;
     });
 
-    // Update the product data state with the updated quantity
-    setProductData(updatedProductData);
-
-    // Update selected quantity (optional)
-    const updatedSelectedQuantity = selectedQuantity + 1;
-    setSelectedQuantity(updatedSelectedQuantity);
+    setCartItems(updatedCartItems);
   };
 
-  const navigation = useNavigation();
+  const handleSelectItem = (cartItemId) => {
+    setSelectedItems((prevSelectedItems) => ({
+      ...prevSelectedItems,
+      [cartItemId]: !prevSelectedItems[cartItemId],
+    }));
+  };
 
   const handleToValidateScreen = () => {
-    // Navigate to my order screen
     navigation.navigate("ToValidateScreen");
   };
 
@@ -119,126 +162,169 @@ const ShoppingCartScreen = () => {
     const groupedItems = {};
 
     cartItems.forEach((item) => {
-      const sellerId = item.sellerId;
-      console.log("group", sellerId); // Replace with the actual key for seller ID in your cart item data
-      if (!groupedItems[sellerId]) {
-        groupedItems[sellerId] = [];
+      if (item.sellerInfo && item.sellerInfo.sellerId) {
+        const sellerId = item.sellerInfo.sellerId;
+        if (!groupedItems[sellerId]) {
+          groupedItems[sellerId] = [];
+        }
+        groupedItems[sellerId].push(item);
       }
-      groupedItems[sellerId].push(item);
     });
-    console.log("cartItems", cartItems);
 
     return Object.values(groupedItems);
   };
-  const renderCartItem = ({ item }) => (
-    <View style={styles.sellerContainer}>
-      {item[0] && (
-        <>
-          <Text style={styles.sellerName}>{item[0].sellerName}</Text>
-          {item.map((item) => (
-            <View style={styles.productContainer} key={item.id}>
-              <View>
+
+  const calculateTotalPrice = () => {
+    let totalPrice = 0;
+    cartItems.forEach((cartItem) => {
+      if (
+        selectedItems[cartItem.id] &&
+        cartItem.productData &&
+        cartItem.productData.price
+      ) {
+        totalPrice += cartItem.quantity * cartItem.productData.price;
+      }
+    });
+    return totalPrice.toFixed(2);
+  };
+
+  const renderCartItem = ({ item }) => {
+    if (!item || !item[0] || !item[0].sellerInfo) {
+      return (
+        <View>
+          <Text>Item information is missing or unavailable.</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.sellerContainer}>
+        {item[0] && item[0].sellerInfo ? (
+          <>
+            <Text style={styles.sellerName}>{item[0].sellerInfo.branch}</Text>
+            {item.map((cartItem) => (
+              <View style={styles.productContainer} key={cartItem.id}>
                 <Checkbox
                   color="#EC6F56"
-                  value={isChecked}
-                  onValueChange={setIsChecked}
+                  value={selectedItems[cartItem.id] || false}
+                  onValueChange={() => handleSelectItem(cartItem.id)}
                   style={styles.checkBoxIcon}
                 />
-              </View>
-              <View style={styles.imageContainer}>
-                {item.img ? (
-                  <Image
-                    source={{ uri: item.img }}
-                    style={styles.productImage}
-                  />
-                ) : (
-                  <Image
-                    source={require("../../assets/img/default-image.jpg")}
-                    style={styles.productImage}
-                  />
-                )}
-              </View>
-              <View style={styles.productInfoContainer}>
-                <View>
-                  <Text style={styles.productName}>{item.productName}</Text>
-                  {item.requiresPrescription === "Yes" ? (
-                    <Text style={styles.productReq}>
-                      {" "}
-                      [ Requires Prescription ]{" "}
-                    </Text>
+                <View style={styles.imageContainer}>
+                  {cartItem.productData.img ? (
+                    <Image
+                      source={{ uri: cartItem.productData.img }}
+                      style={styles.productImage}
+                    />
                   ) : (
-                    <Text style={styles.productReq}> </Text>
+                    <Image
+                      source={require("../../assets/img/default-image.jpg")}
+                      style={styles.productImage}
+                    />
                   )}
                 </View>
-                <View style={styles.priceRowContainer}>
-                  <View style={styles.quantityButton}>
-                    <TouchableOpacity
-                      onPress={handleDecrement}
-                      style={styles.button}
-                    >
-                      <Iconify icon="ph:minus-fill" size={22} color="#EC6F56" />
-                    </TouchableOpacity>
-                    <Text style={styles.quantityText}>{item.quantity}</Text>
-                    <TouchableOpacity
-                      onPress={handleIncrement}
-                      style={styles.button}
-                    >
-                      <Iconify icon="ph:plus-fill" size={22} color="#EC6F56" />
-                    </TouchableOpacity>
+                <View style={styles.productInfoContainer}>
+                  <View>
+                    <Text style={styles.productName}>
+                      {cartItem.productData.productName}
+                    </Text>
+                    {cartItem.productData.requiresPrescription === "Yes" ? (
+                      <Text style={styles.productReq}>
+                        {" "}
+                        [ Requires Prescription ]{" "}
+                      </Text>
+                    ) : (
+                      <Text style={styles.productReq}> </Text>
+                    )}
                   </View>
+                  <View style={styles.priceRowContainer}>
+                    <View style={styles.quantityButton}>
+                      <TouchableOpacity
+                        onPress={() => handleDecrement(cartItem.id)}
+                        style={styles.button}
+                      >
+                        <Iconify
+                          icon="ph:minus-fill"
+                          size={22}
+                          color="#EC6F56"
+                        />
+                      </TouchableOpacity>
+                      <Text style={styles.quantityText}>
+                        {cartItem.quantity}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => handleIncrement(cartItem.id)}
+                        style={styles.button}
+                      >
+                        <Iconify
+                          icon="ph:plus-fill"
+                          size={22}
+                          color="#EC6F56"
+                        />
+                      </TouchableOpacity>
+                    </View>
 
-                  <Text style={styles.productPrice}>
-                    {"\u20B1"}
-                    {item.price}
-                  </Text>
+                    <Text style={styles.productPrice}>
+                      {"\u20B1"}
+                      {cartItem.productData.price}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.xButtonWrapper}>
+                  <TouchableOpacity>
+                    <Iconify
+                      icon="carbon:close-filled"
+                      size={22}
+                      color="black"
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              <View style={styles.xButtonWrapper}>
-                <TouchableOpacity>
-                  <Iconify icon="carbon:close-filled" size={22} color="black" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </>
-      )}
-    </View>
-  );
+            ))}
+          </>
+        ) : (
+          <Text>Item is missing sellerInfo: {JSON.stringify(item)}</Text>
+        )}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.titleWrapper}>
         <Text style={styles.screenTitle}>MY CART</Text>
-        <View style={styles.selectedProductContainer}>
-          <View style={styles.itemsContainer}>
-            <FlatList
-              data={groupCartItemsBySeller(cartItems)}
-              scrollEnabled={false}
-              keyExtractor={(item) => item[0].sellerId} // Use the seller ID as the key
-              renderItem={renderCartItem}
-            />
+      </View>
+      <View style={styles.bodyWrapper}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.selectedProductContainer}>
+            <View style={styles.cartContainer}>
+              <FlatList
+                data={groupCartItemsBySeller(cartItems)}
+                scrollEnabled={false}
+                keyExtractor={(item) =>
+                  `${item[0].sellerInfo.sellerId}-${item[0].id}`
+                }
+                renderItem={renderCartItem}
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
-
-      <View style={styles.checkoutContainer}>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalPmentText}>Total Payment</Text>
-          <View style={styles.tpContainer}>
-            <View style={{ flex: 1 }}>
+        </ScrollView>
+      </View>
+      <View>
+        <View style={styles.footer}>
+          <View style={styles.checkoutContainer}>
+            <Text style={styles.totalPmentText}>Total Payment</Text>
+            <View style={styles.tpContainer}>
               <Text style={styles.pdTotalAmountText}>
                 {"\u20B1"}
-                12345
-                {/* {totalPrice.toFixed(2)}  */}
+                {calculateTotalPrice()}
               </Text>
+              <TouchableOpacity
+                style={styles.ordernowButton}
+                onPress={handleToValidateScreen}
+              >
+                <Text style={styles.ordernowText}>CHECKOUT</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={styles.ordernowButton}
-              onPress={handleToValidateScreen}
-            >
-              <Text style={styles.ordernowText}>CHECKOUT</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </View>

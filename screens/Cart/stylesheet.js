@@ -1,35 +1,47 @@
-import { StyleSheet } from "react-native";
-
+import { StyleSheet, Dimensions } from "react-native";
+const screenHeight = Dimensions.get("window").height;
 const styles = StyleSheet.create({
   container: {
-    width: "90%",
-    alignSelf: "center",
+    flex: 1,
   },
-  itemsContainer: {
-    width: "90%",
-    alignSelf: "center",
-    bottom: 100, //brute force padding from the checkout container
+  titleWrapper: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    zIndex: 2, // Ensure the title is on top
   },
   screenTitle: {
-    marginTop: 20,
+    marginTop: 10,
     fontSize: 22,
     fontWeight: 500,
+    paddingLeft: 20,
   },
+  bodyWrapper: {
+    flex: 1,
+  },
+  itemsContainer: {
+    width: "100%",
+    alignSelf: "center",
+  },
+  cartContainer: {
+    width: "90%",
+    alignSelf: "center",
+    bottom: 73, //brute force padding from the checkout container
+  },
+
   selectedProductContainer: {
     height: "100%",
-    paddingTop: "30%",
+    paddingTop: "21%",
   },
   productContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    backgroundColor: "white",
     borderRadius: 10,
     elevation: 3,
     width: "100%",
-    height: 120,
     alignSelf: "center",
     marginTop: 15,
+    backgroundColor: "#FBFFF7",
   },
   imageContainer: {
     marginLeft: 10,
@@ -97,14 +109,31 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9D9D9",
     alignSelf: "center",
   },
+  footer: {
+    position: "absolute",
+    bottom: 80,
+    left: 0,
+    right: 0,
+    backgroundColor: "#DFFF00",
+    // borderTopWidth: 1,
+    // borderTopColor: "#E0E0E0",
+    zIndex: 2, // Ensure the footer is on top
+  },
+  //here
   checkoutContainer: {
+    flexDirection: "row",
     backgroundColor: "white",
     position: "absolute",
-    bottom: 10, //brute force padding from the checkout tab navigator
+    left: "5%",
+    right: "5%",
     borderRadius: 20,
-    width: "100%",
+    width: "90%",
     paddingVertical: 15,
-    elevation: 2,
+    elevation: 15,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    alignSelf: "center",
+    padding: 10,
   },
   priceContainer: {
     flexDirection: "row",
@@ -112,21 +141,7 @@ const styles = StyleSheet.create({
     width: "60%",
     justifyContent: "space-between",
   },
-  delFeeContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-    width: "60%",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  totalAmountContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignSelf: "center",
-    width: "60%",
-    marginTop: 10,
-    marginBottom: 20,
-  },
+
   checkoutText: {
     fontWeight: 700,
     fontSize: 16,
@@ -141,14 +156,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   priceText: {
-    fontWeight: 400,
-    fontSize: 15,
-  },
-  delFeeText: {
-    fontWeight: 400,
-    fontSize: 15,
-  },
-  amountText: {
     fontWeight: 400,
     fontSize: 15,
   },
@@ -188,6 +195,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginRight: 11,
   },
+  pdTotalAmountText: {
+    fontWeight: 600,
+    fontSize: 15,
+  },
   tpContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -204,17 +215,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#DC3642",
     padding: 15,
     borderRadius: 30,
-    width: "100%",
+    width: "50%",
   },
   sellerContainer: {
-    backgroundColor: "#f0f0f0", // Background color for the seller container
-    padding: 10, // Padding around the seller container
-    marginBottom: 10, // Margin at the bottom to separate seller containers
-    // Add any other styles you want for the seller container here
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+    marginBottom: 15,
+    borderRadius: 20,
   },
   sellerName: {
-    fontWeight: "bold", // Style for the seller's name
-    fontSize: 16, // Adjust the font size as needed
+    fontWeight: 700,
+    fontSize: 20,
   },
 });
 
