@@ -25,6 +25,8 @@ import ApprovedProductDetailScreen from "../screens/ProductDetails/ApprovedProdu
 import CartNavigatorHeader from "./CartNavigatorHeader";
 import ChatScreen from "../screens/Chat/ChatScreen";
 import MessageScreen from "../screens/Message/MessageScreen";
+import CreateDiaryMaintenance from "../screens/DiaryMaintenance/CreateDiaryMaintenance";
+import UpdateDiaryMaintenance from "../screens/DiaryMaintenance/UpdateDiaryMaintenance";
 import { Colors } from "../components/styles";
 import { TailwindProvider } from "tailwindcss-react-native";
 import { Iconify } from "react-native-iconify";
@@ -256,6 +258,24 @@ const RootStack = () => {
               </View>
             ),
           })}
+        />
+
+        <Stack.Screen
+          name="CreateDiaryMaintenance"
+          component={CreateDiaryMaintenance}
+          options={{
+            headerTitle: () => <View></View>,
+            headerTintColor: "black",
+          }}
+        />
+
+        <Stack.Screen
+          name="UpdateDiaryMaintenance"
+          component={UpdateDiaryMaintenance}
+          options={{
+            headerTitle: () => <View></View>,
+            headerTintColor: "black",
+          }}
         />
       </Stack.Navigator>
     </TailwindProvider>

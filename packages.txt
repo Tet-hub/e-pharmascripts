@@ -5,3 +5,7 @@ npm install @react-native-firebase/storage
 
 oct 10
 npm add react-native-toast-notifications
+
+oct 12
+npm install react-native-modal
+npm install luxon
