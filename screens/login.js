@@ -40,7 +40,7 @@ import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
 //firebase
 import { AuthContext } from "../src/context";
 import { saveAuthToken } from "../src/authToken";
-import { BASE_URL, EMU_URL } from "../src/api/apiURL";
+import { BASE_URL } from "../src/api/apiURL";
 
 const Login = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);

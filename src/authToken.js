@@ -1,5 +1,25 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Get the current userId from AsyncStorage
+export const getCurrentUserId = async () => {
+  try {
+    const userId = await AsyncStorage.getItem("userId");
+    return userId;
+  } catch (error) {
+    console.log("Error retrieving userId:", error);
+    return null;
+  }
+};
+// Get the current userId from AsyncStorage
+export const getCurrentEmail = async () => {
+  try {
+    const email = await AsyncStorage.getItem("email");
+    return email;
+  } catch (error) {
+    console.log("Error retrieving email:", error);
+    return null;
+  }
+};
 // Save the user's email and authentication token to AsyncStorage
 export const saveAuthToken = async (email, token, userId) => {
   try {

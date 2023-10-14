@@ -14,9 +14,13 @@ import {
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import styles from "./detailsStylesheet";
-import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { BASE_URL } from "../../src/api/apiURL";
 import { getAuthToken } from "../../src/authToken";
 import { useToast } from "react-native-toast-notifications";
+import ChatScreen from "../Chat/ChatScreen";
+import buildQueryUrl from "../../src/api/components/conditionalQuery";
 const deviceWidth = Dimensions.get("window").width;
 
 const ProductDetailScreen = ({ navigation, route }) => {
@@ -25,10 +29,15 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [selectedQuantity, setSelectedQuantity] = useState(1); // New state variable
   const [item, setProductData] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [branches, setBranches] = useState([]);
   const productId = route.params?.productId;
   const sellerName = route.params?.branch;
   const company = route.params?.name;
   const toast = useToast();
+
+  const [createdBy, setCreatedBy] = useState(null); // Initialize createdBy state
+
+  // First useEffect to fetch product data and set createdBy
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -39,6 +48,9 @@ const ProductDetailScreen = ({ navigation, route }) => {
           if (response.ok) {
             const productData = await response.json();
             setProductData(productData);
+
+            // Set the createdBy value obtained from productData
+            setCreatedBy(productData.createdBy);
           } else {
             console.log("API request failed with status:", response.status);
           }
@@ -51,7 +63,34 @@ const ProductDetailScreen = ({ navigation, route }) => {
     };
 
     fetchData();
-  }, []);
+  }, [productId]);
+
+  //Fetch seller details based on createdBy
+  useEffect(() => {
+    if (createdBy) {
+      const fetchBranches = async () => {
+        console.log(`Createdby before conditition: ${createdBy}`);
+        try {
+          // Construct the Firestore document reference by its ID
+          const sellerDocRef = doc(db, "sellers", createdBy);
+
+          // Fetch the seller document
+          const sellerDocSnap = await getDoc(sellerDocRef);
+
+          if (sellerDocSnap.exists()) {
+            const sellerData = sellerDocSnap.data();
+            setBranches(sellerData);
+          } else {
+            console.log("Seller document not found for createdBy:", createdBy);
+          }
+        } catch (error) {
+          console.log("Error fetching seller document:", error);
+        }
+      };
+
+      fetchBranches();
+    }
+  }, [createdBy]);
 
   const handleIncrement = () => {
     if (quantity < item.stock) {
@@ -77,7 +116,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         return;
       }
 
-      const storeItemUrl = `${EMU_URL}/api/mobile/post/items/cart`;
+      const storeItemUrl = `${BASE_URL}/api/mobile/post/items/cart`;
 
       // Create the item object to be sent
       const itemToAddToCart = {
@@ -200,9 +239,20 @@ const ProductDetailScreen = ({ navigation, route }) => {
               <Text style={styles.stockText}>Stock left: {item.stock}</Text>
             </View>
           </View>
-
           <View style={styles.threeButtonsRow}>
-            <TouchableOpacity style={styles.chatnowView}>
+            {/* Chat now */}
+            <TouchableOpacity
+              style={styles.chatnowView}
+              onPress={() =>
+                navigation.navigate("ChatScreen", {
+                  // name: branches ? branches.displayName : null,
+                  // img: branches ? branches.img : null,
+                  name: branches.displayName,
+                  img: branches.img,
+                  sellerId: item.createdBy,
+                })
+              }
+            >
               <Iconify
                 icon="ant-design:message-outlined"
                 size={19}

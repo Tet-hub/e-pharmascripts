@@ -5,7 +5,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../src/context";
 import { getAuthToken } from "../../src/authToken";
 import styles from "./stylesheet";
-import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
+import { BASE_URL } from "../../src/api/apiURL";
 
 const defaultImage = require("../../assets/img/default-image.jpg");
 

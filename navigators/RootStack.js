@@ -28,7 +28,7 @@ import MessageScreen from "../screens/Message/MessageScreen";
 import { Colors } from "../components/styles";
 import { TailwindProvider } from "tailwindcss-react-native";
 import { Iconify } from "react-native-iconify";
-
+import { MessageProvider } from "../screens/Chat/messageContext";
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
   saveButton: {
@@ -57,207 +57,207 @@ const Stack = createStackNavigator();
 const RootStack = () => {
   return (
     <TailwindProvider>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#F5F5F5",
-          },
-        }}
-      >
-        <Stack.Screen
-          name="HomeScreen"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="MenuScreen"
-          component={MenuScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-
-        <Stack.Screen
-          name="NotificationScreen"
-          component={NotificationScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-        <Stack.Screen
-          name="OrderScreen"
-          component={OrderScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="InstallmentScreen"
-          component={InstallmentScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-        <Stack.Screen
-          name="FavoritesScreen"
-          component={FavoritesScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-        <Stack.Screen
-          name="StoreLocatorScreen"
-          component={StoreLocatorScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-        <Stack.Screen
-          name="SettingsScreen"
-          component={SettingsScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-        <Stack.Screen
-          name="ProfileScreen"
-          component={ProfileScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
-        <Stack.Screen
-          name="BranchesScreen"
-          component={BranchesScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="EditProfileScreen"
-          component={EditProfileScreen}
-          options={({ navigation }) => ({
-            headerTitle: () => <View style={styles.headerTITLE}></View>,
-            headerBackground: () => <View style={styles.headBG}></View>,
-            headerTintColor: "black",
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() => {
-                  // Handle the save action here
-                }}
-              >
-                <Text style={styles.saveButton}>SAVE</Text>
-              </TouchableOpacity>
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="RateScreen"
-          component={RateScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="ViewCompletedOrderScreen"
-          component={ViewCompletedOrderScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="ToValidateScreen"
-          component={ToValidateScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="PlaceOrderScreen"
-          component={PlaceOrderScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="ProductScreen"
-          component={ProductScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="ProductDetailScreen"
-          component={ProductDetailScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-        <Stack.Screen
-          name="ApprovedProductDetailScreen"
-          component={ApprovedProductDetailScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-            headerRight: () => <CartNavigatorHeader />,
-          }}
-        />
-
-        <Stack.Screen
-          name="ChatScreen"
-          component={ChatScreen}
-          options={({ route }) => ({
-            title: route.params.name,
+      <MessageProvider>
+        <Stack.Navigator
+          screenOptions={{
             headerStyle: {
-              backgroundColor: "#EC6F56",
+              backgroundColor: "#F5F5F5",
             },
-            headerTitleStyle: {
-              color: "white",
-              fontWeight: "bold",
-              fontSize: 24,
-            },
-            headerTintColor: "white",
+          }}
+        >
+          <Stack.Screen
+            name="HomeScreen"
+            component={TabNavigator}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MenuScreen"
+            component={MenuScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
 
-            headerRight: () => (
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Image
-                  source={require("../assets/img/cymer.jpg")}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    marginRight: 10,
+          <Stack.Screen
+            name="NotificationScreen"
+            component={NotificationScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="OrderScreen"
+            component={OrderScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="InstallmentScreen"
+            component={InstallmentScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="FavoritesScreen"
+            component={FavoritesScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="StoreLocatorScreen"
+            component={StoreLocatorScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="SettingsScreen"
+            component={SettingsScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="ProfileScreen"
+            component={ProfileScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="BranchesScreen"
+            component={BranchesScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="EditProfileScreen"
+            component={EditProfileScreen}
+            options={({ navigation }) => ({
+              headerTitle: () => <View style={styles.headerTITLE}></View>,
+              headerBackground: () => <View style={styles.headBG}></View>,
+              headerTintColor: "black",
+              headerRight: () => (
+                <TouchableOpacity
+                  onPress={() => {
+                    // Handle the save action here
                   }}
-                />
-                {/* You can add other header elements here if needed */}
-              </View>
-            ),
-          })}
-        />
-      </Stack.Navigator>
+                >
+                  <Text style={styles.saveButton}>SAVE</Text>
+                </TouchableOpacity>
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="RateScreen"
+            component={RateScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ViewCompletedOrderScreen"
+            component={ViewCompletedOrderScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ToValidateScreen"
+            component={ToValidateScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="PlaceOrderScreen"
+            component={PlaceOrderScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ProductScreen"
+            component={ProductScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ProductDetailScreen"
+            component={ProductDetailScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ApprovedProductDetailScreen"
+            component={ApprovedProductDetailScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ChatScreen"
+            component={ChatScreen}
+            options={({ route }) => ({
+              title: route.params.name,
+              headerStyle: {
+                backgroundColor: "#EC6F56",
+              },
+              headerTitleStyle: {
+                color: "white",
+                fontWeight: "bold",
+                fontSize: 24,
+              },
+              headerTintColor: "white",
+
+              headerRight: () => (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={{ uri: route.params.img }}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      marginRight: 10,
+                    }}
+                  />
+                </View>
+              ),
+            })}
+          />
+        </Stack.Navigator>
+      </MessageProvider>
     </TailwindProvider>
   );
 };

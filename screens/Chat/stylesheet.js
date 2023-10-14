@@ -11,6 +11,7 @@ const styles = StyleSheet.create({
     padding: 8,
     marginVertical: 4,
     maxWidth: "80%",
+    marginRight: 4,
   },
   yourMessage: {
     alignSelf: "flex-end",
@@ -18,7 +19,8 @@ const styles = StyleSheet.create({
   },
   otherMessage: {
     alignSelf: "flex-start",
-    backgroundColor: "#E5E5EA",
+    backgroundColor: "#A8A8A8",
+    marginLeft: 5,
   },
   messageText: {
     color: "#fff",
@@ -44,7 +46,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     paddingHorizontal: 8,
-    fontSize: 16,
+    fontSize: 14,
   },
 
   inputContainer: {
@@ -60,7 +62,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     width: "70%",
-    marginLeft: 5, // Add this property to push it to the right
+    marginLeft: 20,
   },
   icons: {
     marginRight: 10,
@@ -77,9 +79,6 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center", // Center horizontally
     justifyContent: "center", // Center vertically
-  },
-  sendButtonIcon: {
-    color: "white",
   },
 });
 

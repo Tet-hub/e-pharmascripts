@@ -13,7 +13,7 @@ import { Iconify } from "react-native-iconify";
 import { StatusBar } from "expo-status-bar";
 import { getAuthToken } from "../../src/authToken";
 import styles from "./stylesheet";
-import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
+import { BASE_URL } from "../../src/api/apiURL";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -28,7 +28,7 @@ const ProfileScreen = () => {
 
         if (userId) {
           // Calling API here
-          const apiUrl = `${EMU_URL}/api/mobile/get/fetch/docs/by/users/${userId}`;
+          const apiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/users/${userId}`;
           const response = await fetch(apiUrl);
 
           if (response.ok) {

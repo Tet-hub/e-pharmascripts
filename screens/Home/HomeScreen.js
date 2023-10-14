@@ -16,7 +16,7 @@ import { TextInput } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import styles from "./stylesheet";
 import axios from "axios";
-import { EMU_URL, BASE_URL, API_URL } from "../../src/api/apiURL";
+import { BASE_URL } from "../../src/api/apiURL";
 
 const { width, height } = Dimensions.get("window");
 const adsImage = require("../../assets/img/ads/ads.png");
