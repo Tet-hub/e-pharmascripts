@@ -9,3 +9,11 @@ npm add react-native-toast-notifications
 oct 12
 npm install react-native-modal
 npm install luxon
+npm install date-fns
+
+oct 13
+npm install @react-native-picker/picker --save 
+npx expo install @react-native-picker/picker@2.4.8
+npx expo install expo-image-picker
+npm install @firebase/storage
+npm install base-64

@@ -22,3 +22,15 @@ git pull origin main
 
 
 
+git remote set-url origin https://github.com/00Frans/E-pharmaScripts.git
+How to check the repo
+git remote -v
+
+How to push
+git add *
+git commit -m "Updated source"
+git push
+
+git push -u origin master
+
+
