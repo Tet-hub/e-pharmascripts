@@ -17,3 +17,4 @@ npx expo install @react-native-picker/picker@2.4.8
 npx expo install expo-image-picker
 npm install @firebase/storage
 npm install base-64
+

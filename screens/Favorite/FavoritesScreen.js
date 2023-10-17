@@ -5,6 +5,7 @@ import {
   Text,
   Dimensions,
   FlatList,
+  ToastAndroid,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Iconify } from "react-native-iconify";
@@ -43,7 +44,6 @@ const FavoritesScreen = () => {
         where("userId", "==", currentUserId)
       );
 
-      // Set up a real-time listener with onSnapshot
       onSnapshot(favoritesQuery, (snapshot) => {
         const productIds = snapshot.docs.map((doc) => doc.data().productId);
 
@@ -53,7 +53,6 @@ const FavoritesScreen = () => {
             where("productId", "in", productIds)
           );
 
-          // Set up a real-time listener for product data
           onSnapshot(productQuery, (productSnapshot) => {
             const productData = productSnapshot.docs.map((doc) => doc.data());
             setProductData(productData);
@@ -76,6 +75,7 @@ const FavoritesScreen = () => {
     if (!favoritesSnapshot.empty) {
       const favoriteDocRef = doc(db, "favorites", favoritesSnapshot.docs[0].id);
       await deleteDoc(favoriteDocRef);
+      ToastAndroid.show("Product removed from favorites", ToastAndroid.SHORT);
     }
   };
 
@@ -148,12 +148,16 @@ const FavoritesScreen = () => {
     <View style={styles.container}>
       <Text style={styles.screenTitle}>Favorites</Text>
       <View style={styles.line} />
-      <FlatList
-        data={productData}
-        renderItem={renderItem}
-        numColumns={2}
-        keyExtractor={(item) => item.productId}
-      />
+      {productData.length === 0 ? (
+        <Text style={styles.noFavoritesText}>No products added</Text>
+      ) : (
+        <FlatList
+          data={productData}
+          renderItem={renderItem}
+          numColumns={2}
+          keyExtractor={(item) => item.productId}
+        />
+      )}
     </View>
   );
 };

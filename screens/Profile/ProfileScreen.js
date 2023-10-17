@@ -15,7 +15,7 @@ const ProfileScreen = () => {
   const [CurrentUserId, setCurrentUserId] = useState(null);
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
-  const [status, setStatus] = useState("Unverified");
+  const [fetchedStatus, setFetchedStatus] = useState("Unverified");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,8 +35,8 @@ const ProfileScreen = () => {
               if (data.profileImage) {
                 setProfileImage(data.profileImage);
               }
-              if (data.status) {
-                setStatus(data.status);
+              if (data.Status) {
+                setFetchedStatus(data.Status);
               }
             }
           });
@@ -80,7 +80,7 @@ const ProfileScreen = () => {
             <Text>Loading...</Text>
           ) : user ? (
             <>
-              {status === "Verified" ? (
+              {fetchedStatus === "Verified" ? (
                 <View style={styles.verifiedCheckView}>
                   <View>
                     <Image
@@ -110,9 +110,9 @@ const ProfileScreen = () => {
             <Text>User data not available</Text>
           )}
           <View style={styles.statusView}>
-            {status !== "Verified" ? (
+            {fetchedStatus !== "Verified" ? (
               <Text style={styles.statusText}>
-                {status ? status : "Unverified"}
+                {fetchedStatus ? fetchedStatus : "Unverified"}
               </Text>
             ) : null}
           </View>

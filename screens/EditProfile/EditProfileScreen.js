@@ -28,9 +28,11 @@ const EditProfileScreen = () => {
   const navigation = useNavigation();
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFileImage, setSelectedFileImage] = useState(null);
-  const [status, setStatus] = useState("Unverified");
+  const [fetchedStatus, setFetchedStatus] = useState("Unverified");
   const isEditingEnabled =
-    status === "Verified" || status === "Unverified" || status === "Rejected";
+    fetchedStatus === "Verified" ||
+    fetchedStatus === "Unverified" ||
+    fetchedStatus === "Rejected";
   const [updateUserData, setUpdateUserData] = useState({
     firstName: "",
     lastName: "",
@@ -97,11 +99,14 @@ const EditProfileScreen = () => {
           if (data.profileImage) {
             setSelectedImage(data.profileImage);
           }
-          if (data.status) {
-            setStatus(data.status);
+          if (data.Status) {
+            setFetchedStatus(data.Status);
           }
+
           if (data.validId) {
-            setSelectedFileImage(data.validId);
+            setSelectedFileImage(
+              data.Status === "Rejected" ? "" : data.validId
+            );
           }
         } else {
           console.error("Document does not exist");
@@ -177,13 +182,13 @@ const EditProfileScreen = () => {
         userData.profileImage = imageUrl;
       }
 
-      if (status === "Verified") {
-        userData.status = "Verified";
+      if (fetchedStatus === "Verified") {
+        userData.Status = "Verified";
       } else {
-        userData.status = fileImageUrl ? "Pending" : "Unverified";
+        userData.Status = fileImageUrl ? "Pending" : "Unverified";
       }
 
-      if (status === "Verified") {
+      if (fetchedStatus === "Verified") {
         userData.validId = fileImageUrl;
       } else {
         userData.validId = fileImageUrl || "";
@@ -340,12 +345,6 @@ const EditProfileScreen = () => {
             />
           )}
         </TouchableOpacity>
-
-        <View style={styles.statusView}>
-          <Text style={styles.statusText}>
-            {status ? status : "Unverified"}
-          </Text>
-        </View>
       </View>
 
       <View style={styles.lowerContainer}>
@@ -355,13 +354,13 @@ const EditProfileScreen = () => {
             <TextInput
               style={[
                 styles.info,
-                (!isEditingEnabled || status === "Verified") &&
+                (!isEditingEnabled || fetchedStatus === "Verified") &&
                   styles.disabledInput,
               ]}
               placeholder="First name"
               value={updateUserData.firstName}
               onChangeText={handleFirstNameChange}
-              editable={isEditingEnabled && status !== "Verified"}
+              editable={isEditingEnabled && fetchedStatus !== "Verified"}
             />
           </View>
         </View>
@@ -372,12 +371,12 @@ const EditProfileScreen = () => {
             <TextInput
               style={[
                 styles.info,
-                (!isEditingEnabled || status === "Verified") &&
+                (!isEditingEnabled || fetchedStatus === "Verified") &&
                   styles.disabledInput,
               ]}
               value={updateUserData.lastName}
               onChangeText={handleLastNameChange}
-              editable={isEditingEnabled && status !== "Verified"}
+              editable={isEditingEnabled && fetchedStatus !== "Verified"}
             />
           </View>
         </View>
@@ -404,7 +403,7 @@ const EditProfileScreen = () => {
               onValueChange={(itemValue) =>
                 setUpdateUserData({ ...updateUserData, gender: itemValue })
               }
-              enabled={isEditingEnabled && status !== "Verified"}
+              enabled={isEditingEnabled && fetchedStatus !== "Verified"}
             >
               <Picker.Item label="Select Gender" value="" />
               <Picker.Item label="Male" value="Male" />
@@ -424,7 +423,7 @@ const EditProfileScreen = () => {
                 : ""}
             </Text>
 
-            {isEditingEnabled && status !== "Verified" && (
+            {isEditingEnabled && fetchedStatus !== "Verified" && (
               <Iconify
                 size={22}
                 icon="mi:calendar"
@@ -446,10 +445,20 @@ const EditProfileScreen = () => {
           />
         )}
 
-        <View style={styles.labelInfoCont}>
-          <Text style={styles.label}>Valid ID</Text>
+        <View style={styles.labelInfoContValidId}>
+          <View style={styles.statusView}>
+            <Text style={styles.label}>Valid ID</Text>
+            <Text
+              style={[
+                styles.statusText,
+                { color: fetchedStatus === "Verified" ? "#0CB669" : "#DC3642" },
+              ]}
+            >
+              [ {fetchedStatus ? fetchedStatus : "Unverified"} ]
+            </Text>
+          </View>
           <View style={styles.chooseFileTouchable}>
-            {isEditingEnabled && status !== "Verified" ? (
+            {isEditingEnabled && fetchedStatus !== "Verified" ? (
               <TouchableOpacity onPress={handleChooseID}>
                 <View style={styles.chooseFileTextView}>
                   <Text style={styles.chooseFileText}>Choose File</Text>
@@ -463,16 +472,20 @@ const EditProfileScreen = () => {
               </View>
             )}
             <Text style={styles.fileDisplayText}>
-              {selectedFileImage ? "File saved" : "No file chosen"}
+              {fetchedStatus === "Rejected"
+                ? "Submit again"
+                : selectedFileImage
+                ? "File submitted"
+                : "No file chosen"}
             </Text>
           </View>
         </View>
       </View>
 
       <View style={styles.addButtonView}>
-        {status === "Verified" ||
-        status === "Unverified" ||
-        status === "Rejected" ? (
+        {fetchedStatus === "Verified" ||
+        fetchedStatus === "Unverified" ||
+        fetchedStatus === "Rejected" ? (
           <TouchableOpacity style={styles.addButton} onPress={updateProfile}>
             <Text style={styles.addText}>SAVE</Text>
           </TouchableOpacity>
