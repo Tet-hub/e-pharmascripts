@@ -7,45 +7,85 @@ import {
   Image,
   Button,
 } from "react-native";
-import React, { useState } from "react";
 import { Iconify } from "react-native-iconify";
 import OrderSwitchTabs from "../../components/OrderSwitchTabs";
 import { Checkbox } from "expo-checkbox";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import styles from "./stylesheet";
+import React, { useState, useEffect } from "react";
+import {
+  getDocs,
+  collection,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { getAuthToken } from "../../src/authToken";
 
 const OrderScreen = () => {
   const navigation = useNavigation();
+  const [orderId, setOrderId] = useState("rOHz230V7aygWyLmQ6MR");
+  const [isRated, setIsRated] = useState(false);
+  const [CurrentUserId, setCurrentUserId] = useState("");
 
   const [trackerTab, setTrackerTab] = useState(1);
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
   };
-  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
-
-  const toggleNotifications = () => {
-    setIsNotificationsEnabled((prevState) => !prevState);
-  };
   const { width, height } = Dimensions.get("window");
-
-  // State for the checkbox
   const [isChecked, setIsChecked] = useState(false);
 
   const handleRateScreen = () => {
-    // Navigate to my order screen
-    navigation.navigate("RateScreen");
+    navigation.navigate("RateScreen", { orderId, CurrentUserId });
   };
-
   const handleViewOrderScreen = () => {
-    // Navigate to my order screen
     navigation.navigate("ViewCompletedOrderScreen");
   };
-
   const handleApprovedProductDetailScreen = () => {
-    // Navigate to my order screen
     navigation.navigate("ApprovedProductDetailScreen");
   };
+
+  //
+  useEffect(() => {
+    async function getUserData() {
+      try {
+        const authToken = await getAuthToken();
+        const userId = authToken.userId;
+
+        setCurrentUserId(userId);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    }
+
+    getUserData();
+  }, []);
+
+  const buttonText = isRated ? "VIEW RATE" : "RATE";
+  //
+  useEffect(() => {
+    const checkIfRated = async () => {
+      try {
+        const rateAndReviewRef = collection(db, "rateAndReview");
+        const q = query(rateAndReviewRef, where("orderId", "==", orderId));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          if (!snapshot.empty) {
+            setIsRated(true);
+          } else {
+            setIsRated(false);
+          }
+        });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error checking if rated: ", error);
+      }
+    };
+
+    checkIfRated();
+  }, [orderId]);
 
   return (
     <View style={styles.container}>
@@ -195,12 +235,12 @@ const OrderScreen = () => {
               <View style={styles.viewRateContainer}>
                 <TouchableOpacity onPress={handleViewOrderScreen}>
                   <View style={styles.viewButton}>
-                    <Text style={styles.viewText}>VIEW</Text>
+                    <Text style={styles.viewText}>DETAILS</Text>
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleRateScreen}>
                   <View style={styles.rateButton}>
-                    <Text style={styles.rateText}>RATE</Text>
+                    <Text style={styles.rateText}>{buttonText}</Text>
                   </View>
                 </TouchableOpacity>
               </View>

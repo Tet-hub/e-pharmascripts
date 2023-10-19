@@ -13,9 +13,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   rateInstruction: {
-    fontWeight: "300",
+    fontWeight: "400",
     fontSize: 14,
-    marginTop: 10,
+    marginTop: 5,
+    color: "#3C3C3C",
   },
   containerRate: {
     marginTop: 20,
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
   },
   rateText: {
     fontSize: 14,
-    fontWeight: 300,
+    fontWeight: 400,
   },
   submitContainer: {
     backgroundColor: "#EC6F56",
@@ -63,6 +64,40 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#D9D9D9",
     alignSelf: "center",
+  },
+  pharmacyBranch: {
+    color: "#8E8E8E",
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  reviewView: {
+    marginTop: 25,
+  },
+  reviewText: {
+    fontWeight: 400,
+    fontSize: 15,
+  },
+  reviewInputView: {
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    marginTop: 15,
+    height: "50%",
+  },
+  inputReview: {
+    width: "80%",
+    alignSelf: "center",
+    marginTop: 20,
+  },
+  disabledTextInput: {
+    color: "black",
+  },
+  countCharactersInput: {
+    fontSize: 13,
+    fontWeight: 400,
+    textAlign: "right",
+    color: "#3A3A3A",
+    marginRight: 10,
+    marginTop: 5,
   },
 });
 

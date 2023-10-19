@@ -30,29 +30,38 @@ import styles from "./udm";
 const UpdateDiaryMaintenance = () => {
   const navigation = useNavigation();
   //
-  const [alarmTimes, setAlarmTimes] = useState([]);
+  const [reminderTimes, setReminderTimes] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showSelectedAlarm, setShowSelectedAlarm] = useState(false);
+  const [showSelectedReminder, setShowSelectedReminder] = useState(false);
 
-  const [selectedAlarmTime, setSelectedAlarmTime] = useState(null);
+  const [selectedReminderTime, setSelectedReminderTime] = useState(null);
   const [selectedDays, setSelectedDays] = useState([]);
   const daysOfWeek = ["S", "M", "T", "W", "TH", "F", "ST"];
   const [isDeleteIconDisabled, setIsDeleteIconDisabled] = useState(false);
 
   useEffect(() => {
-    setIsDeleteIconDisabled(alarmTimes.length <= 1);
-  }, [alarmTimes]);
+    setIsDeleteIconDisabled(reminderTimes.length <= 1);
+  }, [reminderTimes]);
 
-  const handleSetAlarmTime = () => {
+  const handleSetReminderTime = () => {
     setShowDatePicker(true);
   };
 
+  //
   const handleDateTimeChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === "ios"); // Close the picker on iOS
+    if (event.type === "dismissed") {
+      // Handle the cancel action
+      setShowDatePicker(false);
+    } else {
+      setShowDatePicker(Platform.OS === "ios");
 
-    if (selectedDate) {
-      setSelectedAlarmTime(selectedDate); // Store the selected alarm time
-      setAlarmTimes((prevAlarmTimes) => [...prevAlarmTimes, selectedDate]);
+      if (selectedDate) {
+        setSelectedReminderTime(selectedDate);
+        setReminderTimes((prevReminderTimes) => [
+          ...prevReminderTimes,
+          selectedDate,
+        ]);
+      }
     }
   };
 
@@ -60,14 +69,14 @@ const UpdateDiaryMaintenance = () => {
   route = useRoute();
   const { diaryID, userID } = route.params;
 
-  const [alarmsData, setAlarmsData] = useState([]);
+  const [remindersData, setRemindersData] = useState([]);
 
   // State to hold fetched data
   const [diaryMaintenanceData, setDiaryMaintenanceData] = useState({
-    alarmName: "",
-    alarmDescription: "",
-    alarmSched: [],
-    alarmTime: [],
+    reminderName: "",
+    reminderDescription: "",
+    reminderSched: [],
+    reminderTime: [],
     medicineStock: "",
   });
 
@@ -111,20 +120,23 @@ const UpdateDiaryMaintenance = () => {
     setSelectedDays(updatedDays);
   };
 
-  // Function to add a fetched alarm time to the alarmTimes array
-  const addFetchedAlarmTime = (fetchedAlarmTime) => {
-    setAlarmTimes((prevAlarmTimes) => [...prevAlarmTimes, fetchedAlarmTime]);
+  // Function to add a fetched reminder time to the reminderTimes array
+  const addFetchedReminderTime = (fetchedReminderTime) => {
+    setReminderTimes((prevReminderTimes) => [
+      ...prevReminderTimes,
+      fetchedReminderTime,
+    ]);
   };
 
-  const deleteDiaryAlarm = async (alarmTime) => {
+  const deleteDiaryReminder = async (reminderTime) => {
     try {
-      // Query the diaryAlarms collection for the specific alarm time
-      const diaryAlarmsCollectionRef = collection(db, "diaryAlarms");
+      // Query the diaryReminders collection for the specific reminder time
+      const diaryRemindersCollectionRef = collection(db, "diaryReminders");
       const querySnapshot = await getDocs(
         query(
-          diaryAlarmsCollectionRef,
+          diaryRemindersCollectionRef,
           where("diaryMaintenanceId", "==", diaryID),
-          where("alarmTime", "==", Timestamp.fromDate(alarmTime))
+          where("reminderTime", "==", Timestamp.fromDate(reminderTime))
         )
       );
 
@@ -133,21 +145,21 @@ const UpdateDiaryMaintenance = () => {
         await deleteDoc(doc.ref);
       });
     } catch (error) {
-      console.error("Error deleting diaryAlarms document: ", error);
+      console.error("Error deleting diaryReminders document: ", error);
     }
   };
 
-  const handleDeleteAlarm = (index) => {
-    const updatedAlarmTimes = [...alarmTimes];
-    const deletedAlarmTime = updatedAlarmTimes[index];
-    updatedAlarmTimes.splice(index, 1);
-    setAlarmTimes(updatedAlarmTimes);
+  const handleDeleteReminder = (index) => {
+    const updatedReminderTimes = [...reminderTimes];
+    const deletedReminderTime = updatedReminderTimes[index];
+    updatedReminderTimes.splice(index, 1);
+    setReminderTimes(updatedReminderTimes);
 
-    if (index < alarmsData.length) {
-      deleteDiaryAlarm(deletedAlarmTime);
-    } else if (updatedAlarmTimes.length === 1) {
-      // Show the toast message when there is one alarm left
-      ToastAndroid.show("Alarms cannot be left empty", ToastAndroid.LONG);
+    if (index < remindersData.length) {
+      deleteDiaryReminder(deletedReminderTime);
+    } else if (updatedReminderTimes.length === 1) {
+      // Show the toast message when there is one reminder left
+      ToastAndroid.show("Reminders cannot be left empty", ToastAndroid.LONG);
     }
   };
 
@@ -165,54 +177,54 @@ const UpdateDiaryMaintenance = () => {
 
           // Update the state with fetched data
           setDiaryMaintenanceData({
-            alarmName: data.alarmName,
-            alarmDescription: data.alarmDescription,
-            alarmSched: data.alarmSched,
+            reminderName: data.reminderName,
+            reminderDescription: data.reminderDescription,
+            reminderSched: data.reminderSched,
             medicineStock: data.medicineStock,
             // ... (other fields)
           });
 
-          // Convert the numeric alarmSched values to day strings
-          const selectedDaysFromAlarmSched = data.alarmSched.map(
+          // Convert the numeric reminderSched values to day strings
+          const selectedDaysFromReminderSched = data.reminderSched.map(
             (numericDay) => daysOfWeek[numericDay]
           );
 
           // Update the selectedDays state with the converted array
-          setSelectedDays(selectedDaysFromAlarmSched);
+          setSelectedDays(selectedDaysFromReminderSched);
 
-          // Fetch data from diaryAlarms collection based on diaryMaintenanceId
-          const diaryAlarmsCollectionRef = collection(db, "diaryAlarms");
+          // Fetch data from diaryReminders collection based on diaryMaintenanceId
+          const diaryRemindersCollectionRef = collection(db, "diaryReminders");
           const querySnapshot = await getDocs(
             query(
-              diaryAlarmsCollectionRef,
+              diaryRemindersCollectionRef,
               where("diaryMaintenanceId", "==", diaryID)
             )
           );
 
-          const alarmsData = [];
+          const remindersData = [];
           querySnapshot.forEach((doc) => {
-            const alarmData = doc.data();
-            // Convert alarmTime to a JavaScript Date object
-            const alarmTime = alarmData.alarmTime.toDate();
-            // Format the alarmTime as HH:MM AM/PM
-            const formattedAlarmTime =
-              `${alarmTime.getHours()}:${String(
-                alarmTime.getMinutes()
+            const reminderData = doc.data();
+            // Convert reminderTime to a JavaScript Date object
+            const reminderTime = reminderData.reminderTime.toDate();
+            // Format the reminderTime as HH:MM AM/PM
+            const formattedReminderTime =
+              `${reminderTime.getHours()}:${String(
+                reminderTime.getMinutes()
               ).padStart(2, "0")}` +
-              ` ${alarmTime.getHours() >= 12 ? "PM" : "AM"}`;
-            alarmData.alarmTime = formattedAlarmTime;
-            alarmsData.push(alarmData);
+              ` ${reminderTime.getHours() >= 12 ? "PM" : "AM"}`;
+            reminderData.reminderTime = formattedReminderTime;
+            remindersData.push(reminderData);
 
-            // Add the fetched alarm time to the alarmTimes array
-            addFetchedAlarmTime(alarmTime);
+            // Add the fetched reminder time to the reminderTimes array
+            addFetchedReminderTime(reminderTime);
           });
 
-          // Set the alarmsData state
-          setAlarmsData(alarmsData);
+          // Set the remindersData state
+          setRemindersData(remindersData);
 
-          // Now, alarmsData contains the alarms related to this diaryMaintenanceId
+          // Now, remindersData contains the reminders related to this diaryMaintenanceId
           // You can set it in your state or handle it as needed
-          //console.log("Alarms Data:", alarmsData);
+          //console.log("Reminders Data:", remindersData);
         } else {
           console.error("Document does not exist");
           // Handle the case where the document does not exist
@@ -234,12 +246,12 @@ const UpdateDiaryMaintenance = () => {
   };
 
   //HANDLE TEXT INPUTS-----------------------
-  const handleAlarmNameChange = (text) => {
+  const handleReminderNameChange = (text) => {
     const formattedText = text.charAt(0).toUpperCase() + text.slice(1, 50);
 
     setDiaryMaintenanceData((prevData) => ({
       ...prevData,
-      alarmName: formattedText,
+      reminderName: formattedText,
     }));
   };
 
@@ -252,20 +264,20 @@ const UpdateDiaryMaintenance = () => {
     }));
   };
 
-  handleAlarmDescriptionChange = (text) => {
+  handleReminderDescriptionChange = (text) => {
     const formattedText = text.charAt(0).toUpperCase() + text.slice(1, 100);
 
     setDiaryMaintenanceData((prevData) => ({
       ...prevData,
-      alarmDescription: formattedText,
+      reminderDescription: formattedText,
     }));
   };
 
   const handleUpdateButtonPress = () => {
     if (
-      !diaryMaintenanceData.alarmName ||
-      !diaryMaintenanceData.alarmDescription ||
-      alarmTimes.length === 0 ||
+      !diaryMaintenanceData.reminderName ||
+      !diaryMaintenanceData.reminderDescription ||
+      reminderTimes.length === 0 ||
       selectedDays.length === 0 ||
       !diaryMaintenanceData.medicineStock
     ) {
@@ -275,7 +287,7 @@ const UpdateDiaryMaintenance = () => {
     }
   };
 
-  // Function to update the Firestore document and replace alarm times
+  // Function to update the Firestore document and replace reminder times
   const updateDiary = async () => {
     try {
       // Reference to the Firestore document for diary maintenance
@@ -283,18 +295,18 @@ const UpdateDiaryMaintenance = () => {
 
       // Prepare the data to update the document
       const updatedData = {
-        alarmName: diaryMaintenanceData.alarmName,
-        alarmDescription: diaryMaintenanceData.alarmDescription,
-        alarmSched: selectedDays.map((day) => daysOfWeek.indexOf(day)),
+        reminderName: diaryMaintenanceData.reminderName,
+        reminderDescription: diaryMaintenanceData.reminderDescription,
+        reminderSched: selectedDays.map((day) => daysOfWeek.indexOf(day)),
         medicineStock: diaryMaintenanceData.medicineStock,
         // ... (other fields)
       };
 
-      // Delete all existing documents in the diaryAlarms collection for this diaryID
-      const diaryAlarmsCollectionRef = collection(db, "diaryAlarms");
+      // Delete all existing documents in the diaryReminders collection for this diaryID
+      const diaryRemindersCollectionRef = collection(db, "diaryReminders");
       const querySnapshot = await getDocs(
         query(
-          diaryAlarmsCollectionRef,
+          diaryRemindersCollectionRef,
           where("diaryMaintenanceId", "==", diaryID)
         )
       );
@@ -303,11 +315,11 @@ const UpdateDiaryMaintenance = () => {
         await deleteDoc(doc.ref);
       });
 
-      // Insert alarm times into the diaryAlarms collection
-      for (const alarm of alarmTimes) {
-        await addDoc(diaryAlarmsCollectionRef, {
+      // Insert reminder times into the diaryReminders collection
+      for (const reminder of reminderTimes) {
+        await addDoc(diaryRemindersCollectionRef, {
           diaryMaintenanceId: diaryID, // Reference to the diaryMaintenance document
-          alarmTime: Timestamp.fromDate(alarm),
+          reminderTime: Timestamp.fromDate(reminder),
           switchState: true, // Default switch state to true
         });
       }
@@ -320,10 +332,10 @@ const UpdateDiaryMaintenance = () => {
 
       navigation.goBack();
     } catch (error) {
-      console.error("Error updating data or replacing alarm times: ", error);
+      console.error("Error updating data or replacing reminder times: ", error);
       // Handle error (e.g., show an error message)
       ToastAndroid.show(
-        "Error updating data or replacing alarm times",
+        "Error updating data or replacing reminder times",
         ToastAndroid.LONG
       );
     }
@@ -338,9 +350,9 @@ const UpdateDiaryMaintenance = () => {
           <View style={styles.mainteInputView}>
             <TextInput
               style={styles.placeholderStyle}
-              placeholder="Alarm name..."
-              value={diaryMaintenanceData.alarmName}
-              onChangeText={handleAlarmNameChange}
+              placeholder="Reminder name..."
+              value={diaryMaintenanceData.reminderName}
+              onChangeText={handleReminderNameChange}
             />
           </View>
         </View>
@@ -350,27 +362,27 @@ const UpdateDiaryMaintenance = () => {
           <View style={styles.descriptionInputView}>
             <TextInput
               style={styles.placeholderStyle}
-              placeholder="Alarm description..."
-              value={diaryMaintenanceData.alarmDescription}
-              onChangeText={handleAlarmDescriptionChange}
+              placeholder="Reminder description..."
+              value={diaryMaintenanceData.reminderDescription}
+              onChangeText={handleReminderDescriptionChange}
             />
           </View>
         </View>
 
-        <View style={styles.setAlarmNoteView}>
-          <View style={styles.setAlarmView}>
+        <View style={styles.setReminderNoteView}>
+          <View style={styles.setReminderView}>
             <Text
-              style={styles.setAlarmText}
+              style={styles.setReminderText}
               onPress={() => {
-                handleSetAlarmTime();
-                setShowSelectedAlarm(true);
+                handleSetReminderTime();
+                setShowSelectedReminder(true);
               }}
             >
-              Set alarm
+              Set reminder
             </Text>
           </View>
-          <Text style={styles.alarmNoteText}>
-            Press this set button to set alarms
+          <Text style={styles.reminderNoteText}>
+            Press this set button to set reminders
           </Text>
         </View>
 
@@ -385,26 +397,26 @@ const UpdateDiaryMaintenance = () => {
           />
         )}
 
-        <View style={styles.alarmsView}>
-          <Text style={styles.alarmsText}>Alarms</Text>
-          {alarmTimes.length > 0 ? (
+        <View style={styles.remindersView}>
+          <Text style={styles.remindersText}>Reminders</Text>
+          {reminderTimes.length > 0 ? (
             <View>
-              {alarmTimes.map((alarm, index) => (
-                <View key={index} style={styles.alarmContainer}>
-                  <Text style={styles.alarmTimeText}>
-                    {alarm.getHours()}:
-                    {String(alarm.getMinutes()).padStart(2, "0")}{" "}
-                    {alarm.getHours() >= 12 ? "PM" : "AM"}
+              {reminderTimes.map((reminder, index) => (
+                <View key={index} style={styles.reminderContainer}>
+                  <Text style={styles.reminderTimeText}>
+                    {reminder.getHours()}:
+                    {String(reminder.getMinutes()).padStart(2, "0")}{" "}
+                    {reminder.getHours() >= 12 ? "PM" : "AM"}
                   </Text>
                   <TouchableWithoutFeedback
-                    onPress={() => handleDeleteAlarm(index)}
-                    disabled={alarmTimes.length <= 1}
+                    onPress={() => handleDeleteReminder(index)}
+                    disabled={reminderTimes.length <= 1}
                   >
                     <View style={styles.deleteIcon}>
                       <Iconify
                         icon="ic:outline-delete"
                         size={30}
-                        color={alarmTimes.length <= 1 ? "#CCC" : "#DC3642"}
+                        color={reminderTimes.length <= 1 ? "#CCC" : "#DC3642"}
                       />
                     </View>
                   </TouchableWithoutFeedback>
@@ -412,7 +424,7 @@ const UpdateDiaryMaintenance = () => {
               ))}
             </View>
           ) : (
-            <Text style={styles.noAlarmsText}>No alarms yet</Text>
+            <Text style={styles.noRemindersText}>No reminders yet</Text>
           )}
         </View>
 

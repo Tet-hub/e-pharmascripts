@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   TouchableOpacity,
   TextInput,
@@ -20,18 +19,17 @@ import styles from "./cdm";
 const CreateDiaryMaintenance = () => {
   const navigation = useNavigation();
 
-  const [userId, setUserId] = useState(null); // State to store the user ID
+  const [userId, setUserId] = useState(null);
 
-  const [alarmTimes, setAlarmTimes] = useState([]);
+  const [reminderTimes, setReminderTimes] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showSelectedAlarm, setShowSelectedAlarm] = useState(false);
+  const [showSelectedReminder, setShowSelectedReminder] = useState(false);
 
-  const [selectedAlarmTime, setSelectedAlarmTime] = useState(null);
+  const [selectedReminderTime, setSelectedReminderTime] = useState(null);
   const [selectedDays, setSelectedDays] = useState([]);
   const daysOfWeek = ["S", "M", "T", "W", "TH", "F", "ST"];
 
   useEffect(() => {
-    // Fetch the user ID when the component mounts
     async function fetchUserId() {
       try {
         const authToken = await getAuthToken();
@@ -44,7 +42,7 @@ const CreateDiaryMaintenance = () => {
     fetchUserId();
   }, []);
 
-  const handleSetAlarmTime = () => {
+  const handleSetReminderTime = () => {
     setShowDatePicker(true);
   };
 
@@ -61,24 +59,27 @@ const CreateDiaryMaintenance = () => {
 
   //
   const handleDateTimeChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === "ios"); // Close the picker on iOS
+    if (event.type === "dismissed") {
+      // Handle the cancel action
+      setShowDatePicker(false); // Close the date picker
+    } else {
+      setShowDatePicker(Platform.OS === "ios"); // Close the picker on iOS
 
-    if (selectedDate) {
-      setSelectedAlarmTime(selectedDate); // Store the selected alarm time
-      setAlarmTimes((prevAlarmTimes) => [...prevAlarmTimes, selectedDate]);
+      if (selectedDate) {
+        setSelectedReminderTime(selectedDate); // Store the selected alarm time
+        setReminderTimes((prevReminderTimes) => [
+          ...prevReminderTimes,
+          selectedDate,
+        ]);
+      }
     }
   };
 
   // Function to handle the delete action
-  const handleDeleteAlarm = (index) => {
-    // Create a copy of the alarmTimes array
-    const updatedAlarmTimes = [...alarmTimes];
-
-    // Remove the alarm at the specified index
-    updatedAlarmTimes.splice(index, 1);
-
-    // Update the alarmTimes state with the modified array
-    setAlarmTimes(updatedAlarmTimes);
+  const handleDeleteReminder = (index) => {
+    const updatedReminderTimes = [...reminderTimes];
+    updatedReminderTimes.splice(index, 1);
+    setReminderTimes(updatedReminderTimes);
   };
 
   //schedule
@@ -111,8 +112,8 @@ const CreateDiaryMaintenance = () => {
   };
 
   //store data to the variable from TextInputs
-  const [alarmName, setAlarmName] = useState("");
-  const [alarmDescription, setAlarmDescription] = useState("");
+  const [reminderName, setReminderName] = useState("");
+  const [reminderDescription, setReminderDescription] = useState("");
   const [medicineStock, setMedicineStock] = useState("");
 
   //HANDLE TEXTINPUTS-------------------------------------
@@ -123,28 +124,28 @@ const CreateDiaryMaintenance = () => {
     }
   };
 
-  const handleAlarmNameChange = (inputText) => {
+  const handleReminderNameChange = (inputText) => {
     if (inputText.length <= 50) {
       const capitalizedInput =
         inputText.charAt(0).toUpperCase() + inputText.slice(1);
-      setAlarmName(capitalizedInput);
+      setReminderName(capitalizedInput);
     }
   };
 
-  const handleAlarmDescriptionChange = (inputText) => {
+  const handleReminderDescriptionChange = (inputText) => {
     if (inputText.length <= 100) {
       const capitalizedInput =
         inputText.charAt(0).toUpperCase() + inputText.slice(1);
-      setAlarmDescription(capitalizedInput);
+      setReminderDescription(capitalizedInput);
     }
   };
 
   const handleAddButtonPress = () => {
     if (
-      !alarmName ||
-      !alarmDescription ||
+      !reminderName ||
+      !reminderDescription ||
       !medicineStock ||
-      !selectedAlarmTime ||
+      !selectedReminderTime ||
       selectedDays.length === 0
     ) {
       ToastAndroid.show("All fields are required.", ToastAndroid.LONG);
@@ -155,11 +156,11 @@ const CreateDiaryMaintenance = () => {
 
   //clear input fields
   const clearInputFields = () => {
-    setAlarmName("");
-    setAlarmDescription("");
+    setReminderName("");
+    setReminderDescription("");
     setMedicineStock("");
-    setSelectedAlarmTime(null);
-    setAlarmTimes([]); // Clear the alarmTimes array
+    setSelectedReminderTime(null);
+    setReminderTimes([]);
   };
 
   //insert data to firestore
@@ -172,8 +173,8 @@ const CreateDiaryMaintenance = () => {
       }
 
       // Create a Firestore Timestamp object from selectedAlarmTime
-      const alarmTime = selectedAlarmTime
-        ? Timestamp.fromDate(selectedAlarmTime)
+      const reminderTime = selectedReminderTime
+        ? Timestamp.fromDate(selectedReminderTime)
         : null;
 
       // Create an array to store the selected days as numbers
@@ -183,19 +184,18 @@ const CreateDiaryMaintenance = () => {
 
       // Create a new diaryMaintenance document
       const docRef = await addDoc(collection(db, "diaryMaintenance"), {
-        userId: userId, // Insert the user ID into the Firestore document
-        alarmName: alarmName,
-        alarmDescription: alarmDescription,
+        userId: userId,
+        reminderName: reminderName,
+        reminderDescription: reminderDescription,
         medicineStock: medicineStock,
-        alarmSched: selectedDaysNumbers, // Store the selected days as an array of numbers
+        reminderSched: selectedDaysNumbers,
       });
 
-      // Add alarms to the "diaryAlarms" collection
-      for (const alarm of alarmTimes) {
-        await addDoc(collection(db, "diaryAlarms"), {
-          alarmTime: Timestamp.fromDate(alarm),
-          diaryMaintenanceId: docRef.id, // Reference to the diaryMaintenance document
-          switchState: false, // Default switch state to true
+      for (const reminder of reminderTimes) {
+        await addDoc(collection(db, "diaryReminders"), {
+          reminderTime: Timestamp.fromDate(reminder),
+          diaryMaintenanceId: docRef.id,
+          switchState: false,
         });
       }
 
@@ -223,9 +223,9 @@ const CreateDiaryMaintenance = () => {
             <View style={styles.mainteInputView}>
               <TextInput
                 style={styles.placeholderStyle}
-                placeholder="Alarm name..."
-                value={alarmName}
-                onChangeText={handleAlarmNameChange}
+                placeholder="Reminder name..."
+                value={reminderName}
+                onChangeText={handleReminderNameChange}
                 maxLength={50}
                 autoCapitalize="sentences"
               />
@@ -237,29 +237,29 @@ const CreateDiaryMaintenance = () => {
             <View style={styles.descriptionInputView}>
               <TextInput
                 style={styles.placeholderStyle}
-                placeholder="Alarm description..."
-                value={alarmDescription}
-                onChangeText={handleAlarmDescriptionChange}
+                placeholder="Reminder description..."
+                value={reminderDescription}
+                onChangeText={handleReminderDescriptionChange}
                 maxLength={100}
                 autoCapitalize="sentences"
               />
             </View>
           </View>
 
-          <View style={styles.setAlarmNoteView}>
-            <View style={styles.setAlarmView}>
+          <View style={styles.setReminderNoteView}>
+            <View style={styles.setReminderView}>
               <Text
-                style={styles.setAlarmText}
+                style={styles.setReminderText}
                 onPress={() => {
-                  handleSetAlarmTime();
-                  setShowSelectedAlarm(true);
+                  handleSetReminderTime();
+                  setShowSelectedReminder(true);
                 }}
               >
-                Set alarm
+                Set reminder
               </Text>
             </View>
-            <Text style={styles.alarmNoteText}>
-              Press this set button to set alarms
+            <Text style={styles.reminderNoteText}>
+              Press this set button to set reminders
             </Text>
           </View>
 
@@ -274,22 +274,22 @@ const CreateDiaryMaintenance = () => {
             />
           )}
 
-          <View style={styles.alarmsView}>
-            <Text style={styles.alarmsText}>Alarms</Text>
-            {alarmTimes.length === 0 ? (
-              <Text style={styles.noAlarmsText}>No alarms yet</Text>
+          <View style={styles.remindersView}>
+            <Text style={styles.remindersText}>Reminders</Text>
+            {reminderTimes.length === 0 ? (
+              <Text style={styles.noRemindersText}>No reminders yet</Text>
             ) : (
               <View>
-                {alarmTimes.map((alarm, index) => (
-                  <View key={index} style={styles.alarmContainer}>
-                    <Text style={styles.alarmTimeText}>
-                      {alarm.getHours()}:
-                      {String(alarm.getMinutes()).padStart(2, "0")}{" "}
-                      {alarm.getHours() >= 12 ? "PM" : "AM"}
+                {reminderTimes.map((reminder, index) => (
+                  <View key={index} style={styles.reminderContainer}>
+                    <Text style={styles.reminderTimeText}>
+                      {reminder.getHours()}:
+                      {String(reminder.getMinutes()).padStart(2, "0")}{" "}
+                      {reminder.getHours() >= 12 ? "PM" : "AM"}
                     </Text>
                     <TouchableOpacity
                       style={styles.deleteIcon}
-                      onPress={() => handleDeleteAlarm(index)}
+                      onPress={() => handleDeleteReminder(index)}
                     >
                       <Iconify
                         icon="ic:outline-delete"

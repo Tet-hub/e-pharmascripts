@@ -11,7 +11,7 @@ import {
   FlatList,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
-import styles from "./stylesheet";
+import styles from "./bs";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
 const { width, height } = Dimensions.get("window");
 
@@ -57,18 +57,34 @@ const BranchesScreen = ({ navigation, route }) => {
     const match = branch.match(/\(([^)]+)\)/);
     return match ? branch.replace(match[0], "").trim() : branch;
   };
-
+  //{averageRating.toFixed(1)}
   const renderBranchItem = ({ item }) => (
     <View style={[styles.pharmacyContainer, { width: cardWidth }]}>
       <View style={styles.pharmacyCard}>
-        <Text style={styles.ratingText}>{item.rating}★</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={styles.ratingText}>{item.rating}★</Text>
+          <Text style={styles.averageStar}></Text>
+        </View>
         <Image source={{ uri: item.img }} style={styles.image} />
         <Text style={styles.pharmacyName}>{item.companyName}</Text>
         <Text style={styles.branchName}>{`(${extractBranchName(
           item.branch
         )})`}</Text>
+
         <View style={styles.viewButtonContainer}>
           <TouchableOpacity
+            style={styles.pharmacyDetailsView}
+            onPress={() =>
+              navigation.navigate("BranchDetailsScreen", {
+                sellerId: item.id,
+              })
+            }
+          >
+            <Text style={styles.viewDetailsText}>View Details</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.viewButton}
             onPress={() =>
               navigation.navigate("ProductScreen", {
                 name: item.companyName,
@@ -77,10 +93,13 @@ const BranchesScreen = ({ navigation, route }) => {
               })
             }
           >
-            <View style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>View Branch</Text>
-              <Iconify icon="ic:round-greater-than" size={15} color="#EC6F56" />
-            </View>
+            <Text style={styles.viewButtonText}>Products</Text>
+            <Iconify
+              icon="ic:round-greater-than"
+              size={18}
+              color="white"
+              style={{ marginLeft: 5 }}
+            />
           </TouchableOpacity>
         </View>
       </View>

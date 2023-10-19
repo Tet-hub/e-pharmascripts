@@ -76,6 +76,11 @@ const FavoritesScreen = () => {
       const favoriteDocRef = doc(db, "favorites", favoritesSnapshot.docs[0].id);
       await deleteDoc(favoriteDocRef);
       ToastAndroid.show("Product removed from favorites", ToastAndroid.SHORT);
+
+      // Update the productData state to remove the product
+      setProductData((prevData) =>
+        prevData.filter((item) => item.productId !== productId)
+      );
     }
   };
 

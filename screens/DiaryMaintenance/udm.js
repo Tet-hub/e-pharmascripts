@@ -75,32 +75,32 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginVertical: 3,
   },
-  setAlarmView: {
+  setReminderView: {
     alignItems: "center",
     backgroundColor: "#3C3C3C",
     width: "30%",
     padding: 10,
     borderRadius: 25,
   },
-  setAlarmNoteView: {
+  setReminderNoteView: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 15,
   },
-  setAlarmText: {
+  setReminderText: {
     color: "white",
     fontSize: 14,
   },
-  alarmsView: {
+  remindersView: {
     marginTop: 25,
     marginLeft: 10,
   },
-  alarmsText: {
+  remindersText: {
     fontSize: 16,
     fontWeight: 500,
   },
-  alarmNoteText: {
+  reminderNoteText: {
     color: "#8E8E8E",
     fontSize: 12,
     fontWeight: 400,
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  noAlarmsText: {
+  noRemindersText: {
     color: "#8E8E8E",
     fontSize: 18,
     textAlign: "center",
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   //
-  alarmContainer: {
+  reminderContainer: {
     marginTop: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     width: "95%",
     alignSelf: "center",
   },
-  alarmTimeText: {
+  reminderTimeText: {
     fontWeight: 400,
     fontSize: 20,
     marginLeft: 25,

@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 5,
   },
-  alarmNameContainer: {
+  reminderNameContainer: {
     backgroundColor: "#8E8E8E",
     borderRadius: 20,
   },
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
 
   //
-  alarmContainer: {
+  reminderContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
