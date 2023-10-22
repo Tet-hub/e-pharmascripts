@@ -7,13 +7,13 @@ const styles = StyleSheet.create({
     flexGrow: 1, // This allows the ScrollView to grow to fill the screen
   },
   container: {
-    flex: 1,
     backgroundColor: "white",
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     alignSelf: "center",
     width: "100%",
     height: "100%",
+    marginTop: 0,
   },
   delAddressContainer: {
     width: "80%",

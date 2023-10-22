@@ -26,7 +26,7 @@ const ProfileScreen = () => {
 
         if (userId) {
           // Firestore real-time listener
-          const userRef = doc(db, "users", userId);
+          const userRef = doc(db, "customers", userId);
           const unsubscribe = onSnapshot(userRef, (doc) => {
             if (doc.exists()) {
               const data = doc.data();

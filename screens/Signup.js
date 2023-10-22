@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
   Text,
+  ToastAndroid,
 } from "react-native";
 import {
   StyledContainer,
@@ -27,6 +28,8 @@ import {
   TextLink,
   TextLinkContent,
 } from "../components/styles";
+import { useToast } from "react-native-toast-notifications";
+
 import axios from "axios"; // Import Axios for making API requests
 //colors
 const { darkLight } = Colors;
@@ -40,6 +43,7 @@ import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { BASE_URL } from "../src/api/apiURL";
 
 const Signup = ({ navigation }) => {
+  const toast = useToast();
   const [hidePassword, setHidePassword] = useState(true);
   const [show, setShow] = useState(false);
   const [date, setDate] = useState(new Date(2000, 0, 1));
@@ -130,14 +134,20 @@ const Signup = ({ navigation }) => {
     };
     try {
       const response = await axios.post(
-        `${BASE_URL}/api/mobile/post/${"users"}`,
+        `${BASE_URL}/api/mobile/post/${"customers"}`,
         userData
       );
-      if (response.status === 200) {
-        // console.log("User added successfully");
+      if (response.status === 201) {
         console.log("User added successfully", response.data.msg);
         setErrorWithTimeout("User added successfully");
         navigation.navigate("Login");
+        toast.show("User added successfully", {
+          type: "normal ",
+          placement: "bottom",
+          duration: 3000,
+          offset: 10,
+          animationType: "slide-in",
+        });
       }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.msg) {

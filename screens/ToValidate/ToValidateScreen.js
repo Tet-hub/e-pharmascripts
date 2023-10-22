@@ -41,7 +41,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         // Fetch user data
         const authToken = await getAuthToken();
         const userId = authToken.userId; // Get userId from AsyncStorage
-        const userData = await fetchSingleDocumentById(userId, "users");
+        const userData = await fetchSingleDocumentById(userId, "customers");
 
         // Fetch product data
         if (productId) {
@@ -157,7 +157,7 @@ const ToValidateScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={[styles.container]}>
+        <View style={styles.container}>
           <View style={styles.delAddressContainer}>
             <View>
               <Iconify icon="system-uicons:location" size={35} color="black" />

@@ -82,7 +82,7 @@ const EditProfileScreen = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userRef = doc(db, "users", userID);
+        const userRef = doc(db, "customers", userID);
         const userDoc = await getDoc(userRef);
 
         if (userDoc.exists()) {
@@ -99,8 +99,8 @@ const EditProfileScreen = () => {
           if (data.profileImage) {
             setSelectedImage(data.profileImage);
           }
-          if (data.Status) {
-            setFetchedStatus(data.Status);
+          if (data.status) {
+            setFetchedStatus(data.status);
           }
 
           if (data.validId) {
@@ -158,7 +158,7 @@ const EditProfileScreen = () => {
     }
 
     try {
-      const userRef = doc(db, "users", userID);
+      const userRef = doc(db, "customers", userID);
       let imageUrl = null;
       let fileImageUrl = null;
 

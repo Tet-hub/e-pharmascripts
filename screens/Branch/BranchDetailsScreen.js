@@ -49,7 +49,7 @@ const BranchDetailsScreen = () => {
 
   const fetchUserData = async (userId) => {
     try {
-      const userRef = doc(db, "users", userId);
+      const userRef = doc(db, "customers", userId);
       const userSnapshot = await getDoc(userRef);
 
       if (userSnapshot.exists()) {
