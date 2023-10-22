@@ -6,6 +6,7 @@ import {
   Dimensions,
   Image,
   Button,
+  FlatList,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import OrderSwitchTabs from "../../components/OrderSwitchTabs";
@@ -20,16 +21,20 @@ import {
   query,
   where,
   onSnapshot,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { getAuthToken } from "../../src/authToken";
+import { BASE_URL } from "../../src/api/apiURL";
 
 const OrderScreen = () => {
   const navigation = useNavigation();
   const [orderId, setOrderId] = useState("rOHz230V7aygWyLmQ6MR");
   const [isRated, setIsRated] = useState(false);
-  const [CurrentUserId, setCurrentUserId] = useState("");
-
+  const [currentCustomerId, setCurrentCustomerId] = useState("");
+  // Define a state to store the pending orders
+  const [pendingOrders, setPendingOrders] = useState([]);
   const [trackerTab, setTrackerTab] = useState(1);
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
@@ -38,7 +43,7 @@ const OrderScreen = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleRateScreen = () => {
-    navigation.navigate("RateScreen", { orderId, CurrentUserId });
+    navigation.navigate("RateScreen", { orderId, currentCustomerId });
   };
   const handleViewOrderScreen = () => {
     navigation.navigate("ViewCompletedOrderScreen");
@@ -52,11 +57,11 @@ const OrderScreen = () => {
     async function getUserData() {
       try {
         const authToken = await getAuthToken();
-        const userId = authToken.userId;
+        const customerId = authToken.userId;
 
-        setCurrentUserId(userId);
+        setCurrentCustomerId(customerId);
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.log("Error fetching user data:", error);
       }
     }
 
@@ -86,6 +91,72 @@ const OrderScreen = () => {
 
     checkIfRated();
   }, [orderId]);
+  // Fetch pending orders from the database
+  useEffect(() => {
+    const fetchPendingOrdersRealTime = () => {
+      try {
+        const ordersRef = collection(db, "orders");
+        const q = query(
+          ordersRef,
+          where("customerId", "==", currentCustomerId)
+        );
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+          const pendingOrdersData = [];
+          snapshot.docs.forEach((doc) => {
+            const data = { id: doc.id, ...doc.data() };
+            pendingOrdersData.push(data);
+          });
+          const filteredPendingOrders = pendingOrdersData.filter((item) => {
+            if (trackerTab === 1 && item.status === "Pending Validation") {
+              return true;
+            } else if (
+              trackerTab === 2 &&
+              (item.status === "Validated" || item.status === "Ordered")
+            ) {
+              return true;
+            } else if (
+              trackerTab === 3 &&
+              (item.status === "To Deliver" ||
+                item.status === "Pending Rider" ||
+                item.status === "On Delivery")
+            ) {
+              return true;
+            } else if (trackerTab === 4 && item.status === "Cancelled") {
+              return true;
+            } else if (trackerTab === 5 && item.status === "Completed") {
+              return true;
+            } else {
+              return false;
+            }
+          });
+          const promises = filteredPendingOrders.map(async (item) => {
+            try {
+              const productDocumentId = item.productId;
+              const productApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productDocumentId}`;
+              const productResponse = await fetch(productApiUrl, {
+                method: "GET",
+              });
+              const productData = await productResponse.json();
+              return { ...item, productDetails: productData };
+            } catch (error) {
+              console.error("Error fetching product details:", error);
+              return null;
+            }
+          });
+
+          const results = await Promise.all(promises);
+          const filteredResults = results.filter(Boolean);
+          setPendingOrders(filteredResults);
+        });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error fetching pending orders: ", error);
+      }
+    };
+
+    fetchPendingOrdersRealTime();
+  }, [currentCustomerId, trackerTab]);
 
   return (
     <View style={styles.container}>
@@ -102,64 +173,108 @@ const OrderScreen = () => {
           onSelectSwitch={onSelectSwitch}
         />
       </View>
-      {trackerTab == 1 && (
-        <View style={styles.productContainer}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={require("../../assets/img/amlodipine.png")}
-              style={styles.productImage}
+      {trackerTab === 1 && (
+        <View>
+          {pendingOrders.length === 0 ? (
+            <Text>No pending orders</Text>
+          ) : (
+            <FlatList
+              data={pendingOrders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View key={item.id} style={styles.productContainer}>
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: item.productDetails.img }}
+                      style={styles.productImage}
+                    />
+                  </View>
+                  <View style={styles.productInfoContainer}>
+                    <View>
+                      <Text style={styles.productName}>
+                        {item.productDetails.productName}
+                      </Text>
+                      <Text style={styles.productReq}>
+                        {item.productDetails.requiresPrescription
+                          ? "[ Requires Prescription ]"
+                          : ""}
+                      </Text>
+                    </View>
+                    <View style={styles.priceRowContainer}>
+                      <Text style={styles.productAmount}>x{item.quantity}</Text>
+                      <Text style={styles.productPrice}>
+                        {"\u20B1"}
+                        {item.productDetails.price}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
             />
-          </View>
-          <View style={styles.productInfoContainer}>
-            <View>
-              <Text style={styles.productName}>Zynapse 1G Tablet</Text>
-              <Text style={styles.productReq}>[ Requires Prescription ]</Text>
-            </View>
-            <View style={styles.priceRowContainer}>
-              <Text style={styles.productAmount}>x1</Text>
-              <Text style={styles.productPrice}>{"\u20B1"}102.75</Text>
-            </View>
-          </View>
+          )}
         </View>
       )}
-      {trackerTab == 2 && (
+
+      {trackerTab === 2 && (
         <View style={styles.container}>
-          <TouchableOpacity
-            style={styles.productContainer}
-            onPress={handleApprovedProductDetailScreen}
-          >
-            <View>
-              <Checkbox
-                color="#EC6F56"
-                value={isChecked}
-                onValueChange={setIsChecked}
-                style={styles.checkBoxIcon}
-              />
-            </View>
-            <View style={styles.imageContainer}>
-              <Image
-                source={require("../../assets/img/amlodipine.png")}
-                style={styles.productImage}
-              />
-            </View>
-            <View style={styles.productInfoContainer}>
-              <View>
-                <Text style={styles.productName}>Zynapse 1G Tablet</Text>
-                <Text style={styles.productReq}>[ Requires Prescription ]</Text>
-              </View>
-              <View style={styles.priceRowContainer}>
-                <Text style={styles.productAmount}>x1</Text>
-                <Text style={styles.productPrice}>{"\u20B1"}102.75</Text>
-              </View>
-            </View>
+          {pendingOrders.length === 0 ? (
+            <Text>No Orders Yet</Text>
+          ) : (
+            <FlatList
+              data={pendingOrders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.productContainer}
+                  onPress={handleApprovedProductDetailScreen}
+                >
+                  <View>
+                    <Checkbox
+                      color="#EC6F56"
+                      value={isChecked}
+                      onValueChange={setIsChecked}
+                      style={styles.checkBoxIcon}
+                    />
+                  </View>
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: item.productDetails.img }}
+                      style={styles.productImage}
+                    />
+                  </View>
+                  <View style={styles.productInfoContainer}>
+                    <View>
+                      <Text style={styles.productName}>
+                        {item.productDetails.productName}
+                      </Text>
+                      <Text style={styles.productReq}>
+                        {item.productDetails.requiresPrescription
+                          ? "[ Requires Prescription ]"
+                          : ""}
+                      </Text>
+                    </View>
+                    <View style={styles.priceRowContainer}>
+                      <Text style={styles.productAmount}>x{item.quantity}</Text>
+                      <Text style={styles.productPrice}>
+                        {"\u20B1"}
+                        {item.productDetails.price}
+                      </Text>
+                    </View>
+                  </View>
 
-            <View style={styles.xButtonWrapper}>
-              <TouchableOpacity style={styles.xButton}>
-                <Iconify icon="carbon:close-filled" size={22} color="black" />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-
+                  <View style={styles.xButtonWrapper}>
+                    <TouchableOpacity style={styles.xButton}>
+                      <Iconify
+                        icon="carbon:close-filled"
+                        size={22}
+                        color="black"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          )}
           <View style={styles.proceedButtonContainer}>
             <TouchableOpacity style={styles.proceedButton}>
               <Text style={styles.proceedText}>Proceed to payment</Text>
@@ -168,84 +283,148 @@ const OrderScreen = () => {
           </View>
         </View>
       )}
-      {trackerTab == 3 && (
-        <View style={styles.productContainer}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={require("../../assets/img/amlodipine.png")}
-              style={styles.productImage}
-            />
-          </View>
-          <View style={styles.productInfoContainer}>
-            <View>
-              <Text style={styles.productName}>Zynapse 1G Tablet</Text>
-              <Text style={styles.productReq}>[ Requires Prescription ]</Text>
-            </View>
-            <View style={styles.priceRowContainer}>
-              <Text style={styles.productAmount}>x1</Text>
-              <Text style={styles.productPrice}>{"\u20B1"}102.75</Text>
-            </View>
-          </View>
-        </View>
-      )}
-      {trackerTab == 4 && (
-        <View style={styles.productContainer}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={require("../../assets/img/amlodipine.png")}
-              style={styles.productImage}
-            />
-          </View>
-          <View style={styles.productInfoContainer}>
-            <View>
-              <Text style={styles.productName}>Zynapse 1G Tablet</Text>
-              <Text style={styles.productReq}>[ Requires Prescription ]</Text>
-            </View>
-            <View style={styles.priceRowContainer}>
-              <Text style={styles.productAmount}>x1</Text>
-              <Text style={styles.productPrice}>{"\u20B1"}102.75</Text>
-            </View>
-          </View>
-        </View>
-      )}
-      {trackerTab == 5 && (
+
+      {trackerTab === 3 && (
         <View>
-          <View style={styles.completedOrderContainer}>
-            <View style={styles.completedProductContainer}>
-              <View style={styles.imageContainerCompletedScreen}>
-                <Image
-                  source={require("../../assets/img/amlodipine.png")}
-                  style={styles.productImageCompletedScreen}
-                />
-              </View>
-              <View style={styles.productInfoContainer}>
-                <View>
-                  <Text style={styles.productName}>Zynapse 1G Tablet</Text>
-                  <Text style={styles.productReq}>
-                    [ Requires Prescription ]
-                  </Text>
-                </View>
-                <View style={styles.priceRowContainer}>
-                  <Text style={styles.productAmount}>x1</Text>
-                  <Text style={styles.productPrice}>{"\u20B1"}102.75</Text>
-                </View>
-              </View>
-            </View>
-            <View>
-              <View style={styles.viewRateContainer}>
-                <TouchableOpacity onPress={handleViewOrderScreen}>
-                  <View style={styles.viewButton}>
-                    <Text style={styles.viewText}>DETAILS</Text>
+          {pendingOrders.length === 0 ? (
+            <Text>No Orders Yet</Text>
+          ) : (
+            <FlatList
+              data={pendingOrders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.productContainer}>
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: item.productDetails.img }}
+                      style={styles.productImage}
+                    />
                   </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleRateScreen}>
-                  <View style={styles.rateButton}>
-                    <Text style={styles.rateText}>{buttonText}</Text>
+                  <View style={styles.productInfoContainer}>
+                    <View>
+                      <Text style={styles.productName}>
+                        {item.productDetails.productName}
+                      </Text>
+                      <Text style={styles.productReq}>
+                        {item.productDetails.requiresPrescription
+                          ? "[ Requires Prescription ]"
+                          : ""}
+                      </Text>
+                    </View>
+                    <View style={styles.priceRowContainer}>
+                      <Text style={styles.productAmount}>x{item.quantity}</Text>
+                      <Text style={styles.productPrice}>
+                        {"\u20B1"}
+                        {item.productDetails.price}
+                      </Text>
+                    </View>
                   </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
+                </View>
+              )}
+            />
+          )}
+        </View>
+      )}
+
+      {trackerTab === 4 && (
+        <View>
+          {pendingOrders.length === 0 ? (
+            <Text>No Orders Yet</Text>
+          ) : (
+            <FlatList
+              data={pendingOrders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.productContainer}>
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: item.productDetails.img }}
+                      style={styles.productImage}
+                    />
+                  </View>
+                  <View style={styles.productInfoContainer}>
+                    <View>
+                      <Text style={styles.productName}>
+                        {item.productDetails.productName}
+                      </Text>
+                      <Text style={styles.productReq}>
+                        {item.productDetails.requiresPrescription
+                          ? "[ Requires Prescription ]"
+                          : ""}
+                      </Text>
+                    </View>
+                    <View style={styles.priceRowContainer}>
+                      <Text style={styles.productAmount}>x{item.quantity}</Text>
+                      <Text style={styles.productPrice}>
+                        {"\u20B1"}
+                        {item.productDetails.price}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            />
+          )}
+        </View>
+      )}
+
+      {trackerTab === 5 && (
+        <View>
+          {pendingOrders.length === 0 ? (
+            <Text>No Orders Yet</Text>
+          ) : (
+            <FlatList
+              data={pendingOrders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.completedOrderContainer}>
+                  <View style={styles.completedProductContainer}>
+                    <View style={styles.imageContainerCompletedScreen}>
+                      <Image
+                        source={{ uri: item.productDetails.img }}
+                        style={styles.productImageCompletedScreen}
+                      />
+                    </View>
+                    <View style={styles.productInfoContainer}>
+                      <View>
+                        <Text style={styles.productName}>
+                          {item.productDetails.productName}
+                        </Text>
+                        <Text style={styles.productReq}>
+                          {item.productDetails.requiresPrescription
+                            ? "[ Requires Prescription ]"
+                            : ""}
+                        </Text>
+                      </View>
+                      <View style={styles.priceRowContainer}>
+                        <Text style={styles.productAmount}>
+                          x{item.quantity}
+                        </Text>
+                        <Text style={styles.productPrice}>
+                          {"\u20B1"}
+                          {item.productDetails.price}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View>
+                    <View style={styles.viewRateContainer}>
+                      <TouchableOpacity onPress={handleViewOrderScreen}>
+                        <View style={styles.viewButton}>
+                          <Text style={styles.viewText}>DETAILS</Text>
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={handleRateScreen}>
+                        <View style={styles.rateButton}>
+                          <Text style={styles.rateText}>{buttonText}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
+            />
+          )}
         </View>
       )}
     </View>

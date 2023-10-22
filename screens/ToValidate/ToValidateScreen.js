@@ -93,7 +93,7 @@ const ToValidateScreen = ({ navigation, route }) => {
 
       // Create an order object with the necessary data
       const data = {
-        userId: user.id,
+        customerId: user.id,
         customerName: `${user.firstName} ${user.lastName}`,
         deliveryAddress: "NA", //google map api
         phoneNumber: user.phone, //temp for now
@@ -102,7 +102,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         quantity: quantity,
         totalPrice: productSubtotal.toFixed(2),
         sellerId: item.createdBy,
-        Status: "Not Validated",
+        status: "Pending Validation",
         createdAt: orderCreatedTimestamp,
       };
       // console.log("orederData", orderData);
