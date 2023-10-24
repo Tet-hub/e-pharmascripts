@@ -5,12 +5,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  searchTexInputView: {
+    width: "90%",
+  },
+  xButton: {
+    backgroundColor: "black",
+    borderRadius: 50,
+    padding: 3,
+    marginLeft: 5,
+  },
+  searchButtonIcon: {},
   searchCont: {
-    flexDirection: "row",
-    alignItems: "center",
     padding: 10,
     borderRadius: 15,
-    width: "82%",
+    width: "100%",
     backgroundColor: "white",
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
@@ -18,21 +26,26 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1.5,
     marginVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  iconSearch: {
-    marginRight: 10,
-    color: "black",
+  searchIconView: {
+    backgroundColor: "white",
+    padding: 5,
+    paddingRight: 10,
+    paddingLeft: 10,
+    marginRight: 3,
+    shadowColor: "black",
+    shadowOpacity: 0.2,
+    elevation: 1,
+    borderRadius: 10,
+  },
+  searchTextInput: {
+    marginLeft: 5,
   },
   inputSearch: {
     flex: 1,
   },
-  iconFilterCont: {
-    backgroundColor: "black",
-    padding: 10,
-    marginLeft: 15,
-    borderRadius: 15,
-  },
-
   //Flatlist Styles
   container: {
     flex: 1,

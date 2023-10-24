@@ -1,168 +1,124 @@
-import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
-  SafeAreaView,
   Image,
-  ScrollView,
   TouchableOpacity,
-  Dimensions,
-  FlatList,
+  Text,
+  ToastAndroid,
+  TextInput,
   Modal,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import React, { useEffect, useState, useRef } from "react";
 import { Iconify } from "react-native-iconify";
-import { TextInput } from "react-native-gesture-handler";
-import { listenForItem } from "../../database/component/realTimeListenerByCondition";
-import styles from "./stylesheet";
-import buildQueryUrl from "../../src/api/components/conditionalQuery";
 import { getDocs, where, collection, query } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import { ScrollView } from "react-native-gesture-handler";
+import styles from "./searchedStyle";
+import { Picker } from "@react-native-picker/picker";
 
-const { width, height } = Dimensions.get("window");
-
-// Calculate the image dimensions based on screen size
-const cardWidth = (width - 30) / 2;
-
-const ProductScreen = ({ navigation, route }) => {
-  const sellerId = route.params?.sellerId;
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [product, setProductData] = useState([]);
-  const [filteredProduct, setFilteredProduct] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+const SearchProductsScreen = ({ navigation, route }) => {
+  const { searchKeyword } = route.params;
+  //console.log("keyword", searchKeyword);
+  const [newSearchKeyword, setNewSearchKeyword] = useState(searchKeyword);
   const [sortingOption, setSortingOption] = useState(null);
   const [isLowToHighSelected, setIsLowToHighSelected] = useState(false);
   const [isHighToLowSelected, setIsHighToLowSelected] = useState(false);
   const [isLocationButtonClicked, setLocationButtonClicked] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [displayAllProducts, setDisplayAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
-  //
+  //console.log("PASSED DATA:", matchedProductIds);
   const handleFilterClick = () => {
     setShowModal(true);
   };
-
-  // sorting and select category
-  const applySorting = (data) => {
-    const sortedProduct = [...data];
-
+  // RESET SORTING
+  const cancelSorting = () => {
+    setLocationButtonClicked(false);
+    setIsLowToHighSelected(false);
+    setIsHighToLowSelected(false);
+    setNewSearchKeyword("");
+    setSelectedCategory("");
+    setSortingOption(null);
+    setShowModal(false);
+  };
+  //
+  const sortProducts = () => {
     if (sortingOption === "lowToHigh") {
-      sortedProduct.sort((a, b) => a.price - b.price);
+      filteredProducts.sort((a, b) => a.price - b.price);
     } else if (sortingOption === "highToLow") {
-      sortedProduct.sort((a, b) => b.price - a.price);
+      filteredProducts.sort((a, b) => b.price - a.price);
     } else {
       setSortingOption(null);
     }
 
-    return sortedProduct;
+    setShowModal(false);
   };
 
-  const applyFilters = (data) => {
-    let filteredProducts = [...data];
-
-    if (selectedCategory) {
-      filteredProducts = filteredProducts.filter((item) => {
-        if (Array.isArray(item.category)) {
-          return item.category.includes(selectedCategory);
+  //display based on the selected category
+  //note: use includes when matching string to an array
+  useEffect(() => {
+    if (selectedCategory === "") {
+      setFilteredProducts(displayAllProducts);
+    } else {
+      const filteredByCategory = displayAllProducts.filter((product) => {
+        if (Array.isArray(product.productCategory)) {
+          return product.productCategory.includes(selectedCategory);
         } else {
-          return item.category === selectedCategory;
+          return product.productCategory === selectedCategory;
         }
       });
+      setFilteredProducts(filteredByCategory);
     }
+  }, [selectedCategory, displayAllProducts]);
 
-    if (isLocationButtonClicked) {
-      //
-    }
-
-    // Apply sorting
-    return applySorting(filteredProducts);
-  };
-  //
-  const applyFiltersAndSorting = () => {
-    // First, apply sorting to the products
-    const sortedData = applySorting(product);
-
-    // Then, apply filters to the sorted data
-    const filteredAndSortedData = applyFilters(sortedData);
-
-    // Set the filtered and sorted data
-    setFilteredProduct(filteredAndSortedData);
-    setShowModal(false);
-  };
-  //
-  const cancelSorting = () => {
-    setSelectedCategory("");
-    setLocationButtonClicked(false);
-    setIsLowToHighSelected(false);
-    setIsHighToLowSelected(false);
-    setSortingOption(null);
-    setSearchKeyword("");
-    setFilteredProduct(product); // Show the default display of products
-    setShowModal(false);
-  };
-  //
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const conditions = [
-          { fieldName: "createdBy", operator: "==", value: sellerId },
-          {
-            fieldName: "productStatus",
-            operator: "in",
-            value: ["Display", "Test", "Xyxy"],
-          },
-        ];
-        const apiUrl = buildQueryUrl("products", conditions);
-        const response = await fetch(apiUrl, {
-          method: "GET",
-        });
-
-        if (response.ok) {
-          const branchesData = await response.json();
-          setProductData(branchesData);
-        } else {
-          console.log("API request failed with status:", response.status);
-        }
-      } catch (error) {
-        console.log("Error fetching products:", error);
-      }
-    };
-
-    const setUpRealTimeListener = () => {
-      const multipleConditions = [
-        {
-          fieldName: "createdBy",
-          operator: "==",
-          value: sellerId,
-        },
-        {
-          fieldName: "productStatus",
-          operator: "in",
-          value: ["Display", "Test", "Xyxy"],
-        },
-      ];
-
-      const unsubscribe = listenForItem(
-        "products",
-        multipleConditions,
-        (products) => {
-          setProductData(products);
-        }
+  //fetched all products -- default display
+  const fetchAllProducts = async () => {
+    const productDataArray = [];
+    try {
+      const productsCollection = collection(db, "products");
+      const productQuery = query(
+        productsCollection,
+        where("productStatus", "==", "Display")
       );
-      return () => unsubscribe();
-    };
+      const productDocs = await getDocs(productQuery);
+      productDocs.forEach((doc) => {
+        const data = doc.data();
+        productDataArray.push({
+          productName: data.productName,
+          price: data.price,
+          productImg: data.img,
+          productCategory: data.category,
+          id: doc.id,
+        });
+      });
 
-    fetchInitialData();
-    setUpRealTimeListener();
-  }, [sellerId]);
+      // Log the category values
+      setDisplayAllProducts(productDataArray);
+    } catch (error) {
+      console.error("Error fetching all product data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchAllProducts();
+  }, []);
 
-  //fetch category
+  //display products based on keyword or passed keyword
+  useEffect(() => {
+    const trimmedSearchKeyword = newSearchKeyword.trim().toLowerCase();
+    const filteredProducts = displayAllProducts.filter((product) => {
+      return product.productName.toLowerCase().includes(trimmedSearchKeyword);
+    });
+    setFilteredProducts(filteredProducts);
+  }, [newSearchKeyword, displayAllProducts]);
+
+  //fetch category-----------------------------
   const fetchProductCategories = async () => {
     try {
       const productsCollection = collection(db, "products");
       const productQuery = query(
         productsCollection,
-        where("createdBy", "==", sellerId),
         where("productStatus", "==", "Display")
       );
       const productDocs = await getDocs(productQuery);
@@ -194,66 +150,22 @@ const ProductScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     fetchProductCategories();
-  }, [sellerId]);
+  }, []);
 
-  //
-  useEffect(() => {
-    const trimmedSearchKeyword = searchKeyword.trim().toLowerCase();
-    const filtered = product.filter((item) =>
-      item.productName.toLowerCase().includes(trimmedSearchKeyword)
-    );
-    setFilteredProduct(filtered);
-  }, [searchKeyword, product]);
-
-  const renderProducts = ({ item }) => {
-    return (
-      <View style={[styles.productContainer, { width: cardWidth }]}>
-        <View style={styles.productCard}>
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: item.img }} style={styles.image} />
-          </View>
-          <Text style={styles.productName}>{item.productName}</Text>
-
-          {item.requiresPrescription == "Yes" ? (
-            <Text style={styles.productReq}> [ Requires Prescription ] </Text>
-          ) : (
-            <Text style={styles.productReq}> </Text>
-          )}
-
-          <Text style={styles.productPrice}>₱ {item.price}</Text>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("ProductDetailScreen", {
-                productId: item.id,
-                name: route.params?.name,
-                branch: route.params?.branch,
-              })
-            }
-          >
-            <View style={styles.addtocartButton}>
-              <Text style={styles.addtocartText}>View Product</Text>
-              <Iconify icon="ic:round-greater-than" size={18} color="white" />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
-  //
+  //show search icon-----------------------
   const renderSearchIcon = () => {
     return (
-      <TouchableOpacity style={styles.searchButtonIcon}>
+      <Text style={styles.searchButtonIcon}>
         <Iconify icon="iconoir:search" size={22} color="black" />
-      </TouchableOpacity>
+      </Text>
     );
   };
-
   return (
-    <ScrollView style={styles.container}>
-      <View className="items-center flex-row mt-5 ml-3 mr-3 ">
-        <Text style={styles.screenTitle}>
-          {route.params?.name} ({route.params?.branch})
+    <View style={styles.containerView}>
+      <View style={styles.ePharmaScriptsView}>
+        <Text style={styles.eText}>
+          E-
+          <Text style={styles.PharmaScriptsText}> PharmaScripts</Text>
         </Text>
       </View>
 
@@ -264,31 +176,77 @@ const ProductScreen = ({ navigation, route }) => {
               <TextInput
                 style={styles.searchTextInput}
                 placeholder="Search product"
-                value={searchKeyword}
-                onChangeText={(text) => setSearchKeyword(text)}
+                value={newSearchKeyword}
+                onChangeText={(text) => setNewSearchKeyword(text)}
               />
             </View>
             {renderSearchIcon()}
           </View>
-          <TouchableOpacity
-            style={styles.iconFilterCont}
-            onPress={handleFilterClick}
-          >
-            <Iconify icon="mi:filter" size={25} color="white" />
+          <TouchableOpacity onPress={handleFilterClick}>
+            <View style={styles.iconFilterCont}>
+              <Iconify icon="mi:filter" size={25} color="white" />
+            </View>
           </TouchableOpacity>
         </View>
       </View>
 
       <Text style={styles.productSelectionText}>Product Selection</Text>
-
-      <FlatList
-        numColumns={2}
-        scrollEnabled={false}
-        data={filteredProduct}
-        keyExtractor={(item) => item.id}
-        renderItem={renderProducts}
-      />
-
+      {filteredProducts.length === 0 ? ( // Check if productData is empty
+        <Text style={styles.noResultsText}>No results matched</Text>
+      ) : (
+        <ScrollView style={{ marginBottom: 20 }}>
+          {filteredProducts.map((product, index) => (
+            <TouchableOpacity
+              style={styles.productBorder}
+              activeOpacity={0.7}
+              key={index}
+              onPress={() =>
+                navigation.navigate("ProductDetailScreen", {
+                  productId: product.id,
+                })
+              }
+            >
+              <View style={styles.insideBorder}>
+                <View
+                  style={{
+                    width: "22%",
+                    marginLeft: 5,
+                  }}
+                >
+                  {product.productImg ? (
+                    <Image
+                      source={{ uri: product.productImg }}
+                      style={{ width: 60, height: 60, marginLeft: 5 }}
+                    />
+                  ) : (
+                    <Image
+                      source={require("../../assets/img/default-image.jpg")}
+                      style={{ width: 60, height: 60, marginLeft: 5 }}
+                    />
+                  )}
+                </View>
+                <View style={{ width: "52%" }}>
+                  <Text style={styles.productNameText}>
+                    {product.productName}
+                  </Text>
+                  <Text style={styles.locationTextDisplay}>
+                    Rose Pharmacy (Basak San Nicolas Branch) Alumnos St., Basak
+                    San Nicolas, Cebu City
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    width: "23%",
+                    marginLeft: 10,
+                  }}
+                >
+                  <Text style={styles.priceText}>₱ {product.price}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
       <Modal
         visible={showModal}
         animationType="fade"
@@ -355,11 +313,9 @@ const ProductScreen = ({ navigation, route }) => {
                   }}
                   onPress={() => {
                     if (isLowToHighSelected) {
-                      // If it's already selected, deselect it
                       setIsLowToHighSelected(false);
                       setSortingOption(null);
                     } else {
-                      // If it's not selected, select it
                       setIsLowToHighSelected(true);
                       setIsHighToLowSelected(false);
                       setSortingOption("lowToHigh");
@@ -376,12 +332,10 @@ const ProductScreen = ({ navigation, route }) => {
                   }}
                   onPress={() => {
                     if (isHighToLowSelected) {
-                      // If it's already selected, deselect it
                       setIsHighToLowSelected(false);
                       setSortingOption(null);
                     } else {
-                      // If it's not selected, select it
-                      setIsLowToHighSelected(false); // Deselect "Low to High" if selected
+                      setIsLowToHighSelected(false);
                       setIsHighToLowSelected(true);
                       setSortingOption("highToLow");
                     }
@@ -402,13 +356,7 @@ const ProductScreen = ({ navigation, route }) => {
                   <Text style={styles.resetText}>CANCEL</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.applyTO}
-                  onPress={() => {
-                    applyFiltersAndSorting();
-                    setShowModal(false);
-                  }}
-                >
+                <TouchableOpacity style={styles.applyTO} onPress={sortProducts}>
                   <Text style={styles.applyText}>APPLY</Text>
                 </TouchableOpacity>
               </View>
@@ -416,7 +364,8 @@ const ProductScreen = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
-export default ProductScreen;
+
+export default SearchProductsScreen;

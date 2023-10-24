@@ -22,11 +22,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   searchCont: {
-    flexDirection: "row",
-    alignItems: "center",
     padding: 10,
     borderRadius: 15,
-    width: "100%",
+    width: "82%",
     backgroundColor: "white",
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
@@ -34,6 +32,20 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1.5,
     marginVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchTexInputView: {
+    width: "90%",
+  },
+  searchTextInput: {
+    marginLeft: 5,
+  },
+  iconFilterCont: {
+    backgroundColor: "black",
+    padding: 10,
+    marginLeft: 15,
+    borderRadius: 15,
   },
   iconSearch: {
     marginRight: 10,
@@ -133,6 +145,85 @@ const styles = StyleSheet.create({
   averageStar: {
     fontSize: 10,
     marginLeft: 3,
+  },
+  //MODAL
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  modalView: {
+    backgroundColor: "white",
+    width: "80%",
+    height: "100%",
+  },
+  drawerContainer: {
+    width: "75%",
+    alignSelf: "center",
+  },
+  drawerTitle: {
+    fontWeight: 600,
+    fontSize: 18,
+    color: "#EC6F56",
+    marginTop: 30,
+  },
+  locationView: {
+    marginTop: 30,
+  },
+  locationText: {
+    fontWeight: 600,
+    fontSize: 14,
+  },
+  locationTO: {
+    borderWidth: 1.5,
+    borderColor: "#D9D9D9",
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 30,
+  },
+  searchlocationText: {
+    textAlign: "center",
+    fontWeight: 400,
+    fontSize: 14,
+  },
+  separator: {
+    marginTop: 40,
+    height: 1,
+    width: "100%",
+    backgroundColor: "#D9D9D9",
+    alignSelf: "center",
+  },
+
+  resetApplyView: {
+    marginTop: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  resetText: {
+    fontWeight: 700,
+    fontSize: 14,
+    color: "#8E8E8E",
+    textAlign: "center",
+  },
+  applyText: {
+    color: "white",
+    fontWeight: 700,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  resetTO: {
+    borderWidth: 1,
+    borderColor: "#8E8E8E",
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
+  },
+  applyTO: {
+    backgroundColor: "#EC6F56",
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
   },
 });
 

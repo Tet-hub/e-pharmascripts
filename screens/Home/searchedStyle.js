@@ -1,19 +1,28 @@
 import { StyleSheet } from "react-native";
+import { Dimensions } from "react-native";
 
 const styles = StyleSheet.create({
-  screenTitle: {
-    fontSize: 16,
-    fontWeight: 600,
-    marginTop: 10,
-    color: "#3C3C3C",
-  },
-  container: {
-    width: "95%",
+  containerView: {
+    width: "90%",
+    flex: 1,
     alignSelf: "center",
+  },
+  ePharmaScriptsView: {
+    marginLeft: 5,
+    marginTop: 20,
+    marginBottom: 10,
   },
   searchFilterCont: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  eText: {
+    color: "black",
+    fontSize: 22,
+    fontWeight: 600,
+  },
+  PharmaScriptsText: {
+    color: "#EC6F56",
   },
   searchCont: {
     padding: 10,
@@ -29,91 +38,78 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  searchIconView: {
+    backgroundColor: "white",
+    padding: 5,
+    paddingRight: 10,
+    paddingLeft: 10,
+    marginRight: 3,
+    shadowColor: "black",
+    shadowOpacity: 0.2,
+    elevation: 1,
+    borderRadius: 10,
+  },
+  searchTextInput: {
+    marginLeft: 5,
+  },
+  searchTexInputView: {
+    width: "90%",
+  },
   iconSearch: {
-    marginRight: 10,
     color: "black",
   },
   iconFilterCont: {
     backgroundColor: "black",
     padding: 10,
-    marginLeft: 15,
+    paddingRight: 15,
+    paddingLeft: 15,
+    marginLeft: 10,
     borderRadius: 15,
   },
   productSelectionText: {
-    color: "#3A3A3A",
-    fontSize: 16,
-    fontWeight: 600,
-    marginTop: 15,
-    marginBottom: 10,
-    marginLeft: 12,
-  },
-
-  //Product Container/Card
-
-  productContainer: {
-    width: "45%",
-    alignSelf: "center",
-    paddingVertical: 10,
-    marginHorizontal: 4,
-  },
-  productCard: {
-    backgroundColor: "white",
-    height: 250,
-    borderRadius: 15,
-    padding: 17,
-    width: 180,
-    elevation: 2,
-  },
-  productName: {
-    fontSize: 14,
-    fontWeight: 600,
-    textAlign: "center",
-    marginTop: 15,
-  },
-  productReq: {
-    fontWeight: 400,
-    fontSize: 8,
-    color: "#0CB669",
-    marginTop: 8,
-    textAlign: "center",
-  },
-  productPrice: {
-    fontWeight: 600,
     fontSize: 15,
-    textAlign: "center",
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  addtocartButton: {
-    backgroundColor: "#EC6F56",
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "center",
-    justifyContent: "center",
-    borderRadius: 15,
-    padding: 10,
-    width: "90%",
-    marginTop: 3,
-  },
-  addtocartText: {
-    color: "white",
-    marginRight: 10,
-    fontSize: 12,
-    fontWeight: 500,
-  },
-  image: {
-    width: "100%",
-    height: 90,
-  },
-  imageContainer: {
-    width: "100%",
-    borderRadius: 2,
-  },
-  searchTexInputView: {
-    width: "90%",
-  },
-  searchTextInput: {
+    fontWeight: 400,
+    color: "#3A3A3A",
     marginLeft: 5,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  noResultsText: {
+    color: "#3A3A3A",
+    marginLeft: 15,
+    marginTop: 20,
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: 400,
+  },
+  productBorder: {
+    marginTop: 7,
+    backgroundColor: "white",
+    width: "100%",
+    borderRadius: 5,
+  },
+  insideBorder: {
+    flexDirection: "row",
+    width: "100f%",
+    alignSelf: "center",
+    paddingTop: 10,
+    paddingBottom: 10,
+    alignItems: "center",
+  },
+  productNameText: {
+    fontWeight: 600,
+    fontSize: 13,
+  },
+  locationTextDisplay: {
+    fontWeight: 300,
+    fontSize: 8,
+    marginTop: 5,
+  },
+  priceText: {
+    fontWeight: 600,
+    fontSize: 17,
+    color: "#3C3C3C",
+    marginRight: 10,
   },
   //MODAL
   modalContainer: {

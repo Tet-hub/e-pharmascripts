@@ -9,6 +9,7 @@ import {
   Dimensions,
   ScrollView,
   FlatList,
+  Modal,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import styles from "./bs";
@@ -22,6 +23,16 @@ const cardWidth = (width - 30) / 2;
 const BranchesScreen = ({ navigation, route }) => {
   const [branches, setBranches] = useState([]);
   const branchCompany = route.params?.name;
+
+  const [showModal, setShowModal] = useState(false);
+  const [isLocationButtonClicked, setLocationButtonClicked] = useState(false);
+  //
+  const handleFilterClick = () => {
+    setShowModal(true);
+  };
+  handleCloseDrawer = () => {
+    setShowModal(false);
+  };
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -106,6 +117,15 @@ const BranchesScreen = ({ navigation, route }) => {
     </View>
   );
 
+  //
+  const renderSearchIcon = () => {
+    return (
+      <TouchableOpacity style={styles.searchButtonIcon}>
+        <Iconify icon="iconoir:search" size={22} color="black" />
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -113,10 +133,23 @@ const BranchesScreen = ({ navigation, route }) => {
           <Text style={styles.headerText}>{route.params?.name}</Text>
         </View>
 
-        <View style={styles.searchFilterCont}>
-          <View style={styles.searchCont}>
-            <Iconify icon="circum:search" size={22} style={styles.iconSearch} />
-            <TextInput placeholder="Search branch" style={styles.inputSearch} />
+        <View style={{ alignItems: "center" }}>
+          <View style={styles.searchFilterCont}>
+            <View style={styles.searchCont}>
+              <View style={styles.searchTexInputView}>
+                <TextInput
+                  style={styles.searchTextInput}
+                  placeholder="Search branch"
+                />
+              </View>
+              {renderSearchIcon()}
+            </View>
+            <TouchableOpacity
+              style={styles.iconFilterCont}
+              onPress={handleFilterClick}
+            >
+              <Iconify icon="mi:filter" size={25} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -130,6 +163,56 @@ const BranchesScreen = ({ navigation, route }) => {
           renderItem={renderBranchItem}
           contentContainerStyle={styles.branchesContainer}
         />
+        <Modal
+          visible={showModal}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => {
+            setShowModal(false);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalView}>
+              <View style={styles.drawerContainer}>
+                <Text style={styles.drawerTitle}>Search Filter</Text>
+
+                <View style={styles.locationView}>
+                  <Text style={styles.locationText}>By Location</Text>
+
+                  <TouchableOpacity
+                    style={{
+                      ...styles.locationTO,
+                      borderColor: isLocationButtonClicked
+                        ? "#EC6F56"
+                        : "#D9D9D9",
+                    }}
+                    onPress={() =>
+                      setLocationButtonClicked(!isLocationButtonClicked)
+                    }
+                  >
+                    <Text style={styles.searchlocationText}>
+                      Search by location
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.separator} />
+                <View style={styles.resetApplyView}>
+                  <TouchableOpacity
+                    style={styles.resetTO}
+                    activeOpacity={0.7}
+                    onPress={handleCloseDrawer}
+                  >
+                    <Text style={styles.resetText}>CANCEL</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.applyTO}>
+                    <Text style={styles.applyText}>APPLY</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );
