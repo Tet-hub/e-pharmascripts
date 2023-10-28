@@ -20,6 +20,7 @@ import { storeProductData } from "../../database/storing/storeData";
 import { getAuthToken } from "../../src/authToken";
 import { updateById } from "../../database/update/updateDataById";
 import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
+import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
 
 const ToValidateScreen = ({ navigation, route }) => {
@@ -31,7 +32,7 @@ const ToValidateScreen = ({ navigation, route }) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [user, setUserData] = useState(null);
   const [loading, setLoading] = useState(true); // Added loading state
-
+  const [sellerData, setSellerData] = useState(null);
   const productId = route.params?.productId;
   const quantity = route.params?.quantity;
 
@@ -49,6 +50,16 @@ const ToValidateScreen = ({ navigation, route }) => {
             productId,
             "products"
           );
+          // Fetch seller data
+          if (productData && productData.createdBy) {
+            const sellerData = await fetchSingleDocumentById(
+              productData.createdBy,
+              "sellers"
+            );
+            if (sellerData) {
+              setSellerData(sellerData);
+            }
+          }
           // console.log("product Data kay:", productData);
           // Set loading to false once both user and product data are fetched
           setLoading(false);
@@ -68,7 +79,14 @@ const ToValidateScreen = ({ navigation, route }) => {
 
     fetchData();
   }, []);
-
+  // useEffect(() => {
+  //   const unsubscribe = listenForItem("sellers", [], (sellers) => {
+  //     if (sellers.length > 0) {
+  //       setSellerData(sellers[0]); // ssuming you only need tAhe first seller
+  //     }
+  //   });
+  //   return () => unsubscribe(); // Cleanup the listener on component unmount
+  // }, []);
   useEffect(() => {
     // Calculate product subtotal = price multiplied by quantity
     if (item && item.price && quantity) {
@@ -104,8 +122,11 @@ const ToValidateScreen = ({ navigation, route }) => {
         sellerId: item.createdBy,
         status: "Pending Validation",
         createdAt: orderCreatedTimestamp,
+        branchName: sellerData.branch,
+        sellerFcmToken: sellerData.fcmToken,
       };
       // console.log("orederData", orderData);
+
       const orderId = await storeProductData("orders", data);
 
       // const price = {

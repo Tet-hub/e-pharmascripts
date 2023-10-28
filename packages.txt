@@ -21,3 +21,6 @@ npm install base-64
 oct 22
 npm install @react-navigation/native
 
+oct 27
+npm install react-native-animated-loader --save
+npm install react-native-animatable --save

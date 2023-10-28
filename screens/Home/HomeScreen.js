@@ -132,7 +132,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Body circum:search */}
         <View className="pl-4 pr-4 pb-2">

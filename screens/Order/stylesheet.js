@@ -86,12 +86,35 @@ const styles = StyleSheet.create({
     width: "80%",
     justifyContent: "center",
   },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    // backgroundColor: "#DFFF00",
+    zIndex: 2, // Ensure the footer is on top
+  },
   proceedButtonContainer: {
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
-    paddingBottom: 20,
+    marginBottom: 10, // Adjust this value as needed
   },
+  // proceedButtonContainer: {
+  //   flexDirection: "row",
+  //   backgroundColor: "white",
+  //   position: "absolute",
+  //   left: "5%",
+  //   right: "5%",
+  //   borderRadius: 20,
+  //   width: "90%",
+  //   paddingVertical: 15,
+  //   elevation: 15,
+  //   alignItems: "center",
+  //   justifyContent: "flex-end",
+  //   alignSelf: "center",
+  //   padding: 10,
+  // },
   proceedText: {
     color: "white",
     fontWeight: "bold",
@@ -148,6 +171,27 @@ const styles = StyleSheet.create({
     height: 120, // Adjust the height as needed
     width: "100%", // Make the image take the entire container width
     resizeMode: "contain",
+  },
+  homeButton: {
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    right: 10,
+  },
+  homeButtonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
 });
 

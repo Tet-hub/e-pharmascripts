@@ -40,8 +40,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [isLoading, setLoading] = useState(true);
   const [branches, setBranches] = useState([]);
   const productId = route.params?.productId;
-  const sellerName = route.params?.branch;
-  const company = route.params?.name;
   const toast = useToast();
   const [createdBy, setCreatedBy] = useState(null); // Initialize createdBy state
 
@@ -130,14 +128,13 @@ const ProductDetailScreen = ({ navigation, route }) => {
       const itemToAddToCart = {
         userId,
         productId: productId,
-        productName: item.productName,
-        price: item.price,
         quantity,
-        sellerId: item.createdBy,
-        img: item.img,
-        requiresPrescription: item.requiresPrescription,
-        category: item.category,
-        sellerName: sellerName,
+        // productName: item.productName,
+        // price: item.price, //should i save the current price when the user
+        // sellerId: item.createdBy,
+        // img: item.img,
+        // requiresPrescription: item.requiresPrescription,
+        // category: item.category,
       };
       // console.log("item", itemToAddToCart);
       const response = await fetch(storeItemUrl, {

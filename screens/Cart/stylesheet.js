@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     bottom: 80,
     left: 0,
     right: 0,
-    backgroundColor: "#DFFF00",
+    // backgroundColor: "#DFFF00",
     // borderTopWidth: 1,
     // borderTopColor: "#E0E0E0",
     zIndex: 2, // Ensure the footer is on top

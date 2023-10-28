@@ -226,7 +226,6 @@ const ProductScreen = ({ navigation, route }) => {
               navigation.navigate("ProductDetailScreen", {
                 productId: item.id,
                 name: route.params?.name,
-                branch: route.params?.branch,
               })
             }
           >

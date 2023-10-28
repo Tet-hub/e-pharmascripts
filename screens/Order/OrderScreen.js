@@ -7,6 +7,7 @@ import {
   Image,
   Button,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import OrderSwitchTabs from "../../components/OrderSwitchTabs";
@@ -36,8 +37,11 @@ const OrderScreen = () => {
   // Define a state to store the pending orders
   const [pendingOrders, setPendingOrders] = useState([]);
   const [trackerTab, setTrackerTab] = useState(1);
+  const [loading, setLoading] = useState(true); // Added loading state
+
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
+    setLoading(true);
   };
   const { width, height } = Dimensions.get("window");
   const [isChecked, setIsChecked] = useState(false);
@@ -101,55 +105,63 @@ const OrderScreen = () => {
           where("customerId", "==", currentCustomerId)
         );
         const unsubscribe = onSnapshot(q, async (snapshot) => {
-          const pendingOrdersData = [];
-          snapshot.docs.forEach((doc) => {
-            const data = { id: doc.id, ...doc.data() };
-            pendingOrdersData.push(data);
-          });
-          const filteredPendingOrders = pendingOrdersData.filter((item) => {
-            if (trackerTab === 1 && item.status === "Pending Validation") {
-              return true;
-            } else if (
-              trackerTab === 2 &&
-              (item.status === "Validated" || item.status === "Ordered")
-            ) {
-              return true;
-            } else if (
-              trackerTab === 3 &&
-              (item.status === "To Deliver" ||
-                item.status === "Pending Rider" ||
-                item.status === "On Delivery")
-            ) {
-              return true;
-            } else if (trackerTab === 4 && item.status === "Cancelled") {
-              return true;
-            } else if (trackerTab === 5 && item.status === "Completed") {
-              return true;
-            } else {
-              return false;
-            }
-          });
-          const promises = filteredPendingOrders.map(async (item) => {
-            try {
-              const productDocumentId = item.productId;
-              const productApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productDocumentId}`;
-              const productResponse = await fetch(productApiUrl, {
-                method: "GET",
-              });
-              const productData = await productResponse.json();
-              return { ...item, productDetails: productData };
-            } catch (error) {
-              console.error("Error fetching product details:", error);
-              return null;
-            }
-          });
+          try {
+            const pendingOrdersData = [];
+            snapshot.docs.forEach((doc) => {
+              const data = { id: doc.id, ...doc.data() };
+              pendingOrdersData.push(data);
+            });
+            const filteredPendingOrders = pendingOrdersData.filter((item) => {
+              if (trackerTab === 1 && item.status === "Pending Validation") {
+                return true;
+              } else if (
+                trackerTab === 2 &&
+                (item.status === "Validated" || item.status === "Ordered")
+              ) {
+                return true;
+              } else if (
+                trackerTab === 3 &&
+                (item.status === "To Deliver" ||
+                  item.status === "Pending Rider" ||
+                  item.status === "On Delivery")
+              ) {
+                return true;
+              } else if (trackerTab === 4 && item.status === "Cancelled") {
+                return true;
+              } else if (trackerTab === 5 && item.status === "Completed") {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            const promises = filteredPendingOrders.map(async (item) => {
+              try {
+                const productDocumentId = item.productId;
+                const productApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productDocumentId}`;
+                const productResponse = await fetch(productApiUrl, {
+                  method: "GET",
+                });
+                const productData = await productResponse.json();
+                return { ...item, productDetails: productData };
+              } catch (error) {
+                console.error("Error fetching product details:", error);
+                return null;
+              }
+            });
 
-          const results = await Promise.all(promises);
-          const filteredResults = results.filter(Boolean);
-          setPendingOrders(filteredResults);
+            const results = await Promise.all(promises);
+            const filteredResults = results.filter(Boolean);
+            setPendingOrders(filteredResults);
+          } catch (error) {
+            console.error("Error processing fetched data: ", error);
+          } finally {
+            setLoading(false);
+          }
         });
 
-        return () => unsubscribe();
+        return () => {
+          unsubscribe();
+        };
       } catch (error) {
         console.error("Error fetching pending orders: ", error);
       }
@@ -157,7 +169,16 @@ const OrderScreen = () => {
 
     fetchPendingOrdersRealTime();
   }, [currentCustomerId, trackerTab]);
-
+  const handleNavigateToHome = () => {
+    navigation.navigate("HomeScreen"); // Replace "HomeScreen" with the name of your homescreen component
+  };
+  // if (loading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color="#0000ff" />
+  //     </View>
+  //   );
+  // }
   return (
     <View style={styles.container}>
       <Text style={styles.screenTitle}>MY ORDERS</Text>
@@ -171,11 +192,16 @@ const OrderScreen = () => {
           option4="CANCELLED"
           option5="COMPLETED"
           onSelectSwitch={onSelectSwitch}
+          style={{ fontSize: 20, fontWeight: "bold" }}
         />
       </View>
       {trackerTab === 1 && (
-        <View>
-          {pendingOrders.length === 0 ? (
+        <View style={styles.container}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : pendingOrders.length === 0 ? (
             <Text>No pending orders</Text>
           ) : (
             <FlatList
@@ -217,7 +243,11 @@ const OrderScreen = () => {
 
       {trackerTab === 2 && (
         <View style={styles.container}>
-          {pendingOrders.length === 0 ? (
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : pendingOrders.length === 0 ? (
             <Text>No Orders Yet</Text>
           ) : (
             <FlatList
@@ -275,18 +305,28 @@ const OrderScreen = () => {
               )}
             />
           )}
-          <View style={styles.proceedButtonContainer}>
-            <TouchableOpacity style={styles.proceedButton}>
-              <Text style={styles.proceedText}>Proceed to payment</Text>
-              <Iconify icon="iconoir:nav-arrow-right" size={22} color="white" />
-            </TouchableOpacity>
+          <View style={styles.footer}>
+            <View style={styles.proceedButtonContainer}>
+              <TouchableOpacity style={styles.proceedButton}>
+                <Text style={styles.proceedText}>Proceed to payment</Text>
+                <Iconify
+                  icon="iconoir:nav-arrow-right"
+                  size={22}
+                  color="white"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}
 
       {trackerTab === 3 && (
-        <View>
-          {pendingOrders.length === 0 ? (
+        <View style={styles.container}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : pendingOrders.length === 0 ? (
             <Text>No Orders Yet</Text>
           ) : (
             <FlatList
@@ -327,8 +367,12 @@ const OrderScreen = () => {
       )}
 
       {trackerTab === 4 && (
-        <View>
-          {pendingOrders.length === 0 ? (
+        <View style={styles.container}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : pendingOrders.length === 0 ? (
             <Text>No Orders Yet</Text>
           ) : (
             <FlatList
@@ -369,8 +413,12 @@ const OrderScreen = () => {
       )}
 
       {trackerTab === 5 && (
-        <View>
-          {pendingOrders.length === 0 ? (
+        <View style={styles.container}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : pendingOrders.length === 0 ? (
             <Text>No Orders Yet</Text>
           ) : (
             <FlatList
@@ -427,6 +475,12 @@ const OrderScreen = () => {
           )}
         </View>
       )}
+      <TouchableOpacity
+        style={styles.homeButton}
+        onPress={handleNavigateToHome}
+      >
+        <Text style={styles.homeButtonText}>Go to Home</Text>
+      </TouchableOpacity>
     </View>
   );
 };
