@@ -165,7 +165,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     } catch (error) {
       console.log("Error adding to cart:", error);
       // Optionally, you can show an error message here.
-      ToastAndroid.show("Item adding failed!", ToastAndroid.SHORT);
+      ToastAndroid.show("Item adding failed!", ToastAndroid.SHORT); //shdfasdfsdfldklsdklklfdflllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
     }
   };
 

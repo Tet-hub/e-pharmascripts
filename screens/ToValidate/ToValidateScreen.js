@@ -118,6 +118,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         productId: productId,
         productName: item.productName,
         quantity: quantity,
+        price: item.price,
         totalPrice: productSubtotal.toFixed(2),
         sellerId: item.createdBy,
         status: "Pending Validation",

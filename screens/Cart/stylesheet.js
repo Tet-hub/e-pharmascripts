@@ -227,6 +227,12 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     fontSize: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
 });
 
 export default styles;

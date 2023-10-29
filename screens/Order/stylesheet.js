@@ -193,6 +193,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
+  noOrdersCont: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+  },
+  noOrders: {
+    fontSize: 20,
+    alignSelf: "center",
+    // backgroundColor: "#4CAF",
+  },
 });
 
 export default styles;

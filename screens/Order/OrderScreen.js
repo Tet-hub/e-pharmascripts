@@ -97,7 +97,7 @@ const OrderScreen = () => {
   }, [orderId]);
   // Fetch pending orders from the database
   useEffect(() => {
-    const fetchPendingOrdersRealTime = () => {
+    const fetchOrdersRealTime = () => {
       try {
         const ordersRef = collection(db, "orders");
         const q = query(
@@ -106,12 +106,12 @@ const OrderScreen = () => {
         );
         const unsubscribe = onSnapshot(q, async (snapshot) => {
           try {
-            const pendingOrdersData = [];
+            const ordersData = [];
             snapshot.docs.forEach((doc) => {
               const data = { id: doc.id, ...doc.data() };
-              pendingOrdersData.push(data);
+              ordersData.push(data);
             });
-            const filteredPendingOrders = pendingOrdersData.filter((item) => {
+            const filterOrderByStatus = ordersData.filter((item) => {
               if (trackerTab === 1 && item.status === "Pending Validation") {
                 return true;
               } else if (
@@ -134,7 +134,7 @@ const OrderScreen = () => {
                 return false;
               }
             });
-            const promises = filteredPendingOrders.map(async (item) => {
+            const promises = filterOrderByStatus.map(async (item) => {
               try {
                 const productDocumentId = item.productId;
                 const productApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productDocumentId}`;
@@ -167,7 +167,7 @@ const OrderScreen = () => {
       }
     };
 
-    fetchPendingOrdersRealTime();
+    fetchOrdersRealTime();
   }, [currentCustomerId, trackerTab]);
   const handleNavigateToHome = () => {
     navigation.navigate("HomeScreen"); // Replace "HomeScreen" with the name of your homescreen component
@@ -202,7 +202,14 @@ const OrderScreen = () => {
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
           ) : pendingOrders.length === 0 ? (
-            <Text>No pending orders</Text>
+            <View style={styles.noOrders}>
+              <Iconify
+                icon="fluent-mdl2:deactivate-orders"
+                size={22}
+                color="black"
+              />
+              <Text>No pending orders</Text>
+            </View>
           ) : (
             <FlatList
               data={pendingOrders}
@@ -248,7 +255,14 @@ const OrderScreen = () => {
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
           ) : pendingOrders.length === 0 ? (
-            <Text>No Orders Yet</Text>
+            <View style={styles.noOrders}>
+              <Iconify
+                icon="fluent-mdl2:deactivate-orders"
+                size={22}
+                color="black"
+              />
+              <Text>No pending orders</Text>
+            </View>
           ) : (
             <FlatList
               data={pendingOrders}
@@ -327,7 +341,14 @@ const OrderScreen = () => {
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
           ) : pendingOrders.length === 0 ? (
-            <Text>No Orders Yet</Text>
+            <View style={styles.noOrders}>
+              <Iconify
+                icon="fluent-mdl2:deactivate-orders"
+                size={22}
+                color="black"
+              />
+              <Text>No pending orders</Text>
+            </View>
           ) : (
             <FlatList
               data={pendingOrders}
@@ -373,7 +394,14 @@ const OrderScreen = () => {
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
           ) : pendingOrders.length === 0 ? (
-            <Text>No Orders Yet</Text>
+            <View style={styles.noOrders}>
+              <Iconify
+                icon="fluent-mdl2:deactivate-orders"
+                size={22}
+                color="black"
+              />
+              <Text>No pending orders</Text>
+            </View>
           ) : (
             <FlatList
               data={pendingOrders}
@@ -419,7 +447,16 @@ const OrderScreen = () => {
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
           ) : pendingOrders.length === 0 ? (
-            <Text>No Orders Yet</Text>
+            <View style={styles.noOrdersCont}>
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="fluent-mdl2:deactivate-orders"
+                  size={50}
+                  color="black"
+                />
+                <Text>No Orders Yet</Text>
+              </View>
+            </View>
           ) : (
             <FlatList
               data={pendingOrders}
@@ -449,8 +486,8 @@ const OrderScreen = () => {
                           x{item.quantity}
                         </Text>
                         <Text style={styles.productPrice}>
-                          {"\u20B1"}
-                          {item.productDetails.price}
+                          Order Total: {"\u20B1"}
+                          {item.totalPrice}
                         </Text>
                       </View>
                     </View>
@@ -467,6 +504,9 @@ const OrderScreen = () => {
                           <Text style={styles.rateText}>{buttonText}</Text>
                         </View>
                       </TouchableOpacity>
+                      <Text style={{ fontSize: 15, color: "green" }}>
+                        status:{item.status}
+                      </Text>
                     </View>
                   </View>
                 </View>
