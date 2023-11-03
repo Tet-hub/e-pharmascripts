@@ -72,6 +72,7 @@ const ToValidateScreen = ({ navigation, route }) => {
             setProductData(productData);
           }
           console.log("product id from productscreen:", productData.id);
+
           //fetching data from "ShoppingCartScreen"
         } else if (cartId && cartId.length > 0) {
           try {
@@ -87,24 +88,17 @@ const ToValidateScreen = ({ navigation, route }) => {
                 );
                 fetchedProductData.push({
                   ...productData,
-                  quantity: cartItem.quantity, // Set the quantity based on cart data
+                  quantity: cartItem.quantity,
                 });
               }
             }
-            setQuantity(fetchedCartQuantity);
-            console.log("quantity: ", fetchedCartQuantity);
+            // setQuantity(quantity);
+            // console.log("quantity: ", fetchedCartQuantity);
             // Fetch seller data for each product
-            const fetchedSellerData = [];
-            for (const data of fetchedProductData) {
-              if (data && data.createdBy) {
-                const sellerData = await fetchSingleDocumentById(
-                  data.createdBy,
-                  "sellers"
-                );
-                if (sellerData) {
-                  fetchedSellerData.push(sellerData);
-                }
-              }
+            const sellerId = fetchedProductData[0]?.createdBy;
+            if (sellerId) {
+              const seller = await fetchSingleDocumentById(sellerId, "sellers");
+              setSellerData(seller);
             }
 
             if (userData) {
@@ -132,93 +126,146 @@ const ToValidateScreen = ({ navigation, route }) => {
     fetchData();
   }, [cartId, productId]);
 
-  // useEffect(() => {
-  //   const unsubscribe = listenForItem("sellers", [], (sellers) => {
-  //     if (sellers.length > 0) {
-  //       setSellerData(sellers[0]); // ssuming you only need tAhe first seller
-  //     }
-  //   });
-  //   return () => unsubscribe(); // Cleanup the listener on component unmount
-  // }, []);
   useEffect(() => {
     // Calculate product subtotal = price multiplied by quantity
-    if (item && item.price && quantity) {
-      const subtotal = item.price * quantity;
-      setProductSubtotal(subtotal);
+    if (item) {
+      let subtotal = 0;
+      if (Array.isArray(item)) {
+        for (const product of item) {
+          console.log("item price", product.price);
+          const currentQuantity = cartId ? product.quantity : quantity; // Determine which quantity to use
+          subtotal += product.price * currentQuantity;
+          console.log("quantity", product.quantity);
+        }
+      } else if (item.price && (cartId || quantity !== undefined)) {
+        const currentQuantity = cartId ? item.quantity : quantity; // Determine which quantity to use
+        subtotal += item.price * currentQuantity;
+        console.log("quantity", item.quantity);
+      }
 
-      // Calculate total price  = subtotal plus temp shipping fee
+      setProductSubtotal(subtotal);
+      // Calculate total price = subtotal plus temp shipping fee
       const shippingFee = 50.0; // temp SF
       const total = subtotal + shippingFee;
+      console.log(
+        "subtotal + sf: ",
+        subtotal + " + " + shippingFee + " = " + (subtotal + shippingFee)
+      );
       setTotalPrice(total);
     }
-  }, [item, quantity]);
+  }, [item, cartId, quantity]);
 
+  //handle place order for products checked out from productDetailsScreen
   const handlePlaceOrderScreen = async () => {
     try {
       // Ensure both user data and product data are available
-      if (!user || !item) {
-        console.error("User data or product data is missing.");
+      if (!user || !item || !sellerData) {
+        console.error("User data, product data, or seller data is missing.");
         return;
       }
       const orderCreatedTimestamp = Timestamp.now();
 
-      // Create an order object with the necessary data
+      //"orders" collection
       const data = {
         customerId: user.id,
-        // customerName: `${user.firstName} ${user.lastName}`,
         deliveryAddress: "NA", //google map api
         phoneNumber: user.phone, //temp for now
-        // productId: productId,
-        // productName: item.productName,
-        // quantity: quantity,
-        // price: item.price,
         totalPrice: productSubtotal.toFixed(2),
-        sellerId: item.createdBy,
+        sellerId: sellerData.id,
         status: "Pending Validation",
         createdAt: orderCreatedTimestamp,
         sellerFcmToken: sellerData.fcmToken,
         branchName: sellerData.branch,
+        // customerName: `${user.firstName} ${user.lastName}`,
+        // productId: productId,
+        // productName: item.productName,
+        // quantity: quantity,
+        // price: item.price,
       };
       // console.log("orederData", orderData);
 
       const orderId = await storeProductData("orders", data);
 
-      // const price = {
-      //   orderId: orderId,
-      // };
-      // const priceId = await storeProductData("priceList", price);
-
+      //"attachmentList" collection
       const image = {
         orderId: orderId,
       };
       const imgId = await storeProductData("attachmentList", image);
-      // const imgUrl = item.img || "Image not available"; // Use a default string if item.img is false
+      //will be rendered if the item came from the "ShoppingCartScreen.js"
+      if (Array.isArray(item)) {
+        for (const product of item) {
+          // Ensure that each product has a valid productId
+          if (!product.productId) {
+            console.error("Product ID is missing or invalid.");
+            continue;
+          }
 
-      //details for the products being ordered
-      const orderedProductDetails = {
-        prescriptionImg: "Image not available",
-        orderId: orderId,
-        productId: productId,
-        // prescription: item.requiresPrescription, image for the prescription
-        productName: item.productName,
-        quantity: quantity,
-        price: productSubtotal,
-      };
+          // "productList" collection
+          const orderedProductDetails = {
+            orderId: orderId,
+            productId: product.productId,
+            productName: product.productName,
+            quantity: product.quantity,
+            price: product.price,
+            prescriptionImg: "Image not available",
+          };
 
-      const productListId = await storeProductData(
-        "productList",
-        orderedProductDetails
-      );
+          const productListId = await storeProductData(
+            "productList",
+            orderedProductDetails
+          );
 
-      // Call the function to update product stock
+          console.log("Order placed with ID:", orderId);
+          console.log("AttachmentList ID:", imgId);
+          console.log("ProductList ID", productListId);
+          //updating the stock on the "products" collection
+          await updateById(
+            product.productId,
+            "products",
+            "stock",
+            product.stock - product.quantity
+          );
 
-      console.log("Order placed with ID:", orderId);
-      // console.log("Pricelist ID", priceId);
-      console.log("AttachmentList ID:", imgId);
-      console.log("ProductList ID", productListId);
+          console.log(
+            "update stock:",
+            product.stock +
+              " + " +
+              product.quantity +
+              " = " +
+              (product.stock - product.quantity) +
+              " productID- " +
+              product.productId
+          );
+        }
+      }
+      //will be rendered if the item came from the "ProductDetailsScreen.js"
+      else {
+        // "productList" collection
+        const orderDetails = {
+          orderId: orderId,
+          prescription: item.requiresPrescription,
+          productName: item.productName,
+          quantity: quantity,
+          price: productSubtotal,
+          prescriptionImg: "Image not available",
+        };
 
-      // Call the function to update product stock
-      await updateById(productId, "products", "stock", item.stock - quantity);
+        const productListId = await storeProductData(
+          "productList",
+          orderDetails
+        );
+
+        console.log("Order placed with ID:", orderId);
+        console.log("AttachmentList ID:", imgId);
+        console.log("ProductList ID", productListId);
+
+        //updating the stock on the "products" collection
+        await updateById(productId, "products", "stock", item.stock - quantity);
+        console.log(
+          "updated stock:",
+          item.stock + " + " + quantity + " = " + (item.stock - quantity)
+        );
+      }
 
       navigation.navigate("OrderScreen");
     } catch (error) {
