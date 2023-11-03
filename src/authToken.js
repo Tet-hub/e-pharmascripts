@@ -30,7 +30,7 @@ export const saveAuthToken = async (email, token, userId) => {
     console.log(
       "Authentication token saved successfully in saveAuthToken:",
       email,
-      token,
+      // token,
       userId
     );
   } catch (error) {
@@ -46,7 +46,7 @@ export const getAuthToken = async () => {
     const userId = await AsyncStorage.getItem("userId");
     console.log(
       "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
-      // email,
+      email,
       // token,
       userId
     );

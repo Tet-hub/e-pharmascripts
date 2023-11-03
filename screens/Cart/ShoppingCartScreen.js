@@ -26,6 +26,7 @@ import {
   where,
   doc,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
@@ -39,14 +40,14 @@ const ShoppingCartScreen = () => {
     const fetchCartItems = async () => {
       try {
         const authToken = await getAuthToken();
-        const userId = authToken.userId;
-        if (!userId) {
+        const customerId = authToken.userId;
+        if (!customerId) {
           console.log("User ID is undefined or null.");
           return;
         }
 
         const cartConditions = [
-          { fieldName: "userId", operator: "==", value: userId },
+          { fieldName: "customerId", operator: "==", value: customerId },
         ];
         listenForItem("cart", cartConditions, (updatedCartItems) => {
           const promises = updatedCartItems.map(async (cartItem) => {
@@ -83,36 +84,50 @@ const ShoppingCartScreen = () => {
     fetchCartItems();
   }, []);
 
-  const handleIncrement = (cartItemId) => {
-    const updatedCartItems = cartItems.map((cartItem) => {
+  const handleIncrement = async (cartItemId) => {
+    const updatedCartItems = cartItems.map(async (cartItem) => {
       if (cartItem.id === cartItemId) {
         if (cartItem.quantity < cartItem.productData.stock) {
+          const newQuantity = cartItem.quantity + 1;
+          // Update the quantity field in the cart collection
+          await updateDoc(doc(db, "cart", cartItem.id), {
+            quantity: newQuantity,
+          });
           return {
             ...cartItem,
-            quantity: cartItem.quantity + 1,
+            quantity: newQuantity,
           };
         }
       }
       return cartItem;
     });
 
-    setCartItems(updatedCartItems);
+    Promise.all(updatedCartItems).then((updatedItems) => {
+      setCartItems(updatedItems);
+    });
   };
 
-  const handleDecrement = (cartItemId) => {
-    const updatedCartItems = cartItems.map((cartItem) => {
+  const handleDecrement = async (cartItemId) => {
+    const updatedCartItems = cartItems.map(async (cartItem) => {
       if (cartItem.id === cartItemId) {
         if (cartItem.quantity > 1) {
+          const newQuantity = cartItem.quantity - 1;
+          // Update the quantity field in the cart collection
+          await updateDoc(doc(db, "cart", cartItem.id), {
+            quantity: newQuantity,
+          });
           return {
             ...cartItem,
-            quantity: cartItem.quantity - 1,
+            quantity: newQuantity,
           };
         }
       }
       return cartItem;
     });
 
-    setCartItems(updatedCartItems);
+    Promise.all(updatedCartItems).then((updatedItems) => {
+      setCartItems(updatedItems);
+    });
   };
 
   const handleSelectItem = (cartItemId) => {
@@ -145,7 +160,30 @@ const ShoppingCartScreen = () => {
     }
   };
   const handleToValidateScreen = () => {
-    navigation.navigate("ToValidateScreen");
+    const selectedSellerId = new Set();
+    let selectedCartIds = [];
+    for (const cartItemId in selectedItems) {
+      if (selectedItems[cartItemId]) {
+        const cartItem = cartItems.find((item) => item.id === cartItemId);
+        if (cartItem) {
+          selectedSellerId.add(cartItem.sellerInfo.sellerId);
+          selectedCartIds.push(cartItem.id);
+        }
+      }
+    }
+    console.log("cart id:", selectedCartIds);
+    if (selectedSellerId.size === 1 && selectedCartIds.length > 0) {
+      // Proceed to the checkout screen
+      navigation.navigate("ToValidateScreen", { cartId: selectedCartIds });
+    } else {
+      toast.show("Please select items from the same seller to proceed!", {
+        type: "normal",
+        placement: "bottom",
+        duration: 3000,
+        offset: 10,
+        animationType: "slide-in",
+      });
+    }
   };
 
   const groupCartItemsBySeller = (cartItems) => {
