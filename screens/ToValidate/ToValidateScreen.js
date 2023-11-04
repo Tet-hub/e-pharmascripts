@@ -204,10 +204,14 @@ const ToValidateScreen = ({ navigation, route }) => {
           const orderedProductDetails = {
             orderId: orderId,
             productId: product.productId,
+            prescription: product.requiresPrescription,
             productName: product.productName,
             quantity: product.quantity,
             price: product.price,
+            productImg: product.img,
+            requiresPrescription: product.requiresPrescription,
             prescriptionImg: "Image not available",
+            productSubtotal: productSubtotal,
           };
 
           const productListId = await storeProductData(
@@ -243,11 +247,15 @@ const ToValidateScreen = ({ navigation, route }) => {
         // "productList" collection
         const orderDetails = {
           orderId: orderId,
+          productId: item.productId,
           prescription: item.requiresPrescription,
           productName: item.productName,
           quantity: quantity,
-          price: productSubtotal,
+          price: item.price,
+          productImg: item.img,
+          requiresPrescription: item.requiresPrescription,
           prescriptionImg: "Image not available",
+          productSubtotal: productSubtotal,
         };
 
         const productListId = await storeProductData(
@@ -255,12 +263,12 @@ const ToValidateScreen = ({ navigation, route }) => {
           orderDetails
         );
 
+        //updating the stock on the "products" collection
+        await updateById(productId, "products", "stock", item.stock - quantity);
+
         console.log("Order placed with ID:", orderId);
         console.log("AttachmentList ID:", imgId);
         console.log("ProductList ID", productListId);
-
-        //updating the stock on the "products" collection
-        await updateById(productId, "products", "stock", item.stock - quantity);
         console.log(
           "updated stock:",
           item.stock + " + " + quantity + " = " + (item.stock - quantity)

@@ -203,6 +203,17 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     // backgroundColor: "#4CAF",
   },
+  orderGroupContainer: {
+    // flex: 1,
+    // width: "90%",
+    // alignSelf: "center",
+    // backgroundColor: "yellow",
+
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+    marginBottom: 15,
+    borderRadius: 20,
+  },
 });
 
 export default styles;
