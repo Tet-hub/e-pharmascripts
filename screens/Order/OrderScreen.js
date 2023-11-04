@@ -37,7 +37,7 @@ const OrderScreen = () => {
   const [currentCustomerId, setCurrentCustomerId] = useState("");
   // Define a state to store the pending orders
   const [pendingOrders, setPendingOrders] = useState([]);
-  const [orderData, setOrderData] = useState([]);
+  const [productData, setproductData] = useState([]);
   const [trackerTab, setTrackerTab] = useState(1);
   const [loading, setLoading] = useState(true); // Added loading state
   const [ordersData, setOrdersData] = useState([]);
@@ -65,6 +65,7 @@ const OrderScreen = () => {
               ordersData.push(data);
             });
             setOrdersData(ordersData);
+            // console.log("orders data:", ordersData);
             const filterOrderByStatus = ordersData.filter((item) => {
               if (trackerTab === 1 && item.status === "Pending Validation") {
                 return true;
@@ -106,9 +107,11 @@ const OrderScreen = () => {
                 if (response.ok) {
                   const products = await response.json();
                   products.forEach((product) => {
-                    console.log("Product ID: ", product);
+                    console.log("Product ID: ", product.id);
                   });
-                  setOrderData(products);
+                  setproductData(products);
+                  // console.log("Product data: ", products);
+
                   return products; // Return products to be used later
                 } else {
                   console.log(
@@ -126,6 +129,7 @@ const OrderScreen = () => {
             const results = await Promise.all(promises);
             const filteredResults = results.filter(Boolean);
             setPendingOrders(filteredResults);
+            console.log("filteredResults data:", filteredResults);
           } catch (error) {
             console.error("Error processing fetched data: ", error);
           } finally {
@@ -234,56 +238,76 @@ const OrderScreen = () => {
             </View>
           ) : (
             <View style={styles.orderGroupContainer}>
-              {pendingOrders.map((order, index) => (
-                <View key={index}>
-                  <Text style={styles.groupTitle}>
-                    {order.id ? `Order ${order.id}` : ""}
-                  </Text>
-                  {orderData.length > 0 && orderData[index] && (
-                    <View style={styles.productContainer}>
-                      <View style={styles.imageContainer}>
-                        <Image
-                          source={{
-                            uri: orderData[index].productImg || "",
-                          }}
-                          style={styles.productImage}
-                        />
-                      </View>
-                      <Text>l:{pendingOrders.length}</Text>
-                      <View style={styles.productInfoContainer}>
-                        <View>
-                          <Text style={styles.productName}>
-                            {orderData[index].productName || ""}
-                          </Text>
-                          <Text style={styles.productReq}>
-                            {orderData[index].requiresPrescription
-                              ? "[ Requires Prescription ]"
-                              : ""}
-                          </Text>
-                        </View>
-                        <View style={styles.priceRowContainer}>
-                          <Text style={styles.productAmount}>
-                            {orderData[index].quantity || ""}
-                          </Text>
-                          <Text style={styles.productPrice}>
-                            {"\u20B1"}
-                            {orderData[index].price || ""}
-                          </Text>
-                        </View>
-                      </View>
-                      <View>
-                        <Text>View more Products</Text>
-                      </View>
-                      <View>
-                        <Text>{ordersData.quantity}</Text>
-                        <Text>
-                          {`Order Total: \u20B1${ordersData.totalPrice}`}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-              ))}
+              {pendingOrders.map((orders, index) => {
+                // Initializing the total quantity
+                let totalQuantity = 0;
+
+                return (
+                  <View key={index}>
+                    <Text style={styles.groupTitle}>
+                      {orders.length > 0 && ordersData[index]?.branchName
+                        ? ordersData[index]?.branchName
+                        : ""}
+                    </Text>
+                    {orders.map((order, orderIndex) => {
+                      // Adding to the total quantity
+                      totalQuantity += order.quantity || 0;
+
+                      if (orderIndex === 0) {
+                        return (
+                          <View key={order.id}>
+                            <View style={styles.productContainer}>
+                              <View style={styles.productDataContainer}>
+                                <View style={styles.imageContainer}>
+                                  <Image
+                                    source={{ uri: order.productImg || "" }}
+                                    style={styles.productImage}
+                                  />
+                                </View>
+                                <View style={styles.productInfoContainer}>
+                                  <View>
+                                    <Text style={styles.productName}>
+                                      {order.productName || ""}
+                                    </Text>
+                                    <Text style={styles.productReq}>
+                                      {order.requiresPrescription
+                                        ? "[ Requires Prescription ]"
+                                        : ""}
+                                    </Text>
+                                  </View>
+                                  <View style={styles.priceRowContainer}>
+                                    <Text style={styles.productAmount}>
+                                      x{order.quantity || ""}
+                                    </Text>
+                                    <Text style={styles.productPrice}>
+                                      {"\u20B1"}
+                                      {order.price || ""}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </View>
+                              <View style={styles.separator} />
+                              <View style={styles.viewOrderDetails}>
+                                <View>
+                                  <Text style={styles.productAmount}>
+                                    Total Quantity: {totalQuantity}
+                                  </Text>
+                                  <Text>{`Order Total: \u20B1${order.productSubtotal}`}</Text>
+                                </View>
+                              </View>
+                              <View style={styles.viewMoreText}>
+                                <Text>View more Products</Text>
+                              </View>
+                            </View>
+                          </View>
+                        );
+                      } else {
+                        return null; // To skip rendering additional items for the same order
+                      }
+                    })}
+                  </View>
+                );
+              })}
             </View>
           )}
         </View>

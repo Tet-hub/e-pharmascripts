@@ -19,16 +19,19 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   productContainer: {
-    flexDirection: "row",
-    alignItems: "center", // Added to vertically align the image and info
-    paddingHorizontal: 16, // Added to provide some spacing
-    backgroundColor: "white",
+    // Added to provide some spacing
+    // backgroundColor: "white",
     borderRadius: 10,
     elevation: 3,
     width: "90%",
-    height: 120,
     alignSelf: "center",
     marginBottom: 15,
+  },
+  productDataContainer: {
+    flexDirection: "row",
+    alignItems: "center", // Added to vertically align the image and info
+    paddingHorizontal: 16,
+    height: 120,
   },
   imageContainer: {
     marginLeft: 15,
@@ -204,7 +207,7 @@ const styles = StyleSheet.create({
     // backgroundColor: "#4CAF",
   },
   orderGroupContainer: {
-    // flex: 1,
+    flex: 1,
     // width: "90%",
     // alignSelf: "center",
     // backgroundColor: "yellow",
@@ -213,6 +216,27 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     borderRadius: 20,
+  },
+  viewOrderDetails: {
+    flexDirection: "row",
+    margin: 10,
+  },
+  viewMoreText: {
+    margin: 10,
+  },
+  separator: {
+    marginTop: 20,
+    height: 1,
+    width: "85%",
+    backgroundColor: "#D9D9D9",
+    alignSelf: "center",
+  },
+  separator2: {
+    marginTop: 60,
+    height: 1,
+    width: "85%",
+    backgroundColor: "#D9D9D9",
+    alignSelf: "center",
   },
 });
 
