@@ -7,7 +7,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     alignSelf: "center",
     width: "100%",
-    heigh: "100%",
+    height: "100%",
+    marginBottom: 20,
   },
   delAddressContainer: {
     width: "80%",
@@ -52,6 +53,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9D9D9",
     alignSelf: "center",
   },
+  separator3: {
+    marginTop: 10,
+    marginBottom: 20,
+    height: 1,
+    width: "85%",
+    backgroundColor: "#D9D9D9",
+    alignSelf: "center",
+  },
   productContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -61,6 +70,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   imageContainer: {
+    height: "80%",
     width: "40%",
     marginRight: 15,
   },
@@ -71,10 +81,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   productImage: {
-    height: 120,
-    width: "100%",
     flex: 1,
-    resizeMode: "contain",
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
   },
   productInfoContainer: {
     flex: 1,
@@ -147,6 +157,7 @@ const styles = StyleSheet.create({
     width: "80%",
     alignSelf: "center",
     marginTop: 20,
+    marginBottom: 20,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -159,6 +170,19 @@ const styles = StyleSheet.create({
     color: "#EC6F56",
     fontSize: 20,
     marginRight: 11,
+  },
+  removerOrderButton: {
+    backgroundColor: "#DC3642",
+    borderRadius: 30,
+    padding: 20,
+    width: "90%",
+    alignSelf: "center",
+  },
+  removerOrderText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: 600,
+    textAlign: "center",
   },
 });
 

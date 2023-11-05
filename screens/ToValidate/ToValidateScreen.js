@@ -164,19 +164,29 @@ const ToValidateScreen = ({ navigation, route }) => {
         return;
       }
       const orderCreatedTimestamp = Timestamp.now();
-
+      let totalQuantity = 0;
+      if (Array.isArray(item)) {
+        for (const product of item) {
+          totalQuantity += product.quantity;
+        }
+      } else if (item.quantity !== undefined) {
+        totalQuantity = item.quantity;
+      }
       //"orders" collection
       const data = {
         customerId: user.id,
+        customerName: `${user.firstName} ${user.lastName}`,
         deliveryAddress: "NA", //google map api
-        phoneNumber: user.phone, //temp for now
-        totalPrice: productSubtotal.toFixed(2),
+        customerPhoneNumber: user.phone, //temp for now
+        totalPrice: totalPrice.toFixed(2),
         sellerId: sellerData.id,
         status: "Pending Validation",
         createdAt: orderCreatedTimestamp,
         sellerFcmToken: sellerData.fcmToken,
         branchName: sellerData.branch,
-        // customerName: `${user.firstName} ${user.lastName}`,
+        totalQuantity: totalQuantity,
+        paymentMethod: null,
+        orderSubTotalPrice: productSubtotal,
         // productId: productId,
         // productName: item.productName,
         // quantity: quantity,
@@ -190,7 +200,7 @@ const ToValidateScreen = ({ navigation, route }) => {
       const image = {
         orderId: orderId,
       };
-      const imgId = await storeProductData("attachmentList", image);
+      // const imgId = await storeProductData("attachmentList", image);
       //will be rendered if the item came from the "ShoppingCartScreen.js"
       if (Array.isArray(item)) {
         for (const product of item) {
@@ -211,7 +221,7 @@ const ToValidateScreen = ({ navigation, route }) => {
             productImg: product.img,
             requiresPrescription: product.requiresPrescription,
             prescriptionImg: "Image not available",
-            productSubtotal: productSubtotal,
+            productSubTotalPrice: product.quantity * product.price,
           };
 
           const productListId = await storeProductData(
@@ -220,7 +230,7 @@ const ToValidateScreen = ({ navigation, route }) => {
           );
 
           console.log("Order placed with ID:", orderId);
-          console.log("AttachmentList ID:", imgId);
+          // console.log("AttachmentList ID:", imgId);
           console.log("ProductList ID", productListId);
           //updating the stock on the "products" collection
           await updateById(
@@ -255,7 +265,7 @@ const ToValidateScreen = ({ navigation, route }) => {
           productImg: item.img,
           requiresPrescription: item.requiresPrescription,
           prescriptionImg: "Image not available",
-          productSubtotal: productSubtotal,
+          productSubTotalPrice: item.quantity * item.price,
         };
 
         const productListId = await storeProductData(
@@ -267,7 +277,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         await updateById(productId, "products", "stock", item.stock - quantity);
 
         console.log("Order placed with ID:", orderId);
-        console.log("AttachmentList ID:", imgId);
+        // console.log("AttachmentList ID:", imgId);
         console.log("ProductList ID", productListId);
         console.log(
           "updated stock:",

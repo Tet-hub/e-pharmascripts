@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flex: 1,
+    height: "80%",
     width: "40%",
   },
   productReq: {
@@ -72,11 +73,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   productImage: {
-    height: 120,
-    width: "100%",
-    marginLeft: -15,
     flex: 1,
-    resizeMode: "contain",
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
+    marginLeft: -15,
   },
   productInfoContainer: {
     flex: 1,

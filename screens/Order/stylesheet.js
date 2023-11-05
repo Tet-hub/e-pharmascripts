@@ -12,12 +12,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
   },
-  productReq: {
-    fontWeight: "normal",
-    fontSize: 7,
-    color: "#0CB669",
-    marginTop: 5,
-  },
+
   productContainer: {
     // Added to provide some spacing
     // backgroundColor: "white",
@@ -25,7 +20,7 @@ const styles = StyleSheet.create({
     // elevation: 3,
     width: "90%",
     alignSelf: "center",
-    marginBottom: 15,
+    marginBottom: 5,
   },
   productDataContainer: {
     flexDirection: "row",
@@ -33,16 +28,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 120,
   },
+
   imageContainer: {
-    marginLeft: 15,
-    width: "40%",
+    height: "70%",
+    width: "30%",
+    marginRight: 10,
+    // backgroundColor: "yellow",
   },
+  productImageSecondCont: {},
   productImage: {
-    height: 120, // Adjust the height as needed
-    width: "100%", // Make the image take the entire container width
-    marginLeft: -15,
     flex: 1,
-    resizeMode: "contain",
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
   },
   productInfoContainer: {
     flex: 1, // Product info takes 50% of the container width
@@ -52,13 +50,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  productNamePrescCont: {
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    marginTop: 2,
+  },
   productName: {
-    fontWeight: 600,
-    fontSize: 14,
+    fontWeight: 400,
+    fontSize: 16,
+  },
+  quantityCont: {
+    marginLeft: 4,
+  },
+  productReq: {
+    fontWeight: "normal",
+    fontSize: 8,
+    color: "#0CB669",
+    marginTop: 6,
   },
   productPrice: {
     fontSize: 14,
-    fontWeight: 500,
+    fontWeight: 600,
   },
   productAmount: {
     fontSize: 14,
@@ -71,10 +83,17 @@ const styles = StyleSheet.create({
     marginRight: 3,
     marginTop: 3,
   },
+  checkBoxCont: {
+    alignContent: "center",
+    justifyContent: "center",
+  },
   checkBoxIcon: {
     marginRight: 10,
     width: 20,
     height: 20,
+  },
+  cocont: {
+    flexDirection: "row",
   },
   proceedButton: {
     backgroundColor: "#DC3642",
@@ -98,26 +117,10 @@ const styles = StyleSheet.create({
     zIndex: 2, // Ensure the footer is on top
   },
   proceedButtonContainer: {
-    flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
-    marginBottom: 10, // Adjust this value as needed
+    marginBottom: 10,
   },
-  // proceedButtonContainer: {
-  //   flexDirection: "row",
-  //   backgroundColor: "white",
-  //   position: "absolute",
-  //   left: "5%",
-  //   right: "5%",
-  //   borderRadius: 20,
-  //   width: "90%",
-  //   paddingVertical: 15,
-  //   elevation: 15,
-  //   alignItems: "center",
-  //   justifyContent: "flex-end",
-  //   alignSelf: "center",
-  //   padding: 10,
-  // },
   proceedText: {
     color: "white",
     fontWeight: "bold",
@@ -142,28 +145,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    marginTop: -10,
+    marginTop: 2,
+  },
+
+  rateText: {
+    fontWeight: 600,
+    fontSize: 12,
+    color: "black",
+    margin: 10,
   },
   viewText: {
     fontWeight: 600,
     fontSize: 12,
-    color: "#EC6F56",
-  },
-  rateText: {
-    fontWeight: 600,
-    fontSize: 12,
     color: "white",
+    margin: 10,
   },
   viewButton: {
-    marginRight: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 4,
+    borderRadius: 10,
+    backgroundColor: "#EC6F56",
   },
   rateButton: {
-    backgroundColor: "#EC6F56",
-    paddingBottom: 15,
-    paddingTop: 15,
-    paddingRight: 20,
-    paddingLeft: 20,
+    backgroundColor: "#DCDCDC",
+    elevation: 4,
     borderRadius: 10,
+    marginTop: 4,
   },
   //image style for completed screen
   imageContainerCompletedScreen: {
@@ -195,6 +203,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+    height: "100%",
   },
   noOrdersCont: {
     flex: 1,
@@ -204,36 +213,70 @@ const styles = StyleSheet.create({
   noOrders: {
     fontSize: 20,
     alignSelf: "center",
-    // backgroundColor: "#4CAF",
   },
   orderGroupContainer: {
-    // backgroundColor: "yellow",
-
     backgroundColor: "#FFFFFF",
     margin: 10,
     padding: 10,
-    marginBottom: 15,
+    marginBottom: 10,
   },
   viewOrderDetails: {
     flexDirection: "row",
+    justifyContent: "space-between",
     margin: 10,
+    marginBottom: 15,
+    marginTop: 15,
+  },
+  viewMoreTextCont: {
+    color: "#EC6F56",
+    marginTop: 10,
   },
   viewMoreText: {
-    alignSelf: "center",
+    textAlign: "right",
+    color: "#EC6F56",
+    fontWeight: 700,
+    fontSize: 15,
+    textDecorationLine: "underline",
   },
   separator: {
     marginTop: 10,
     height: 1,
-    width: "85%",
-    backgroundColor: "#D9D9D9",
+    width: "100%",
+    backgroundColor: "rgba(217, 217, 217, 0.5)",
     alignSelf: "center",
   },
   separator2: {
-    marginTop: 60,
     height: 1,
-    width: "85%",
-    backgroundColor: "#D9D9D9",
+    width: "100%",
+    backgroundColor: "rgba(217, 217, 217, 0.5) ",
     alignSelf: "center",
+  },
+  verticalSeparator: {
+    width: 3,
+    height: "100%",
+    backgroundColor: "rgba(217, 217, 217, 0.9) ",
+    alignSelf: "center",
+    marginRight: 10,
+    marginLeft: 5,
+  },
+  sellerCont: {
+    flexDirection: "row",
+  },
+  groupTitle: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 500,
+  },
+  orderTotalText: {
+    fontWeight: 400,
+    fontSize: 12,
+  },
+  orderTotalCont: {
+    flexDirection: "row",
+  },
+  viewButtonCont: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
 });
 

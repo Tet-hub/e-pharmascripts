@@ -37,19 +37,24 @@ const OrderScreen = () => {
   const [currentCustomerId, setCurrentCustomerId] = useState("");
   // Define a state to store the pending orders
   const [pendingOrders, setPendingOrders] = useState([]);
+  const [filteredProductData, setfilteredProductData] = useState([]);
+  const [approvedOrders, setApprovedOrders] = useState([]);
   const [productData, setproductData] = useState([]);
   const [trackerTab, setTrackerTab] = useState(1);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
+  const [orderData, setOrderData] = useState([]);
   const [ordersData, setOrdersData] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({});
 
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
     setLoading(true);
   };
   const { width, height } = Dimensions.get("window");
-  const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+
     const fetchOrdersRealTime = () => {
       try {
         const ordersRef = collection(db, "orders");
@@ -64,8 +69,8 @@ const OrderScreen = () => {
               const data = { id: doc.id, ...doc.data() };
               ordersData.push(data);
             });
-            setOrdersData(ordersData);
             // console.log("orders data:", ordersData);
+            //filtering data based on status and tracker tab
             const filterOrderByStatus = ordersData.filter((item) => {
               if (trackerTab === 1 && item.status === "Pending Validation") {
                 return true;
@@ -111,8 +116,7 @@ const OrderScreen = () => {
                   });
                   setproductData(products);
                   // console.log("Product data: ", products);
-
-                  return products; // Return products to be used later
+                  return products;
                 } else {
                   console.log(
                     "API request failed with status:",
@@ -122,14 +126,19 @@ const OrderScreen = () => {
                 }
               } catch (error) {
                 console.error("Error fetching order data:", error);
+                setLoading(false);
                 return null;
               }
             });
 
             const results = await Promise.all(promises);
+            const orderResults = await Promise.all(filterOrderByStatus);
             const filteredResults = results.filter(Boolean);
-            setPendingOrders(filteredResults);
-            console.log("filteredResults data:", filteredResults);
+            const orderData = orderResults.filter(Boolean);
+            setOrderData(orderData);
+            setfilteredProductData(filteredResults);
+            // console.log("Filtered Product Data:", filteredResults);
+            // console.log("Order Data:", orderData);
           } catch (error) {
             console.error("Error processing fetched data: ", error);
           } finally {
@@ -155,8 +164,8 @@ const OrderScreen = () => {
   const handleRateScreen = () => {
     navigation.navigate("RateScreen", { orderId, currentCustomerId });
   };
-  const handleViewOrderScreen = () => {
-    navigation.navigate("ViewCompletedOrderScreen");
+  const handleViewOrderScreen = (orderId) => {
+    navigation.navigate("ViewCompletedOrderScreen", { orderId: orderId });
   };
   const handleApprovedProductDetailScreen = () => {
     navigation.navigate("ApprovedProductDetailScreen");
@@ -203,6 +212,12 @@ const OrderScreen = () => {
   }, [orderId]);
   // Fetch pending orders from the database
 
+  const handleSelectItem = (item) => {
+    setSelectedItems((prevSelectedItems) => ({
+      ...prevSelectedItems,
+      [item]: !prevSelectedItems[item],
+    }));
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.screenTitle}>MY ORDERS</Text>
@@ -221,40 +236,43 @@ const OrderScreen = () => {
       </View>
 
       {trackerTab === 1 && (
-        <ScrollView>
-          <View style={styles.container}>
-            {/* ... */}
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-              </View>
-            ) : pendingOrders.length === 0 ? (
+        <View style={styles.container}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : orderData.length === 0 ? (
+            <View style={styles.noOrdersCont}>
               <View style={styles.noOrders}>
                 <Iconify
                   icon="fluent-mdl2:deactivate-orders"
-                  size={22}
+                  size={50}
                   color="black"
                 />
-                <Text>No pending orders</Text>
+                <Text>No Orders Yet</Text>
               </View>
-            ) : (
-              <View>
-                {pendingOrders.map((orders, index) => {
-                  // Initializing the total quantity
-                  let totalQuantity = 0;
-
-                  return (
-                    <View key={index} style={styles.orderGroupContainer}>
-                      <Text style={styles.groupTitle}>
-                        {orders.length > 0 && ordersData[index]?.branchName
-                          ? ordersData[index]?.branchName
-                          : ""}
-                      </Text>
+            </View>
+          ) : (
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={orderData}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View key={item.id} style={styles.orderGroupContainer}>
+                  <View style={styles.sellerCont}>
+                    <Iconify
+                      icon="healthicons:market-stall-outline"
+                      size={23}
+                      color="black"
+                    />
+                    <Text style={styles.groupTitle}>
+                      {item.branchName ? item.branchName : "branchName"}
+                    </Text>
+                  </View>
+                  {filteredProductData.map((orders, index) => (
+                    <View key={index}>
                       {orders.map((order, orderIndex) => {
-                        // Adding to the total quantity
-                        totalQuantity += order.quantity || 0;
-
-                        if (orderIndex === 0) {
+                        if (order.orderId === item.id && orderIndex === 0) {
                           return (
                             <View key={order.id}>
                               <View style={styles.productContainer}>
@@ -266,20 +284,36 @@ const OrderScreen = () => {
                                     />
                                   </View>
                                   <View style={styles.productInfoContainer}>
-                                    <View>
-                                      <Text style={styles.productName}>
-                                        {order.productName || ""}
-                                      </Text>
-                                      <Text style={styles.productReq}>
-                                        {order.requiresPrescription
-                                          ? "[ Requires Prescription ]"
-                                          : ""}
-                                      </Text>
+                                    <View style={styles.productNamePrescCont}>
+                                      <View>
+                                        <Text
+                                          style={styles.productName}
+                                          numberOfLines={1}
+                                          ellipsizeMode="tail"
+                                        >
+                                          {order.productName || ""}
+                                        </Text>
+                                      </View>
+                                      <View>
+                                        {order.requiresPrescription ===
+                                        "Yes" ? (
+                                          <Text style={styles.productReq}>
+                                            [ Requires Prescription ]
+                                          </Text>
+                                        ) : (
+                                          <Text
+                                            style={styles.productReq}
+                                          ></Text>
+                                        )}
+                                      </View>
                                     </View>
                                     <View style={styles.priceRowContainer}>
-                                      <Text style={styles.productAmount}>
-                                        x{order.quantity || ""}
-                                      </Text>
+                                      <View style={styles.quantityCont}>
+                                        <Text style={styles.productAmount}>
+                                          x{order.quantity || ""}
+                                        </Text>
+                                      </View>
+
                                       <Text style={styles.productPrice}>
                                         {"\u20B1"}
                                         {order.price || ""}
@@ -287,18 +321,32 @@ const OrderScreen = () => {
                                     </View>
                                   </View>
                                 </View>
-                                <View style={styles.viewMoreText}>
-                                  <Text>View more Products</Text>
-                                </View>
                                 <View style={styles.separator} />
                                 <View style={styles.viewOrderDetails}>
                                   <View>
-                                    <Text>Items: {totalQuantity}</Text>
+                                    <Text>Items: {item.totalQuantity}</Text>
+                                  </View>
+                                  <View style={styles.orderTotalCont}>
+                                    <Text style={styles.orderTotalText}>
+                                      Order Total:
+                                    </Text>
                                     <Text style={styles.productPrice}>
-                                      Order Total: {"\u20B1"}
-                                      {order.productSubtotal}
+                                      {" \u20B1"} {item.totalPrice}
                                     </Text>
                                   </View>
+                                </View>
+                                <View style={styles.separator2} />
+                                <View style={styles.viewButtonCont}>
+                                  <TouchableOpacity
+                                    onPress={() =>
+                                      handleViewOrderScreen(item.id)
+                                    }
+                                    style={styles.viewButton}
+                                  >
+                                    <Text style={styles.viewText}>
+                                      VIEW DETAILS
+                                    </Text>
+                                  </TouchableOpacity>
                                 </View>
                               </View>
                             </View>
@@ -308,96 +356,158 @@ const OrderScreen = () => {
                         }
                       })}
                     </View>
-                  );
-                })}
-              </View>
-            )}
-          </View>
-        </ScrollView>
+                  ))}
+                </View>
+              )}
+            />
+          )}
+        </View>
       )}
 
       {trackerTab === 2 && (
         <View style={styles.container}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          ) : pendingOrders.length === 0 ? (
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="fluent-mdl2:deactivate-orders"
-                size={22}
-                color="black"
-              />
-              <Text>No pending orders</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={pendingOrders}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.productContainer}
-                  onPress={handleApprovedProductDetailScreen}
-                >
-                  <View>
-                    <Checkbox
-                      color="#EC6F56"
-                      value={isChecked}
-                      onValueChange={setIsChecked}
-                      style={styles.checkBoxIcon}
-                    />
-                  </View>
-                  <View style={styles.imageContainer}>
-                    <Image
-                      source={{ uri: item.productDetails.img }}
-                      style={styles.productImage}
-                    />
-                  </View>
-                  <View style={styles.productInfoContainer}>
-                    <View>
-                      <Text style={styles.productName}>
-                        {item.productDetails.productName}
-                      </Text>
-                      <Text style={styles.productReq}>
-                        {item.productDetails.requiresPrescription
-                          ? "[ Requires Prescription ]"
-                          : ""}
-                      </Text>
-                    </View>
-                    <View style={styles.priceRowContainer}>
-                      <Text style={styles.productAmount}>x{item.quantity}</Text>
-                      <Text style={styles.productPrice}>
-                        {"\u20B1"}
-                        {item.productDetails.price}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.xButtonWrapper}>
-                    <TouchableOpacity style={styles.xButton}>
+          <View style={styles.container}>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            ) : orderData.length === 0 ? (
+              <View style={styles.noOrdersCont}>
+                <View style={styles.noOrders}>
+                  <Iconify
+                    icon="fluent-mdl2:deactivate-orders"
+                    size={50}
+                    color="black"
+                  />
+                  <Text>No Orders Yet</Text>
+                </View>
+              </View>
+            ) : (
+              <FlatList
+                data={orderData}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View key={item.id} style={styles.orderGroupContainer}>
+                    <View style={styles.sellerCont}>
+                      <Checkbox
+                        color="#EC6F56"
+                        value={selectedItems[item.id] || false}
+                        onValueChange={() => handleSelectItem(item.id)}
+                        style={styles.checkBoxIcon}
+                      />
+                      <View style={styles.verticalSeparator} />
                       <Iconify
-                        icon="carbon:close-filled"
-                        size={22}
+                        icon="healthicons:market-stall-outline"
+                        size={23}
                         color="black"
                       />
-                    </TouchableOpacity>
+                      <Text style={styles.groupTitle}>
+                        {item.branchName ? item.branchName : "branchName"}
+                      </Text>
+                    </View>
+                    {filteredProductData.map((orders, index) => (
+                      <View key={index}>
+                        {orders.map((order, orderIndex) => {
+                          if (order.orderId === item.id && orderIndex === 0) {
+                            return (
+                              <View key={order.id}>
+                                <View style={styles.productContainer}>
+                                  <View style={styles.checkBoxCont}></View>
+                                  <View style={styles.productDataContainer}>
+                                    <View style={styles.imageContainer}>
+                                      <Image
+                                        source={{
+                                          uri: order.productImg || "",
+                                        }}
+                                        style={styles.productImage}
+                                      />
+                                    </View>
+                                    <View style={styles.productInfoContainer}>
+                                      <View style={styles.productNamePrescCont}>
+                                        <View>
+                                          <Text
+                                            style={styles.productName}
+                                            numberOfLines={1}
+                                            ellipsizeMode="tail"
+                                          >
+                                            {order.productName || ""}
+                                          </Text>
+                                        </View>
+                                        <View>
+                                          {order.requiresPrescription ===
+                                          "Yes" ? (
+                                            <Text style={styles.productReq}>
+                                              [ Requires Prescription ]
+                                            </Text>
+                                          ) : (
+                                            <Text
+                                              style={styles.productReq}
+                                            ></Text>
+                                          )}
+                                        </View>
+                                      </View>
+                                      <View style={styles.priceRowContainer}>
+                                        <View style={styles.quantityCont}>
+                                          <Text style={styles.productAmount}>
+                                            x{order.quantity || ""}
+                                          </Text>
+                                        </View>
+
+                                        <Text style={styles.productPrice}>
+                                          {"\u20B1"}
+                                          {order.price || ""}
+                                        </Text>
+                                      </View>
+                                    </View>
+                                  </View>
+                                  <View style={styles.separator} />
+                                  <View style={styles.viewOrderDetails}>
+                                    <View>
+                                      <Text>Items: {item.totalQuantity}</Text>
+                                    </View>
+                                    <View style={styles.orderTotalCont}>
+                                      <Text style={styles.orderTotalText}>
+                                        Order Total:
+                                      </Text>
+                                      <Text style={styles.productPrice}>
+                                        {" \u20B1"} {item.totalPrice}
+                                      </Text>
+                                    </View>
+                                  </View>
+                                  <View style={styles.separator2} />
+                                  <View style={styles.viewButtonCont}>
+                                    <TouchableOpacity
+                                      onPress={handleViewOrderScreen}
+                                      style={styles.viewButton}
+                                    >
+                                      <Text style={styles.viewText}>
+                                        VIEW DETAILS
+                                      </Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              </View>
+                            );
+                          } else {
+                            return null;
+                          }
+                        })}
+                      </View>
+                    ))}
                   </View>
-                </TouchableOpacity>
-              )}
-            />
-          )}
-          <View style={styles.footer}>
-            <View style={styles.proceedButtonContainer}>
-              <TouchableOpacity style={styles.proceedButton}>
-                <Text style={styles.proceedText}>Proceed to payment</Text>
-                <Iconify
-                  icon="iconoir:nav-arrow-right"
-                  size={22}
-                  color="white"
-                />
-              </TouchableOpacity>
-            </View>
+                )}
+              />
+            )}
+          </View>
+          <View style={styles.proceedButtonContainer}>
+            <TouchableOpacity
+              onPress={handleApprovedProductDetailScreen}
+              style={styles.proceedButton}
+            >
+              <Text style={styles.proceedText}>Proceed to payment</Text>
+              <Iconify icon="iconoir:nav-arrow-right" size={22} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -408,46 +518,122 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : pendingOrders.length === 0 ? (
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="fluent-mdl2:deactivate-orders"
-                size={22}
-                color="black"
-              />
-              <Text>No pending orders</Text>
+          ) : orderData.length === 0 ? (
+            <View style={styles.noOrdersCont}>
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="fluent-mdl2:deactivate-orders"
+                  size={50}
+                  color="black"
+                />
+                <Text>No Orders Yet</Text>
+              </View>
             </View>
           ) : (
             <FlatList
-              data={pendingOrders}
+              showsVerticalScrollIndicator={false}
+              data={orderData}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View style={styles.productContainer}>
-                  <View style={styles.imageContainer}>
-                    <Image
-                      source={{ uri: item.productDetails.img }}
-                      style={styles.productImage}
+                <View key={item.id} style={styles.orderGroupContainer}>
+                  <View style={styles.sellerCont}>
+                    <Iconify
+                      icon="healthicons:market-stall-outline"
+                      size={23}
+                      color="black"
                     />
+                    <Text style={styles.groupTitle}>
+                      {item.branchName ? item.branchName : "branchName"}
+                    </Text>
                   </View>
-                  <View style={styles.productInfoContainer}>
-                    <View>
-                      <Text style={styles.productName}>
-                        {item.productDetails.productName}
-                      </Text>
-                      <Text style={styles.productReq}>
-                        {item.productDetails.requiresPrescription
-                          ? "[ Requires Prescription ]"
-                          : ""}
-                      </Text>
+                  {filteredProductData.map((orders, index) => (
+                    <View key={index}>
+                      {orders.map((order, orderIndex) => {
+                        if (order.orderId === item.id && orderIndex === 0) {
+                          return (
+                            <View key={order.id}>
+                              <View style={styles.productContainer}>
+                                <View style={styles.productDataContainer}>
+                                  <View style={styles.imageContainer}>
+                                    <Image
+                                      source={{ uri: order.productImg || "" }}
+                                      style={styles.productImage}
+                                    />
+                                  </View>
+                                  <View style={styles.productInfoContainer}>
+                                    <View style={styles.productNamePrescCont}>
+                                      <View>
+                                        <Text
+                                          style={styles.productName}
+                                          numberOfLines={1}
+                                          ellipsizeMode="tail"
+                                        >
+                                          {order.productName || ""}
+                                        </Text>
+                                      </View>
+                                      <View>
+                                        {order.requiresPrescription ===
+                                        "Yes" ? (
+                                          <Text style={styles.productReq}>
+                                            [ Requires Prescription ]
+                                          </Text>
+                                        ) : (
+                                          <Text
+                                            style={styles.productReq}
+                                          ></Text>
+                                        )}
+                                      </View>
+                                    </View>
+                                    <View style={styles.priceRowContainer}>
+                                      <View style={styles.quantityCont}>
+                                        <Text style={styles.productAmount}>
+                                          x{order.quantity || ""}
+                                        </Text>
+                                      </View>
+
+                                      <Text style={styles.productPrice}>
+                                        {"\u20B1"}
+                                        {order.price || ""}
+                                      </Text>
+                                    </View>
+                                  </View>
+                                </View>
+                                <View style={styles.separator} />
+                                <View style={styles.viewOrderDetails}>
+                                  <View>
+                                    <Text>Items: {item.totalQuantity}</Text>
+                                  </View>
+                                  <View style={styles.orderTotalCont}>
+                                    <Text style={styles.orderTotalText}>
+                                      Order Total:
+                                    </Text>
+                                    <Text style={styles.productPrice}>
+                                      {" \u20B1"} {item.totalPrice}
+                                    </Text>
+                                  </View>
+                                </View>
+                                <View style={styles.separator2} />
+                                <View style={styles.viewButtonCont}>
+                                  <TouchableOpacity
+                                    onPress={() =>
+                                      handleViewOrderScreen(item.id)
+                                    }
+                                    style={styles.viewButton}
+                                  >
+                                    <Text style={styles.viewText}>
+                                      VIEW DETAILS
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                              </View>
+                            </View>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
                     </View>
-                    <View style={styles.priceRowContainer}>
-                      <Text style={styles.productAmount}>x{item.quantity}</Text>
-                      <Text style={styles.productPrice}>
-                        {"\u20B1"}
-                        {item.productDetails.price}
-                      </Text>
-                    </View>
-                  </View>
+                  ))}
                 </View>
               )}
             />
@@ -461,46 +647,120 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : pendingOrders.length === 0 ? (
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="fluent-mdl2:deactivate-orders"
-                size={22}
-                color="black"
-              />
-              <Text>No pending orders</Text>
+          ) : orderData.length === 0 ? (
+            <View style={styles.noOrdersCont}>
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="fluent-mdl2:deactivate-orders"
+                  size={50}
+                  color="black"
+                />
+                <Text>No Orders Yet</Text>
+              </View>
             </View>
           ) : (
             <FlatList
-              data={pendingOrders}
+              showsVerticalScrollIndicator={false}
+              data={orderData}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View style={styles.productContainer}>
-                  <View style={styles.imageContainer}>
-                    <Image
-                      source={{ uri: item.productDetails.img }}
-                      style={styles.productImage}
+                <View key={item.id} style={styles.orderGroupContainer}>
+                  <View style={styles.sellerCont}>
+                    <Iconify
+                      icon="healthicons:market-stall-outline"
+                      size={23}
+                      color="black"
                     />
+                    <Text style={styles.groupTitle}>
+                      {item.branchName ? item.branchName : "branchName"}
+                    </Text>
                   </View>
-                  <View style={styles.productInfoContainer}>
-                    <View>
-                      <Text style={styles.productName}>
-                        {item.productDetails.productName}
-                      </Text>
-                      <Text style={styles.productReq}>
-                        {item.productDetails.requiresPrescription
-                          ? "[ Requires Prescription ]"
-                          : ""}
-                      </Text>
+                  {filteredProductData.map((orders, index) => (
+                    <View key={index}>
+                      {orders.map((order, orderIndex) => {
+                        if (order.orderId === item.id && orderIndex === 0) {
+                          return (
+                            <View key={order.id}>
+                              <View style={styles.productContainer}>
+                                <View style={styles.productDataContainer}>
+                                  <View style={styles.imageContainer}>
+                                    <Image
+                                      source={{ uri: order.productImg || "" }}
+                                      style={styles.productImage}
+                                    />
+                                  </View>
+                                  <View style={styles.productInfoContainer}>
+                                    <View style={styles.productNamePrescCont}>
+                                      <View>
+                                        <Text
+                                          style={styles.productName}
+                                          numberOfLines={1}
+                                          ellipsizeMode="tail"
+                                        >
+                                          {order.productName || ""}
+                                        </Text>
+                                      </View>
+                                      <View>
+                                        {order.requiresPrescription ===
+                                        "Yes" ? (
+                                          <Text style={styles.productReq}>
+                                            [ Requires Prescription ]
+                                          </Text>
+                                        ) : (
+                                          <Text
+                                            style={styles.productReq}
+                                          ></Text>
+                                        )}
+                                      </View>
+                                    </View>
+                                    <View style={styles.priceRowContainer}>
+                                      <View style={styles.quantityCont}>
+                                        <Text style={styles.productAmount}>
+                                          x{order.quantity || ""}
+                                        </Text>
+                                      </View>
+
+                                      <Text style={styles.productPrice}>
+                                        {"\u20B1"}
+                                        {order.price || ""}
+                                      </Text>
+                                    </View>
+                                  </View>
+                                </View>
+                                <View style={styles.separator} />
+                                <View style={styles.viewOrderDetails}>
+                                  <View>
+                                    <Text>Items: {item.totalQuantity}</Text>
+                                  </View>
+                                  <View style={styles.orderTotalCont}>
+                                    <Text style={styles.orderTotalText}>
+                                      Order Total:
+                                    </Text>
+                                    <Text style={styles.productPrice}>
+                                      {" \u20B1"} {item.totalPrice}
+                                    </Text>
+                                  </View>
+                                </View>
+                                <View style={styles.separator2} />
+                                <View style={styles.viewButtonCont}>
+                                  <TouchableOpacity
+                                    onPress={handleViewOrderScreen}
+                                    style={styles.viewButton}
+                                  >
+                                    <Text style={styles.viewText}>
+                                      VIEW DETAILS
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                              </View>
+                            </View>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
                     </View>
-                    <View style={styles.priceRowContainer}>
-                      <Text style={styles.productAmount}>x{item.quantity}</Text>
-                      <Text style={styles.productPrice}>
-                        {"\u20B1"}
-                        {item.productDetails.price}
-                      </Text>
-                    </View>
-                  </View>
+                  ))}
                 </View>
               )}
             />
@@ -514,7 +774,7 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : pendingOrders.length === 0 ? (
+          ) : orderData.length === 0 ? (
             <View style={styles.noOrdersCont}>
               <View style={styles.noOrders}>
                 <Iconify
@@ -527,56 +787,119 @@ const OrderScreen = () => {
             </View>
           ) : (
             <FlatList
-              data={pendingOrders}
+              showsVerticalScrollIndicator={false}
+              data={orderData}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View style={styles.completedOrderContainer}>
-                  <View style={styles.completedProductContainer}>
-                    <View style={styles.imageContainerCompletedScreen}>
-                      <Image
-                        source={{ uri: item.productDetails.img }}
-                        style={styles.productImageCompletedScreen}
-                      />
-                    </View>
-                    <View style={styles.productInfoContainer}>
-                      <View>
-                        <Text style={styles.productName}>
-                          {item.productDetails.productName}
-                        </Text>
-                        <Text style={styles.productReq}>
-                          {item.productDetails.requiresPrescription
-                            ? "[ Requires Prescription ]"
-                            : ""}
-                        </Text>
-                      </View>
-                      <View style={styles.priceRowContainer}>
-                        <Text style={styles.productAmount}>
-                          x{item.quantity}
-                        </Text>
-                        <Text style={styles.productPrice}>
-                          Order Total: {"\u20B1"}
-                          {item.totalPrice}
-                        </Text>
-                      </View>
-                    </View>
+                <View key={item.id} style={styles.orderGroupContainer}>
+                  <View style={styles.sellerCont}>
+                    <Iconify
+                      icon="healthicons:market-stall-outline"
+                      size={23}
+                      color="black"
+                    />
+                    <Text style={styles.groupTitle}>
+                      {item.branchName ? item.branchName : "branchName"}
+                    </Text>
                   </View>
-                  <View>
-                    <View style={styles.viewRateContainer}>
-                      <TouchableOpacity onPress={handleViewOrderScreen}>
-                        <View style={styles.viewButton}>
-                          <Text style={styles.viewText}>DETAILS</Text>
-                        </View>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={handleRateScreen}>
-                        <View style={styles.rateButton}>
-                          <Text style={styles.rateText}>{buttonText}</Text>
-                        </View>
-                      </TouchableOpacity>
-                      <Text style={{ fontSize: 15, color: "green" }}>
-                        status:{item.status}
-                      </Text>
+                  {filteredProductData.map((orders, index) => (
+                    <View key={index}>
+                      {orders.map((order, orderIndex) => {
+                        if (order.orderId === item.id && orderIndex === 0) {
+                          return (
+                            <View key={order.id}>
+                              <View style={styles.productContainer}>
+                                <View style={styles.productDataContainer}>
+                                  <View style={styles.imageContainer}>
+                                    <Image
+                                      source={{ uri: order.productImg || "" }}
+                                      style={styles.productImage}
+                                    />
+                                  </View>
+                                  <View style={styles.productInfoContainer}>
+                                    <View style={styles.productNamePrescCont}>
+                                      <View>
+                                        <Text
+                                          style={styles.productName}
+                                          numberOfLines={1}
+                                          ellipsizeMode="tail"
+                                        >
+                                          {order.productName || ""}
+                                        </Text>
+                                      </View>
+                                      <View>
+                                        {order.requiresPrescription ===
+                                        "Yes" ? (
+                                          <Text style={styles.productReq}>
+                                            [ Requires Prescription ]
+                                          </Text>
+                                        ) : (
+                                          <Text
+                                            style={styles.productReq}
+                                          ></Text>
+                                        )}
+                                      </View>
+                                    </View>
+                                    <View style={styles.priceRowContainer}>
+                                      <View style={styles.quantityCont}>
+                                        <Text style={styles.productAmount}>
+                                          x{order.quantity || ""}
+                                        </Text>
+                                      </View>
+
+                                      <Text style={styles.productPrice}>
+                                        {"\u20B1"}
+                                        {order.price || ""}
+                                      </Text>
+                                    </View>
+                                  </View>
+                                </View>
+                                <View style={styles.separator} />
+                                <View style={styles.viewOrderDetails}>
+                                  <View>
+                                    <Text>Items: {item.totalQuantity}</Text>
+                                  </View>
+                                  <View style={styles.orderTotalCont}>
+                                    <Text style={styles.orderTotalText}>
+                                      Order Total:
+                                    </Text>
+                                    <Text style={styles.productPrice}>
+                                      {" \u20B1"} {item.totalPrice}
+                                    </Text>
+                                  </View>
+                                </View>
+                                <View style={styles.separator2} />
+                                <View>
+                                  <View style={styles.viewRateContainer}>
+                                    <TouchableOpacity
+                                      onPress={handleRateScreen}
+                                    >
+                                      <View style={styles.rateButton}>
+                                        <Text style={styles.rateText}>
+                                          {buttonText}
+                                        </Text>
+                                      </View>
+                                    </TouchableOpacity>
+                                    <View style={{ marginHorizontal: 5 }} />
+                                    <TouchableOpacity
+                                      onPress={handleViewOrderScreen}
+                                      style={styles.viewButton}
+                                    >
+                                      <Text style={styles.viewText}>
+                                        VIEW DETAILS
+                                      </Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              </View>
+                            </View>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
                     </View>
-                  </View>
+                  ))}
                 </View>
               )}
             />
