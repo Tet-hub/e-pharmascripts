@@ -22,16 +22,27 @@ export const getCurrentEmail = async () => {
 };
 
 // Save the user's email and authentication token to AsyncStorage
-export const saveAuthToken = async (email, token, userId) => {
+export const saveAuthToken = async (
+  email,
+  token,
+  userId,
+  profileImage,
+  customerName
+) => {
   try {
     await AsyncStorage.setItem("email", email);
     await AsyncStorage.setItem("token", token);
     await AsyncStorage.setItem("userId", userId);
+    await AsyncStorage.setItem("profileImage", profileImage);
+    await AsyncStorage.setItem("customerName", customerName);
+
     console.log(
       "Authentication token saved successfully in saveAuthToken:",
       email,
       // token,
-      userId
+      userId,
+      profileImage,
+      customerName
     );
   } catch (error) {
     console.log("Error saving authentication token:", error);
@@ -44,11 +55,15 @@ export const getAuthToken = async () => {
     const email = await AsyncStorage.getItem("email");
     const token = await AsyncStorage.getItem("token");
     const userId = await AsyncStorage.getItem("userId");
+    const profileImage = await AsyncStorage.getItem("profileImage");
+    const customerName = await AsyncStorage.getItem("customerName");
     console.log(
       "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
       email,
       // token,
-      userId
+      userId,
+      profileImage,
+      customerName
     );
     return { email, token, userId };
   } catch (error) {

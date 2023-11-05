@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
   ToastAndroid,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import IconSimple from "react-native-vector-icons/SimpleLineIcons";
 import { Iconify } from "react-native-iconify";
 import styles from "./stylesheet";
+import { saveAuthToken } from "../../src/authToken";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { getDoc, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { Picker } from "@react-native-picker/picker";
@@ -183,6 +186,7 @@ const EditProfileScreen = () => {
 
       if (imageUrl) {
         userData.profileImage = imageUrl;
+        await AsyncStorage.setItem("profileImage", imageUrl);
       }
 
       if (fetchedStatus === "Verified") {
@@ -200,7 +204,8 @@ const EditProfileScreen = () => {
       console.log("userData.validId:", userData.validId);
 
       await updateDoc(userRef, userData);
-
+      const customerName = `${updateUserData.firstName} ${updateUserData.lastName}`;
+      await AsyncStorage.setItem("customerName", customerName);
       ToastAndroid.show("Profile updated", ToastAndroid.LONG);
       navigation.goBack();
     } catch (error) {

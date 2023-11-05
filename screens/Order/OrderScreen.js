@@ -221,96 +221,99 @@ const OrderScreen = () => {
       </View>
 
       {trackerTab === 1 && (
-        <View style={styles.container}>
-          {/* ... */}
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          ) : pendingOrders.length === 0 ? (
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="fluent-mdl2:deactivate-orders"
-                size={22}
-                color="black"
-              />
-              <Text>No pending orders</Text>
-            </View>
-          ) : (
-            <View style={styles.orderGroupContainer}>
-              {pendingOrders.map((orders, index) => {
-                // Initializing the total quantity
-                let totalQuantity = 0;
+        <ScrollView>
+          <View style={styles.container}>
+            {/* ... */}
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            ) : pendingOrders.length === 0 ? (
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="fluent-mdl2:deactivate-orders"
+                  size={22}
+                  color="black"
+                />
+                <Text>No pending orders</Text>
+              </View>
+            ) : (
+              <View>
+                {pendingOrders.map((orders, index) => {
+                  // Initializing the total quantity
+                  let totalQuantity = 0;
 
-                return (
-                  <View key={index}>
-                    <Text style={styles.groupTitle}>
-                      {orders.length > 0 && ordersData[index]?.branchName
-                        ? ordersData[index]?.branchName
-                        : ""}
-                    </Text>
-                    {orders.map((order, orderIndex) => {
-                      // Adding to the total quantity
-                      totalQuantity += order.quantity || 0;
+                  return (
+                    <View key={index} style={styles.orderGroupContainer}>
+                      <Text style={styles.groupTitle}>
+                        {orders.length > 0 && ordersData[index]?.branchName
+                          ? ordersData[index]?.branchName
+                          : ""}
+                      </Text>
+                      {orders.map((order, orderIndex) => {
+                        // Adding to the total quantity
+                        totalQuantity += order.quantity || 0;
 
-                      if (orderIndex === 0) {
-                        return (
-                          <View key={order.id}>
-                            <View style={styles.productContainer}>
-                              <View style={styles.productDataContainer}>
-                                <View style={styles.imageContainer}>
-                                  <Image
-                                    source={{ uri: order.productImg || "" }}
-                                    style={styles.productImage}
-                                  />
+                        if (orderIndex === 0) {
+                          return (
+                            <View key={order.id}>
+                              <View style={styles.productContainer}>
+                                <View style={styles.productDataContainer}>
+                                  <View style={styles.imageContainer}>
+                                    <Image
+                                      source={{ uri: order.productImg || "" }}
+                                      style={styles.productImage}
+                                    />
+                                  </View>
+                                  <View style={styles.productInfoContainer}>
+                                    <View>
+                                      <Text style={styles.productName}>
+                                        {order.productName || ""}
+                                      </Text>
+                                      <Text style={styles.productReq}>
+                                        {order.requiresPrescription
+                                          ? "[ Requires Prescription ]"
+                                          : ""}
+                                      </Text>
+                                    </View>
+                                    <View style={styles.priceRowContainer}>
+                                      <Text style={styles.productAmount}>
+                                        x{order.quantity || ""}
+                                      </Text>
+                                      <Text style={styles.productPrice}>
+                                        {"\u20B1"}
+                                        {order.price || ""}
+                                      </Text>
+                                    </View>
+                                  </View>
                                 </View>
-                                <View style={styles.productInfoContainer}>
+                                <View style={styles.viewMoreText}>
+                                  <Text>View more Products</Text>
+                                </View>
+                                <View style={styles.separator} />
+                                <View style={styles.viewOrderDetails}>
                                   <View>
-                                    <Text style={styles.productName}>
-                                      {order.productName || ""}
-                                    </Text>
-                                    <Text style={styles.productReq}>
-                                      {order.requiresPrescription
-                                        ? "[ Requires Prescription ]"
-                                        : ""}
-                                    </Text>
-                                  </View>
-                                  <View style={styles.priceRowContainer}>
-                                    <Text style={styles.productAmount}>
-                                      x{order.quantity || ""}
-                                    </Text>
+                                    <Text>Items: {totalQuantity}</Text>
                                     <Text style={styles.productPrice}>
-                                      {"\u20B1"}
-                                      {order.price || ""}
+                                      Order Total: {"\u20B1"}
+                                      {order.productSubtotal}
                                     </Text>
                                   </View>
                                 </View>
-                              </View>
-                              <View style={styles.separator} />
-                              <View style={styles.viewOrderDetails}>
-                                <View>
-                                  <Text style={styles.productAmount}>
-                                    Total Quantity: {totalQuantity}
-                                  </Text>
-                                  <Text>{`Order Total: \u20B1${order.productSubtotal}`}</Text>
-                                </View>
-                              </View>
-                              <View style={styles.viewMoreText}>
-                                <Text>View more Products</Text>
                               </View>
                             </View>
-                          </View>
-                        );
-                      } else {
-                        return null; // To skip rendering additional items for the same order
-                      }
-                    })}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </View>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        </ScrollView>
       )}
 
       {trackerTab === 2 && (

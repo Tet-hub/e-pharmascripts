@@ -66,8 +66,17 @@ const Login = ({ navigation }) => {
         const userId = response.data.userId;
         const user = response.data.user;
         const userToken = response.data.token;
-
-        await saveAuthToken(user.email, userToken, userId); // Save user's email, token, and userId to AsyncStorage
+        const profileImageValue =
+          user.profileImage !== null
+            ? user.profileImage
+            : "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
+        await saveAuthToken(
+          user.email,
+          userToken,
+          userId,
+          profileImageValue,
+          user.firstName + " " + user.lastName
+        ); // Save user's email, token, and userId to AsyncStorage
         signIn(userToken); // Update the user's token in the context
         console.log("UserId fetched from login", userId);
       }

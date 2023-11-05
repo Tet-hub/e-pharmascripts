@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     // Added to provide some spacing
     // backgroundColor: "white",
     borderRadius: 10,
-    elevation: 3,
+    // elevation: 3,
     width: "90%",
     alignSelf: "center",
     marginBottom: 15,
@@ -207,25 +207,22 @@ const styles = StyleSheet.create({
     // backgroundColor: "#4CAF",
   },
   orderGroupContainer: {
-    flex: 1,
-    // width: "90%",
-    // alignSelf: "center",
     // backgroundColor: "yellow",
 
     backgroundColor: "#FFFFFF",
+    margin: 10,
     padding: 10,
     marginBottom: 15,
-    borderRadius: 20,
   },
   viewOrderDetails: {
     flexDirection: "row",
     margin: 10,
   },
   viewMoreText: {
-    margin: 10,
+    alignSelf: "center",
   },
   separator: {
-    marginTop: 20,
+    marginTop: 10,
     height: 1,
     width: "85%",
     backgroundColor: "#D9D9D9",
