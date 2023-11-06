@@ -30,7 +30,7 @@ const SettingsScreen = () => {
 
         <View style={styles.line} />
 
-        <TouchableOpacity onPress>
+        <TouchableOpacity>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>Help Center</Text>
             <View style={styles.arrowIcon}>
@@ -43,7 +43,7 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress>
+        <TouchableOpacity>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>Community Rules</Text>
             <View style={styles.arrowIcon}>
@@ -56,7 +56,7 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress>
+        <TouchableOpacity>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>E-Pharmascripts Policies</Text>
             <View style={styles.arrowIcon}>
@@ -69,7 +69,7 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress>
+        <TouchableOpacity>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>About</Text>
             <View style={styles.arrowIcon}>

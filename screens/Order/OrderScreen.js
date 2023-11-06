@@ -53,9 +53,8 @@ const OrderScreen = () => {
   const { width, height } = Dimensions.get("window");
 
   useEffect(() => {
-    setLoading(true);
-
     const fetchOrdersRealTime = () => {
+      setLoading(true);
       try {
         const ordersRef = collection(db, "orders");
         const q = query(
@@ -601,7 +600,9 @@ const OrderScreen = () => {
                                 <View style={styles.separator} />
                                 <View style={styles.viewOrderDetails}>
                                   <View>
-                                    <Text>Items: {item.totalQuantity}</Text>
+                                    <Text>
+                                      Items: {item.totalQuantity || ""}
+                                    </Text>
                                   </View>
                                   <View style={styles.orderTotalCont}>
                                     <Text style={styles.orderTotalText}>

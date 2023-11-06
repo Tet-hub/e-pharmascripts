@@ -158,7 +158,7 @@ const ProfileScreen = () => {
           <View style={styles.line} />
 
           <View style={styles.lowerContainer}>
-            <TouchableOpacity onPress={handlePressAccount}>
+            <TouchableOpacity>
               <View style={styles.viewCont}>
                 <View style={styles.iconsBG}>
                   <Iconify icon="codicon:account" size={22} color="black" />
@@ -174,7 +174,7 @@ const ProfileScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handlePressAddress}>
+            <TouchableOpacity>
               <View style={styles.viewCont}>
                 <View style={styles.iconsBG}>
                   <Iconify
@@ -194,7 +194,7 @@ const ProfileScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handlePressSecurity}>
+            <TouchableOpacity>
               <View style={styles.viewCont}>
                 <View style={styles.iconsBG}>
                   <Iconify
@@ -215,7 +215,7 @@ const ProfileScreen = () => {
             </TouchableOpacity>
 
             <View style={styles.line2} />
-            <TouchableOpacity onPress={handlePressDeleteAccount}>
+            <TouchableOpacity>
               <View style={styles.viewCont} className="mt-2">
                 <View style={styles.iconsBG}>
                   <Iconify icon="ic:outline-delete" size={22} color="black" />
