@@ -58,11 +58,11 @@ export const getAuthToken = async () => {
     const profileImage = await AsyncStorage.getItem("profileImage");
     const customerName = await AsyncStorage.getItem("customerName");
     console.log(
-      "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
-      email,
+      "Retrieved from AsyncStorage/getAuthToken:",
+      // email,
       // token,
       userId,
-      profileImage,
+      // profileImage,
       customerName
     );
     return { email, token, userId };

@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
     color: "#3C3C3C",
   },
   container: {
+    flex: 1,
     width: "95%",
     alignSelf: "center",
   },
@@ -65,6 +66,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   productName: {
+    color: "black",
     fontSize: 14,
     fontWeight: 600,
     textAlign: "center",
@@ -242,6 +244,29 @@ const styles = StyleSheet.create({
     borderColor: "#D9D9D9",
     borderRadius: 5,
     marginTop: 30,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  noOrdersCont: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+    marginBottom: 50,
+  },
+  noOrders: {
+    fontSize: 20,
+    alignSelf: "center",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  noOrdersIcon: {
+    alignSelf: "center",
+    marginBottom: 5,
+    color: "#36454F",
   },
 });
 

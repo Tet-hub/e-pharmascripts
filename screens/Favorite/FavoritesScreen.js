@@ -23,12 +23,11 @@ import {
 import { db } from "../../firebase/firebase";
 import { getAuthToken } from "../../src/authToken";
 import { ScrollView } from "react-native-gesture-handler";
-
 const deviceWidth = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const cardWidth = (width - 30) / 2;
 
-const FavoritesScreen = () => {
+const FavoritesScreen = ({ navigation, route }) => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [userFavorites, setUserFavorites] = useState([]);
   const [productData, setProductData] = useState([]);
@@ -41,7 +40,7 @@ const FavoritesScreen = () => {
 
       const favoritesQuery = query(
         collection(db, "favorites"),
-        where("userId", "==", currentUserId)
+        where("customerId", "==", currentUserId)
       );
 
       onSnapshot(favoritesQuery, (snapshot) => {
@@ -57,6 +56,7 @@ const FavoritesScreen = () => {
             const productData = productSnapshot.docs.map((doc) => doc.data());
             setProductData(productData);
           });
+          2;
         }
       });
     };
@@ -67,7 +67,7 @@ const FavoritesScreen = () => {
   const removeProductFromFavorites = async (productId) => {
     const favoritesQuery = query(
       collection(db, "favorites"),
-      where("userId", "==", currentUserId),
+      where("customerId", "==", currentUserId),
       where("productId", "==", productId)
     );
     const favoritesSnapshot = await getDocs(favoritesQuery);
@@ -83,44 +83,44 @@ const FavoritesScreen = () => {
       );
     }
   };
-  const fetchProductCategories = async () => {
-    try {
-      const productsCollection = collection(db, "products");
-      const productQuery = query(
-        productsCollection,
-        where("createdBy", "==", sellerId),
-        where("productStatus", "==", "Display")
-      );
-      const productDocs = await getDocs(productQuery);
+  // const fetchProductCategories = async () => {
+  //   try {
+  //     const productsCollection = collection(db, "products");
+  //     const productQuery = query(
+  //       productsCollection,
+  //       where("createdBy", "==", sellerId),
+  //       where("productStatus", "==", "Display")
+  //     );
+  //     const productDocs = await getDocs(productQuery);
 
-      const categories = new Set(); //ensure uniqueness
+  //     const categories = new Set(); //ensure uniqueness
 
-      productDocs.forEach((doc) => {
-        const data = doc.data();
-        if (data.category) {
-          if (Array.isArray(data.category)) {
-            // If it's an array, extend the Set
-            data.category.forEach((cat) => categories.add(cat));
-          } else {
-            // If it's a single category, add it to the Set
-            categories.add(data.category);
-          }
-        }
-      });
+  //     productDocs.forEach((doc) => {
+  //       const data = doc.data();
+  //       if (data.category) {
+  //         if (Array.isArray(data.category)) {
+  //           // If it's an array, extend the Set
+  //           data.category.forEach((cat) => categories.add(cat));
+  //         } else {
+  //           // If it's a single category, add it to the Set
+  //           categories.add(data.category);
+  //         }
+  //       }
+  //     });
 
-      // Convert the Set back to an array
-      const uniqueCategories = [...categories];
-      //unique categories
-      //console.log("Product CAtegories:", uniqueCategories);
-      setSelectedCategories(uniqueCategories);
-    } catch (error) {
-      console.log("Error fetching category products:", error);
-    }
-  };
+  //     // Convert the Set back to an array
+  //     const uniqueCategories = [...categories];
+  //     //unique categories
+  //     //console.log("Product CAtegories:", uniqueCategories);
+  //     setSelectedCategories(uniqueCategories);
+  //   } catch (error) {
+  //     console.log("Error fetching category products:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchProductCategories();
-  }, [sellerId]);
+  // useEffect(() => {
+  //   fetchProductCategories();
+  // }, [sellerId]);
   // const addToCart = async (productId) => {
   //   try {
   //     const cartCollection = collection(db, "cart");
@@ -147,7 +147,6 @@ const FavoritesScreen = () => {
               <Iconify icon="bi:x" size={13} color="white" />
             </TouchableOpacity>
           </View>
-
           <View style={styles.imageContainer}>
             {item && item.img ? (
               <Image source={{ uri: item.img }} style={styles.image} />
@@ -158,7 +157,6 @@ const FavoritesScreen = () => {
               />
             )}
           </View>
-
           <Text style={styles.productName}>{item.productName}</Text>
           <Text style={styles.productReq}>
             {item.requiresPrescription === "Yes" ? (
@@ -181,14 +179,14 @@ const FavoritesScreen = () => {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("ProductDetailScreen", {
-                productId: item.id,
+                productId: item.productId,
                 name: route.params?.name,
-                branch: route.params?.branch,
+                // branch: route.params?.branch,
               })
             }
           >
-            <View style={styles.addtocartButton}>
-              <Text style={styles.addtocartText}>View Product</Text>
+            <View style={styles.addButton}>
+              <Text style={styles.addText}>View Product</Text>
               <Iconify icon="ic:round-greater-than" size={18} color="white" />
             </View>
           </TouchableOpacity>

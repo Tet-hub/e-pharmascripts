@@ -326,6 +326,18 @@ const ShoppingCartScreen = () => {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
+        ) : cartItems.length === 0 ? (
+          <View style={styles.noOrdersCont}>
+            <View style={styles.noOrders}>
+              <Iconify
+                icon="tabler:shopping-cart-x"
+                size={50}
+                color="black"
+                style={styles.noOrdersIcon}
+              />
+              <Text>No Cart Items Yet</Text>
+            </View>
+          </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.selectedProductContainer}>

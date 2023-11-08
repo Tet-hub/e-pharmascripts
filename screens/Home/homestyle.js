@@ -97,6 +97,28 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginRight: 3,
   },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 100, // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  noOrdersCont: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+    marginVertical: 90,
+  },
+  noOrders: {
+    fontSize: 20,
+    alignSelf: "center",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  noOrdersIcon: {
+    alignSelf: "center",
+    marginBottom: 5,
+    color: "#36454F",
+  },
 });
 
 export default styles;

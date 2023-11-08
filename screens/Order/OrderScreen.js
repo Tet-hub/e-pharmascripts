@@ -247,6 +247,7 @@ const OrderScreen = () => {
                   icon="fluent-mdl2:deactivate-orders"
                   size={50}
                   color="black"
+                  style={styles.noOrdersIcon}
                 />
                 <Text>No Orders Yet</Text>
               </View>
@@ -377,6 +378,7 @@ const OrderScreen = () => {
                     icon="fluent-mdl2:deactivate-orders"
                     size={50}
                     color="black"
+                    style={styles.noOrdersIcon}
                   />
                   <Text>No Orders Yet</Text>
                 </View>
@@ -524,6 +526,7 @@ const OrderScreen = () => {
                   icon="fluent-mdl2:deactivate-orders"
                   size={50}
                   color="black"
+                  style={styles.noOrdersIcon}
                 />
                 <Text>No Orders Yet</Text>
               </View>
@@ -655,6 +658,7 @@ const OrderScreen = () => {
                   icon="fluent-mdl2:deactivate-orders"
                   size={50}
                   color="black"
+                  style={styles.noOrdersIcon}
                 />
                 <Text>No Orders Yet</Text>
               </View>
@@ -798,6 +802,7 @@ const OrderScreen = () => {
                       icon="healthicons:market-stall-outline"
                       size={23}
                       color="black"
+                      style={styles.noOrdersIcon}
                     />
                     <Text style={styles.groupTitle}>
                       {item.branchName ? item.branchName : "branchName"}

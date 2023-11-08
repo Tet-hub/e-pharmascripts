@@ -49,6 +49,23 @@ const styles = StyleSheet.create({
     height: "80%",
     width: "30%",
   },
+  noOrdersCont: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+    marginBottom: 50,
+  },
+  noOrders: {
+    fontSize: 20,
+    alignSelf: "center",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  noOrdersIcon: {
+    alignSelf: "center",
+    marginBottom: 5,
+    color: "#36454F",
+  },
   productImage: {
     flex: 1,
     resizeMode: "stretch",

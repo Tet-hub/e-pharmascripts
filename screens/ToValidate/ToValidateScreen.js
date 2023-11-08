@@ -23,11 +23,13 @@ import { updateById } from "../../database/update/updateDataById";
 import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
 import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
+import * as ImagePicker from "expo-image-picker";
 
 const ToValidateScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
   const deviceWidth = Dimensions.get("window").width;
-
+  const [itemSelectedImages, setItemSelectedImages] = useState([]);
+  const [itemSelectedImageNames, setItemSelectedImageNames] = useState([]);
   const [item, setProductData] = useState(null); // Initialize as null
   const [quantity, setQuantity] = useState(0);
   const [productSubtotal, setProductSubtotal] = useState(0);
@@ -133,24 +135,19 @@ const ToValidateScreen = ({ navigation, route }) => {
       if (Array.isArray(item)) {
         for (const product of item) {
           console.log("item price", product.price);
-          const currentQuantity = cartId ? product.quantity : quantity; // Determine which quantity to use
+          const currentQuantity = cartId ? product.quantity : quantity;
           subtotal += product.price * currentQuantity;
-          console.log("quantity", product.quantity);
+          console.log("cart quantity", product.quantity);
         }
-      } else if (item.price && (cartId || quantity !== undefined)) {
-        const currentQuantity = cartId ? item.quantity : quantity; // Determine which quantity to use
+      } else if (item.price && quantity !== undefined) {
+        const currentQuantity = item.quantity ? item.quantity : quantity;
         subtotal += item.price * currentQuantity;
-        console.log("quantity", item.quantity);
+        console.log("product screen quantity", currentQuantity);
       }
 
       setProductSubtotal(subtotal);
-      // Calculate total price = subtotal plus temp shipping fee
       const shippingFee = 50.0; // temp SF
       const total = subtotal + shippingFee;
-      console.log(
-        "subtotal + sf: ",
-        subtotal + " + " + shippingFee + " = " + (subtotal + shippingFee)
-      );
       setTotalPrice(total);
     }
   }, [item, cartId, quantity]);
@@ -169,9 +166,10 @@ const ToValidateScreen = ({ navigation, route }) => {
         for (const product of item) {
           totalQuantity += product.quantity;
         }
-      } else if (item.quantity !== undefined) {
-        totalQuantity = item.quantity;
+      } else if (quantity) {
+        totalQuantity = quantity;
       }
+      console.log("item quantity", totalQuantity);
       //"orders" collection
       const data = {
         customerId: user.id,
@@ -186,11 +184,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         branchName: sellerData.branch,
         totalQuantity: totalQuantity,
         paymentMethod: null,
-        orderSubTotalPrice: productSubtotal,
-        // productId: productId,
-        // productName: item.productName,
-        // quantity: quantity,
-        // price: item.price,
+        orderSubTotalPrice: productSubtotal.toFixed(2),
       };
       // console.log("orederData", orderData);
 
@@ -199,8 +193,9 @@ const ToValidateScreen = ({ navigation, route }) => {
       //"attachmentList" collection
       const image = {
         orderId: orderId,
+        prescriptionImg: "Image not available",
       };
-      // const imgId = await storeProductData("attachmentList", image);
+      const imgId = await storeProductData("attachmentList", image);
       //will be rendered if the item came from the "ShoppingCartScreen.js"
       if (Array.isArray(item)) {
         for (const product of item) {
@@ -210,6 +205,7 @@ const ToValidateScreen = ({ navigation, route }) => {
             continue;
           }
 
+          const subtotal = product.quantity * product.price;
           // "productList" collection
           const orderedProductDetails = {
             orderId: orderId,
@@ -220,8 +216,7 @@ const ToValidateScreen = ({ navigation, route }) => {
             price: product.price,
             productImg: product.img,
             requiresPrescription: product.requiresPrescription,
-            prescriptionImg: "Image not available",
-            productSubTotalPrice: product.quantity * product.price,
+            productSubTotalPrice: subtotal.toFixed(2),
           };
 
           const productListId = await storeProductData(
@@ -239,22 +234,12 @@ const ToValidateScreen = ({ navigation, route }) => {
             "stock",
             product.stock - product.quantity
           );
-
-          console.log(
-            "update stock:",
-            product.stock +
-              " + " +
-              product.quantity +
-              " = " +
-              (product.stock - product.quantity) +
-              " productID- " +
-              product.productId
-          );
         }
       }
       //will be rendered if the item came from the "ProductDetailsScreen.js"
       else {
         // "productList" collection
+        const subtotal = item.quantity * item.price;
         const orderDetails = {
           orderId: orderId,
           productId: item.productId,
@@ -265,7 +250,7 @@ const ToValidateScreen = ({ navigation, route }) => {
           productImg: item.img,
           requiresPrescription: item.requiresPrescription,
           prescriptionImg: "Image not available",
-          productSubTotalPrice: item.quantity * item.price,
+          productSubTotalPrice: subtotal.toFixed(2),
         };
 
         const productListId = await storeProductData(
@@ -279,10 +264,6 @@ const ToValidateScreen = ({ navigation, route }) => {
         console.log("Order placed with ID:", orderId);
         // console.log("AttachmentList ID:", imgId);
         console.log("ProductList ID", productListId);
-        console.log(
-          "updated stock:",
-          item.stock + " + " + quantity + " = " + (item.stock - quantity)
-        );
       }
 
       navigation.navigate("OrderScreen");
@@ -290,8 +271,32 @@ const ToValidateScreen = ({ navigation, route }) => {
       console.error("Error placing the order:", error);
     }
   };
+  const handleItemSelection = async () => {
+    let results = await ImagePicker.launchImageLibraryAsync({
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, // Enable multiple image selection
+    });
 
-  const handleImageSelection = () => {};
+    if (!results.canceled) {
+      const selectedAssets = results.assets;
+      const newSelectedImages = [...itemSelectedImages, ...selectedAssets];
+      setItemSelectedImages(newSelectedImages);
+
+      const newSelectedImageNames = selectedAssets.map((asset) =>
+        asset.uri.split("/").pop()
+      );
+      const updatedImageNames = [
+        ...itemSelectedImageNames,
+        ...newSelectedImageNames,
+      ];
+      setItemSelectedImageNames(updatedImageNames);
+
+      console.log("Selected Images:", newSelectedImages);
+      console.log("Selected Image Names:", updatedImageNames);
+    }
+  };
+
   // Show loading indicator while data is being fetched
   if (loading) {
     return (
@@ -338,12 +343,20 @@ const ToValidateScreen = ({ navigation, route }) => {
         </View>
         {item.requiresPrescription === "Yes" && (
           <View style={styles.uploadContainer}>
-            <Text style={styles.reminderText}>
-              Upload your{"\n"} prescription here*
-            </Text>
+            {itemSelectedImages.map((image, index) => (
+              <View key={index}>
+                <Text style={styles.reminderText}>
+                  {itemSelectedImageNames[index]}
+                </Text>
+                <Image
+                  source={{ uri: image.uri }}
+                  style={styles.selectedImage}
+                />
+              </View>
+            ))}
             <TouchableOpacity
               style={styles.uploadButton}
-              onPress={handleImageSelection}
+              onPress={handleItemSelection}
             >
               <Text style={styles.uploadButtonText}>Choose File</Text>
             </TouchableOpacity>

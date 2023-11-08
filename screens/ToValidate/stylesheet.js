@@ -191,6 +191,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "space-between",
   },
+  selectedImageName: {
+    fontSize: 14,
+    color: "red",
+    maxWidth: 20,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+  },
   uploadText: {
     fontSize: 14,
     fontWeight: 400,

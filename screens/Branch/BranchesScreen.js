@@ -10,6 +10,7 @@ import {
   ScrollView,
   FlatList,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import styles from "./bs";
@@ -23,7 +24,7 @@ const cardWidth = (width - 30) / 2;
 const BranchesScreen = ({ navigation, route }) => {
   const [branches, setBranches] = useState([]);
   const branchCompany = route.params?.name;
-
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isLocationButtonClicked, setLocationButtonClicked] = useState(false);
   //
@@ -58,6 +59,9 @@ const BranchesScreen = ({ navigation, route }) => {
         }
       } catch (error) {
         console.log("Error fetching branches:", error);
+        setLoading(false);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -128,92 +132,109 @@ const BranchesScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>{route.params?.name}</Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>{route.params?.name}</Text>
+      </View>
 
-        <View style={{ alignItems: "center" }}>
-          <View style={styles.searchFilterCont}>
-            <View style={styles.searchCont}>
-              <View style={styles.searchTexInputView}>
-                <TextInput
-                  style={styles.searchTextInput}
-                  placeholder="Search branch"
-                />
-              </View>
-              {renderSearchIcon()}
+      <View style={{ alignItems: "center" }}>
+        <View style={styles.searchFilterCont}>
+          <View style={styles.searchCont}>
+            <View style={styles.searchTexInputView}>
+              <TextInput
+                style={styles.searchTextInput}
+                placeholder="Search branch"
+              />
             </View>
-            <TouchableOpacity
-              style={styles.iconFilterCont}
-              onPress={handleFilterClick}
-            >
-              <Iconify icon="mi:filter" size={25} color="white" />
-            </TouchableOpacity>
+            {renderSearchIcon()}
+          </View>
+          <TouchableOpacity
+            style={styles.iconFilterCont}
+            onPress={handleFilterClick}
+          >
+            <Iconify icon="mi:filter" size={25} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <Text style={styles.branchSelectionText}>Branch Selection</Text>
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : branches.length === 0 ? (
+        <View style={styles.noOrdersCont}>
+          <View style={styles.noOrders}>
+            <Iconify
+              icon="tabler:git-branch-deleted"
+              size={50}
+              color="black"
+              style={styles.noOrdersIcon}
+            />
+            <Text>No Branches Yet</Text>
           </View>
         </View>
+      ) : (
+        <>
+          <FlatList
+            data={branches}
+            scrollEnabled={false}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            renderItem={renderBranchItem}
+            contentContainerStyle={styles.branchesContainer}
+          />
+          <Modal
+            visible={showModal}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => {
+              setShowModal(false);
+            }}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <View style={styles.drawerContainer}>
+                  <Text style={styles.drawerTitle}>Search Filter</Text>
 
-        <Text style={styles.branchSelectionText}>Branch Selection</Text>
+                  <View style={styles.locationView}>
+                    <Text style={styles.locationText}>By Location</Text>
 
-        <FlatList
-          data={branches}
-          scrollEnabled={false}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          renderItem={renderBranchItem}
-          contentContainerStyle={styles.branchesContainer}
-        />
-        <Modal
-          visible={showModal}
-          animationType="fade"
-          transparent={true}
-          onRequestClose={() => {
-            setShowModal(false);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalView}>
-              <View style={styles.drawerContainer}>
-                <Text style={styles.drawerTitle}>Search Filter</Text>
+                    <TouchableOpacity
+                      style={{
+                        ...styles.locationTO,
+                        borderColor: isLocationButtonClicked
+                          ? "#EC6F56"
+                          : "#D9D9D9",
+                      }}
+                      onPress={() =>
+                        setLocationButtonClicked(!isLocationButtonClicked)
+                      }
+                    >
+                      <Text style={styles.searchlocationText}>
+                        Search by location
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.separator} />
+                  <View style={styles.resetApplyView}>
+                    <TouchableOpacity
+                      style={styles.resetTO}
+                      activeOpacity={0.7}
+                      onPress={handleCloseDrawer}
+                    >
+                      <Text style={styles.resetText}>CANCEL</Text>
+                    </TouchableOpacity>
 
-                <View style={styles.locationView}>
-                  <Text style={styles.locationText}>By Location</Text>
-
-                  <TouchableOpacity
-                    style={{
-                      ...styles.locationTO,
-                      borderColor: isLocationButtonClicked
-                        ? "#EC6F56"
-                        : "#D9D9D9",
-                    }}
-                    onPress={() =>
-                      setLocationButtonClicked(!isLocationButtonClicked)
-                    }
-                  >
-                    <Text style={styles.searchlocationText}>
-                      Search by location
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.separator} />
-                <View style={styles.resetApplyView}>
-                  <TouchableOpacity
-                    style={styles.resetTO}
-                    activeOpacity={0.7}
-                    onPress={handleCloseDrawer}
-                  >
-                    <Text style={styles.resetText}>CANCEL</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.applyTO}>
-                    <Text style={styles.applyText}>APPLY</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity style={styles.applyTO}>
+                      <Text style={styles.applyText}>APPLY</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </Modal>
-      </ScrollView>
+          </Modal>
+        </>
+      )}
     </SafeAreaView>
   );
 };

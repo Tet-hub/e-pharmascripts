@@ -9,6 +9,7 @@ import {
   Dimensions,
   FlatList,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Iconify } from "react-native-iconify";
@@ -27,6 +28,7 @@ const cardWidth = (width - 30) / 2;
 const ProductScreen = ({ navigation, route }) => {
   const sellerId = route.params?.sellerId;
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [loading, setLoading] = useState(true);
   const [product, setProductData] = useState([]);
   const [filteredProduct, setFilteredProduct] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -118,13 +120,16 @@ const ProductScreen = ({ navigation, route }) => {
         });
 
         if (response.ok) {
-          const branchesData = await response.json();
-          setProductData(branchesData);
+          const products = await response.json();
+          setProductData(products);
         } else {
           console.log("API request failed with status:", response.status);
         }
       } catch (error) {
         console.log("Error fetching products:", error);
+        setLoading(false);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -147,6 +152,7 @@ const ProductScreen = ({ navigation, route }) => {
         multipleConditions,
         (products) => {
           setProductData(products);
+          setLoading(false);
         }
       );
       return () => unsubscribe();
@@ -212,7 +218,13 @@ const ProductScreen = ({ navigation, route }) => {
           <View style={styles.imageContainer}>
             <Image source={{ uri: item.img }} style={styles.image} />
           </View>
-          <Text style={styles.productName}>{item.productName}</Text>
+          <Text
+            style={styles.productName}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {item.productName || ""}
+          </Text>
 
           {item.requiresPrescription == "Yes" ? (
             <Text style={styles.productReq}> [ Requires Prescription ] </Text>
@@ -249,7 +261,7 @@ const ProductScreen = ({ navigation, route }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View className="items-center flex-row mt-5 ml-3 mr-3 ">
         <Text style={styles.screenTitle}>
           {route.params?.name} ({route.params?.branch})
@@ -279,143 +291,166 @@ const ProductScreen = ({ navigation, route }) => {
       </View>
 
       <Text style={styles.productSelectionText}>Product Selection</Text>
-
-      <FlatList
-        numColumns={2}
-        scrollEnabled={false}
-        data={filteredProduct}
-        keyExtractor={(item) => item.id}
-        renderItem={renderProducts}
-      />
-
-      <Modal
-        visible={showModal}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => {
-          setShowModal(false);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <View style={styles.drawerContainer}>
-              <Text style={styles.drawerTitle}>Search Filter</Text>
-              <View style={styles.categoryView}>
-                <Text style={styles.categoryText}>By Category</Text>
-                <View style={styles.categoryTO}>
-                  <Picker
-                    selectedValue={selectedCategory}
-                    onValueChange={(itemValue, itemIndex) => {
-                      setSelectedCategory(itemValue);
-                    }}
-                  >
-                    <Picker.Item label="Select a category" value="" />
-                    {selectedCategories.map((category) => (
-                      <Picker.Item
-                        label={category}
-                        value={category}
-                        key={category}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-              <View style={styles.separator} />
-
-              <View style={styles.locationView}>
-                <Text style={styles.locationText}>By Location</Text>
-
-                <TouchableOpacity
-                  style={{
-                    ...styles.locationTO,
-                    borderColor: isLocationButtonClicked
-                      ? "#EC6F56"
-                      : "#D9D9D9",
-                  }}
-                  onPress={() =>
-                    setLocationButtonClicked(!isLocationButtonClicked)
-                  }
-                >
-                  <Text style={styles.searchlocationText}>
-                    Search by location
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.separator} />
-
-              <View style={styles.priceView}>
-                <Text style={styles.priceText}>By Price</Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={{
-                    ...styles.lowToHighTO,
-                    borderColor: isLowToHighSelected ? "#EC6F56" : "#D9D9D9",
-                  }}
-                  onPress={() => {
-                    if (isLowToHighSelected) {
-                      // If it's already selected, deselect it
-                      setIsLowToHighSelected(false);
-                      setSortingOption(null);
-                    } else {
-                      // If it's not selected, select it
-                      setIsLowToHighSelected(true);
-                      setIsHighToLowSelected(false);
-                      setSortingOption("lowToHigh");
-                    }
-                  }}
-                >
-                  <Text style={styles.lowToHighTOText}>Low to High</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={{
-                    ...styles.highToLowTO,
-                    borderColor: isHighToLowSelected ? "#EC6F56" : "#D9D9D9",
-                  }}
-                  onPress={() => {
-                    if (isHighToLowSelected) {
-                      // If it's already selected, deselect it
-                      setIsHighToLowSelected(false);
-                      setSortingOption(null);
-                    } else {
-                      // If it's not selected, select it
-                      setIsLowToHighSelected(false); // Deselect "Low to High" if selected
-                      setIsHighToLowSelected(true);
-                      setSortingOption("highToLow");
-                    }
-                  }}
-                >
-                  <Text style={styles.highToLowTOText}>High to Low </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.separator} />
-
-              <View style={styles.resetApplyView}>
-                <TouchableOpacity
-                  style={styles.resetTO}
-                  onPress={cancelSorting}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.resetText}>CANCEL</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.applyTO}
-                  onPress={() => {
-                    applyFiltersAndSorting();
-                    setShowModal(false);
-                  }}
-                >
-                  <Text style={styles.applyText}>APPLY</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : product.length === 0 ? (
+        <View style={styles.noOrdersCont}>
+          <View style={styles.noOrders}>
+            <Iconify
+              icon="icons8:document"
+              size={50}
+              color="black"
+              style={styles.noOrdersIcon}
+            />
+            <Text>No Products Yet</Text>
           </View>
         </View>
-      </Modal>
-    </ScrollView>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <FlatList
+            numColumns={2}
+            scrollEnabled={false}
+            data={filteredProduct}
+            keyExtractor={(item) => item.id}
+            renderItem={renderProducts}
+          />
+
+          <Modal
+            visible={showModal}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => {
+              setShowModal(false);
+            }}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <View style={styles.drawerContainer}>
+                  <Text style={styles.drawerTitle}>Search Filter</Text>
+                  <View style={styles.categoryView}>
+                    <Text style={styles.categoryText}>By Category</Text>
+                    <View style={styles.categoryTO}>
+                      <Picker
+                        selectedValue={selectedCategory}
+                        onValueChange={(itemValue, itemIndex) => {
+                          setSelectedCategory(itemValue);
+                        }}
+                      >
+                        <Picker.Item label="Select a category" value="" />
+                        {selectedCategories.map((category) => (
+                          <Picker.Item
+                            label={category}
+                            value={category}
+                            key={category}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                  <View style={styles.separator} />
+
+                  <View style={styles.locationView}>
+                    <Text style={styles.locationText}>By Location</Text>
+
+                    <TouchableOpacity
+                      style={{
+                        ...styles.locationTO,
+                        borderColor: isLocationButtonClicked
+                          ? "#EC6F56"
+                          : "#D9D9D9",
+                      }}
+                      onPress={() =>
+                        setLocationButtonClicked(!isLocationButtonClicked)
+                      }
+                    >
+                      <Text style={styles.searchlocationText}>
+                        Search by location
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.separator} />
+
+                  <View style={styles.priceView}>
+                    <Text style={styles.priceText}>By Price</Text>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={{
+                        ...styles.lowToHighTO,
+                        borderColor: isLowToHighSelected
+                          ? "#EC6F56"
+                          : "#D9D9D9",
+                      }}
+                      onPress={() => {
+                        if (isLowToHighSelected) {
+                          // If it's already selected, deselect it
+                          setIsLowToHighSelected(false);
+                          setSortingOption(null);
+                        } else {
+                          // If it's not selected, select it
+                          setIsLowToHighSelected(true);
+                          setIsHighToLowSelected(false);
+                          setSortingOption("lowToHigh");
+                        }
+                      }}
+                    >
+                      <Text style={styles.lowToHighTOText}>Low to High</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={{
+                        ...styles.highToLowTO,
+                        borderColor: isHighToLowSelected
+                          ? "#EC6F56"
+                          : "#D9D9D9",
+                      }}
+                      onPress={() => {
+                        if (isHighToLowSelected) {
+                          // If it's already selected, deselect it
+                          setIsHighToLowSelected(false);
+                          setSortingOption(null);
+                        } else {
+                          // If it's not selected, select it
+                          setIsLowToHighSelected(false); // Deselect "Low to High" if selected
+                          setIsHighToLowSelected(true);
+                          setSortingOption("highToLow");
+                        }
+                      }}
+                    >
+                      <Text style={styles.highToLowTOText}>High to Low </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.separator} />
+
+                  <View style={styles.resetApplyView}>
+                    <TouchableOpacity
+                      style={styles.resetTO}
+                      onPress={cancelSorting}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.resetText}>CANCEL</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.applyTO}
+                      onPress={() => {
+                        applyFiltersAndSorting();
+                        setShowModal(false);
+                      }}
+                    >
+                      <Text style={styles.applyText}>APPLY</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </ScrollView>
+      )}
+    </View>
   );
 };
 export default ProductScreen;

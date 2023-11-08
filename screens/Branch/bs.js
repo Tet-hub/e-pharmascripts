@@ -225,6 +225,29 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: "45%",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  noOrdersCont: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+    marginBottom: 50,
+  },
+  noOrders: {
+    fontSize: 20,
+    alignSelf: "center",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  noOrdersIcon: {
+    alignSelf: "center",
+    marginBottom: 5,
+    color: "#36454F",
+  },
 });
 
 export default styles;

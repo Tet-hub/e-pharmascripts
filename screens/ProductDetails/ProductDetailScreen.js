@@ -130,7 +130,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         quantity,
         // productName: item.productName,
         // price: item.price, //should i save the current price when the user
-        // sellerId: item.createdBy,
+        sellerId: item.createdBy,
         // img: item.img,
         // requiresPrescription: item.requiresPrescription,
         // category: item.category,
@@ -244,7 +244,10 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollableContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollableContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.imageContainer}>
           {item && item.img ? (
             <Image
@@ -257,11 +260,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
             />
           ) : (
             <Image
-              source={require("../../assets/img/default-image.jpg")}
-              style={[
-                styles.image,
-                { width: deviceWidth, height: (deviceWidth * 2) / 3 },
-              ]}
+              source={require("../../assets/img/def-image.jpg")}
+              style={styles.image}
             />
           )}
         </View>

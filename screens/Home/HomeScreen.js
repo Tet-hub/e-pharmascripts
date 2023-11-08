@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Dimensions,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
@@ -40,6 +41,7 @@ const HomeScreen = () => {
   const [mainPharmacy, setPharmacy] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [loading, setLoading] = useState(true);
 
   //
   //handleNavigateToProducts
@@ -56,6 +58,9 @@ const HomeScreen = () => {
         setPharmacy(pharmacyData);
       } catch (error) {
         console.log("Error fetching pharmacy data:", error);
+        setLoading(false);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -212,15 +217,32 @@ const HomeScreen = () => {
             Pharmacy Selection
           </Text>
           {/**Pharmacy containers code */}
-
           <View style={styles.container}>
-            <FlatList
-              numColumns={2} // Display two items per row
-              scrollEnabled={false}
-              data={mainPharmacy}
-              keyExtractor={(item) => item.id}
-              renderItem={renderPharmacy}
-            />
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            ) : mainPharmacy.length === 0 ? (
+              <View style={styles.noOrdersCont}>
+                <View style={styles.noOrders}>
+                  <Iconify
+                    icon="tabler:git-branch-deleted"
+                    size={50}
+                    color="black"
+                    style={styles.noOrdersIcon}
+                  />
+                  <Text style={{ fontWeight: 300 }}>No Pharmacies Found</Text>
+                </View>
+              </View>
+            ) : (
+              <FlatList
+                numColumns={2} // Display two items per row
+                scrollEnabled={false}
+                data={mainPharmacy}
+                keyExtractor={(item) => item.id}
+                renderItem={renderPharmacy}
+              />
+            )}
           </View>
         </View>
       </ScrollView>

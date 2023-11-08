@@ -214,6 +214,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     alignSelf: "center",
   },
+  noOrdersIcon: {
+    alignSelf: "center",
+  },
   orderGroupContainer: {
     backgroundColor: "#FFFFFF",
     margin: 10,
