@@ -1,4 +1,7 @@
-git add *
+git add *//Git stages all files and changes in the current directory 
+//or
+git add . a//add untracked files
+
 git commit -m "Updated source"
 git push //for branch
 
@@ -27,7 +30,7 @@ How to check the repo
 git remote -v
 
 How to push
-git add *
+git add .
 git commit -m "Updated source"
 git push
 
