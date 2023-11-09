@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontWeight: 600,
-    fontSize: 12,
-    color: "#3C3C3C",
+    fontSize: 14,
+    color: "black",
     textAlign: "center",
   },
   productReq: {

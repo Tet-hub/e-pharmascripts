@@ -12,12 +12,13 @@ import { TextInput } from "react-native-gesture-handler";
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useNavigation, useRoute } from "@react-navigation/native";
-
+import { getCurrentUserId } from "../../src/authToken";
+import { getCurrentEmail } from "../../src/authToken";
 const RateScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { orderId, CurrentUserId } = route.params;
-  //console.log("ORDERID: ", orderId);
+  const { orderId } = route.params;
+  console.log("ORDERID: ", orderId);
 
   const deviceHeight = Dimensions.get("window").height;
   const deviceWidth = Dimensions.get("window").width;
@@ -32,6 +33,9 @@ const RateScreen = () => {
   const [reviewDescription, setReviewDescription] = useState("");
   const [isRated, setIsRated] = useState(false);
   const [characterCount, setCharacterCount] = useState(0);
+  const [customerId, setCustomerId] = useState(null);
+  const [email, setEmail] = useState(null);
+  console.log("sdf: ", customerId);
 
   const handleStarPress = (selectedRating, type) => {
     if (type === "pharmacy") {
@@ -46,14 +50,14 @@ const RateScreen = () => {
 
   //
   useEffect(() => {
-    if (CurrentUserId) {
+    if (customerId) {
       const fetchOrderData = async () => {
         const orderRef = doc(db, "orders", orderId);
         const orderSnapshot = await getDoc(orderRef);
 
         if (orderSnapshot.exists()) {
           const orderData = orderSnapshot.data();
-          if (CurrentUserId === orderData.userId) {
+          if (customerId === orderData.customerId) {
             const sellerId = orderData.sellerId;
             setSeller(sellerId);
             setProductName(orderData.productName);
@@ -82,8 +86,12 @@ const RateScreen = () => {
 
       fetchOrderData();
     }
-  }, [orderId, CurrentUserId]);
-
+  }, [orderId, customerId]);
+  useEffect(() => {
+    // Call the getUserId function and set the result to the state variable
+    getCurrentUserId().then((id) => setCustomerId(id));
+    getCurrentEmail().then((id) => setEmail(id));
+  }, []);
   //
   useEffect(() => {
     const fetchUserRatingAndReview = async () => {
@@ -136,7 +144,7 @@ const RateScreen = () => {
         pharmacyRating,
         reviewDescription,
         sellerId: seller,
-        userId: CurrentUserId,
+        userId: customerId,
         orderId: orderId,
       };
 

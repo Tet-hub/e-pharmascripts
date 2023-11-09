@@ -66,7 +66,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   pharmacyBranch: {
-    color: "#8E8E8E",
+    color: "black",
+    fontSize: 15,
+    fontWeight: 600,
     marginTop: 10,
     marginBottom: 20,
   },

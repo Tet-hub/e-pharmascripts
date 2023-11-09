@@ -16,6 +16,7 @@ const styles = StyleSheet.create({
   },
   searchButtonIcon: {},
   searchCont: {
+    height: "80%",
     padding: 10,
     borderRadius: 15,
     width: "100%",
@@ -118,6 +119,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 5,
     color: "#36454F",
+  },
+  noOrdersText: {
+    fontWeight: 300,
   },
 });
 

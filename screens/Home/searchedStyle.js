@@ -101,15 +101,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   locationTextDisplay: {
-    fontWeight: 300,
-    fontSize: 8,
+    fontWeight: 400,
+    fontSize: 9,
     marginTop: 5,
+    color: "#8E8E8E",
   },
   priceText: {
     fontWeight: 600,
     fontSize: 17,
     color: "#3C3C3C",
     marginRight: 10,
+  },
+  distanceDisplayText: {
+    color: "#DC3642",
+    fontSize: 11,
+    fontWeight: 500,
+    fontStyle: "italic",
+    marginTop: 1,
   },
   //MODAL
   modalContainer: {
@@ -197,15 +205,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   resetText: {
-    fontWeight: 700,
-    fontSize: 14,
+    fontWeight: 600,
+    fontSize: 13,
     color: "#8E8E8E",
     textAlign: "center",
   },
   applyText: {
     color: "white",
-    fontWeight: 700,
-    fontSize: 14,
+    fontWeight: 600,
+    fontSize: 13,
+    textAlign: "center",
+  },
+  closeText: {
+    fontWeight: 600,
+    fontSize: 13,
+    color: "white",
     textAlign: "center",
   },
   resetTO: {
@@ -213,13 +227,21 @@ const styles = StyleSheet.create({
     borderColor: "#8E8E8E",
     padding: 10,
     borderRadius: 5,
-    width: "45%",
+    width: "30%",
+  },
+  closeTO: {
+    borderWidth: 1,
+    borderColor: "black",
+    backgroundColor: "black",
+    padding: 10,
+    borderRadius: 5,
+    width: "30%",
   },
   applyTO: {
     backgroundColor: "#EC6F56",
     padding: 10,
     borderRadius: 5,
-    width: "45%",
+    width: "30%",
   },
   categoryView: {
     marginTop: 30,

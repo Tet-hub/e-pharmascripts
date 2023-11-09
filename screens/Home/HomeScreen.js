@@ -39,9 +39,9 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [mainPharmacy, setPharmacy] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchKeyword, setSearchKeyword] = useState("");
   const [loading, setLoading] = useState(true);
+  // const [filteredProducts, setFilteredProducts] = useState([]);
+  //const [searchKeyword, setSearchKeyword] = useState("");
 
   //
   //handleNavigateToProducts
@@ -58,7 +58,6 @@ const HomeScreen = () => {
         setPharmacy(pharmacyData);
       } catch (error) {
         console.log("Error fetching pharmacy data:", error);
-        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -66,6 +65,10 @@ const HomeScreen = () => {
 
     fetchPharmacyData();
   }, []);
+
+  const handlePressAddress = () => {
+    navigation.navigate("SearchProductsScreen");
+  };
 
   const handleSearchProducts = async () => {
     try {
@@ -156,17 +159,16 @@ const HomeScreen = () => {
             </Text>
           </View>
           <View style={styles.searchFilterCont}>
-            <View style={styles.searchCont}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={styles.searchCont}
+              onPress={handlePressAddress}
+            >
               <View style={styles.searchTexInputView}>
-                <TextInput
-                  style={styles.searchTextInput}
-                  placeholder="Search product"
-                  value={searchKeyword}
-                  onChangeText={(text) => setSearchKeyword(text)}
-                />
+                <Text style={styles.searchTextInput}>Search product</Text>
               </View>
               {renderSearchIcon()}
-            </View>
+            </TouchableOpacity>
           </View>
           <View className="justify-center items-center mt-3 bg-gray-200">
             <SwiperFlatList
@@ -217,24 +219,13 @@ const HomeScreen = () => {
             Pharmacy Selection
           </Text>
           {/**Pharmacy containers code */}
+
           <View style={styles.container}>
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
               </View>
-            ) : mainPharmacy.length === 0 ? (
-              <View style={styles.noOrdersCont}>
-                <View style={styles.noOrders}>
-                  <Iconify
-                    icon="tabler:git-branch-deleted"
-                    size={50}
-                    color="black"
-                    style={styles.noOrdersIcon}
-                  />
-                  <Text style={{ fontWeight: 300 }}>No Pharmacies Found</Text>
-                </View>
-              </View>
-            ) : (
+            ) : mainPharmacy.length != 0 ? (
               <FlatList
                 numColumns={2} // Display two items per row
                 scrollEnabled={false}
@@ -242,6 +233,18 @@ const HomeScreen = () => {
                 keyExtractor={(item) => item.id}
                 renderItem={renderPharmacy}
               />
+            ) : (
+              <View style={styles.noOrdersCont}>
+                <View style={styles.noOrders}>
+                  <Iconify
+                    icon="healthicons:pharmacy-outline"
+                    size={45}
+                    color="black"
+                    style={styles.noOrdersIcon}
+                  />
+                  <Text style={styles.noOrdersText}>No pharmacies found</Text>
+                </View>
+              </View>
             )}
           </View>
         </View>

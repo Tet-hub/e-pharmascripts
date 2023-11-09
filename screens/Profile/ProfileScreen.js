@@ -69,7 +69,7 @@ const ProfileScreen = () => {
   };
 
   const handlePressAddress = () => {
-    navigation.navigate("TestScreen");
+    navigation.navigate("AddressScreen");
   };
 
   const handlePressSecurity = () => {
@@ -174,7 +174,7 @@ const ProfileScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePressAddress}>
               <View style={styles.viewCont}>
                 <View style={styles.iconsBG}>
                   <Iconify

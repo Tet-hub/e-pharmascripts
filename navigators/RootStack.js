@@ -34,6 +34,7 @@ import { TailwindProvider } from "tailwindcss-react-native";
 import { Iconify } from "react-native-iconify";
 import BranchDetailsScreen from "../screens/Branch/BranchDetailsScreen";
 import SearchProductsScreen from "../screens/Home/SearchProductsScreen";
+import AddressScreen from "../screens/Address/addressScreen";
 
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
@@ -296,6 +297,14 @@ const RootStack = () => {
               headerTitle: () => <View></View>,
               headerTintColor: "black",
               headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="AddressScreen"
+            component={AddressScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
             }}
           />
         </Stack.Navigator>

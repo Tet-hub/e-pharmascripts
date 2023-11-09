@@ -198,7 +198,6 @@ const ShoppingCartScreen = () => {
         groupedItems[sellerId].push(item);
       }
     });
-
     return Object.values(groupedItems);
   };
 
@@ -326,19 +325,7 @@ const ShoppingCartScreen = () => {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
-        ) : cartItems.length === 0 ? (
-          <View style={styles.noOrdersCont}>
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="tabler:shopping-cart-x"
-                size={50}
-                color="black"
-                style={styles.noOrdersIcon}
-              />
-              <Text>No Cart Items Yet</Text>
-            </View>
-          </View>
-        ) : (
+        ) : cartItems.length !== 0 ? (
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.selectedProductContainer}>
               <View style={styles.cartContainer}>
@@ -353,6 +340,18 @@ const ShoppingCartScreen = () => {
               </View>
             </View>
           </ScrollView>
+        ) : (
+          <View style={styles.noOrdersCont}>
+            <View style={styles.noOrders}>
+              <Iconify
+                icon="tabler:shopping-cart-x"
+                size={45}
+                color="black"
+                style={styles.noOrdersIcon}
+              />
+              <Text style={styles.noOrdersText}>No cart items yet</Text>
+            </View>
+          </View>
         )}
       </View>
       <View>

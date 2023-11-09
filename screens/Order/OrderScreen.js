@@ -115,7 +115,12 @@ const OrderScreen = () => {
                   });
                   setproductData(products);
                   // console.log("Product data: ", products);
-                  return products;
+                  const rateAndReviewRef = collection(db, "rateAndReview");
+                  const ratedSnapshot = await getDocs(
+                    query(rateAndReviewRef, where("orderId", "==", order.id))
+                  );
+                  const isOrderRated = !ratedSnapshot.empty;
+                  return { products, isOrderRated };
                 } else {
                   console.log(
                     "API request failed with status:",
@@ -134,8 +139,15 @@ const OrderScreen = () => {
             const orderResults = await Promise.all(filterOrderByStatus);
             const filteredResults = results.filter(Boolean);
             const orderData = orderResults.filter(Boolean);
-            setOrderData(orderData);
-            setfilteredProductData(filteredResults);
+            setOrderData(
+              orderData.map((data, index) => ({
+                ...data,
+                isRated: filteredResults[index].isOrderRated,
+              }))
+            );
+            setfilteredProductData(
+              filteredResults.map((result) => result.products)
+            );
             // console.log("Filtered Product Data:", filteredResults);
             // console.log("Order Data:", orderData);
           } catch (error) {
@@ -160,8 +172,8 @@ const OrderScreen = () => {
     navigation.navigate("HomeScreen"); // Replace "HomeScreen" with the name of your homescreen component
   };
 
-  const handleRateScreen = () => {
-    navigation.navigate("RateScreen", { orderId, currentCustomerId });
+  const handleRateScreen = (orderId) => {
+    navigation.navigate("RateScreen", { orderId });
   };
   const handleViewOrderScreen = (orderId) => {
     navigation.navigate("ViewCompletedOrderScreen", { orderId: orderId });
@@ -200,14 +212,15 @@ const OrderScreen = () => {
             setIsRated(false);
           }
         });
-
+        console.log("orderId", orderId);
         return () => unsubscribe();
       } catch (error) {
         console.error("Error checking if rated: ", error);
       }
     };
-
-    checkIfRated();
+    if (orderId) {
+      checkIfRated();
+    }
   }, [orderId]);
   // Fetch pending orders from the database
 
@@ -878,11 +891,11 @@ const OrderScreen = () => {
                                 <View>
                                   <View style={styles.viewRateContainer}>
                                     <TouchableOpacity
-                                      onPress={handleRateScreen}
+                                      onPress={() => handleRateScreen(item.id)}
                                     >
                                       <View style={styles.rateButton}>
                                         <Text style={styles.rateText}>
-                                          {buttonText}
+                                          {item.isRated ? "VIEW RATE" : "RATE"}
                                         </Text>
                                       </View>
                                     </TouchableOpacity>

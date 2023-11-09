@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
     marginTop: 15,
-    backgroundColor: "#FBFFF7",
+    backgroundColor: "#FFFF",
   },
   imageContainer: {
     marginLeft: 20,
@@ -251,6 +251,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  noOrdersText: {
+    fontWeight: 300,
   },
 });
 

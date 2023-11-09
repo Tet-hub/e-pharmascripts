@@ -83,7 +83,6 @@ const FavoritesScreen = ({ navigation, route }) => {
       );
     }
   };
-  // const fetchProductCategories = async () => {
   //   try {
   //     const productsCollection = collection(db, "products");
   //     const productQuery = query(
@@ -157,7 +156,12 @@ const FavoritesScreen = ({ navigation, route }) => {
               />
             )}
           </View>
-          <Text style={styles.productName}>{item.productName}</Text>
+          <Text style={styles.productName}>
+            {" "}
+            {item.productName.length > 20
+              ? `${item.productName.substring(0, 16)}...`
+              : item.productName}
+          </Text>
           <Text style={styles.productReq}>
             {item.requiresPrescription === "Yes" ? (
               <Text style={styles.productReq}>[ Requires Prescription ]</Text>

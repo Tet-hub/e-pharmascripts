@@ -201,15 +201,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   resetText: {
-    fontWeight: 700,
-    fontSize: 14,
+    fontWeight: 600,
+    fontSize: 13,
     color: "#8E8E8E",
     textAlign: "center",
   },
   applyText: {
     color: "white",
-    fontWeight: 700,
-    fontSize: 14,
+    fontWeight: 600,
+    fontSize: 13,
+    textAlign: "center",
+  },
+  closeText: {
+    fontWeight: 600,
+    fontSize: 13,
+    color: "white",
     textAlign: "center",
   },
   resetTO: {
@@ -217,36 +223,53 @@ const styles = StyleSheet.create({
     borderColor: "#8E8E8E",
     padding: 10,
     borderRadius: 5,
-    width: "45%",
+    width: "30%",
+  },
+  closeTO: {
+    borderWidth: 1,
+    borderColor: "black",
+    backgroundColor: "black",
+    padding: 10,
+    borderRadius: 5,
+    width: "30%",
   },
   applyTO: {
     backgroundColor: "#EC6F56",
     padding: 10,
     borderRadius: 5,
-    width: "45%",
+    width: "30%",
+  },
+  distanceText: {
+    color: "#4E4E4E",
+    fontSize: 10,
+    fontWeight: 500,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginVertical: "50%",
+
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
   noOrdersCont: {
     flex: 1,
     justifyContent: "center",
-    alignContent: "center",
-    marginBottom: 50,
+    alignItems: "center",
+    marginVertical: "50%",
   },
   noOrders: {
     fontSize: 20,
-    alignSelf: "center",
     flexDirection: "column",
     justifyContent: "center",
+    alignItems: "center",
   },
   noOrdersIcon: {
-    alignSelf: "center",
     marginBottom: 5,
     color: "#36454F",
+  },
+  noOrdersText: {
+    fontWeight: 300,
   },
 });
 

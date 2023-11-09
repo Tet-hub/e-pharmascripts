@@ -1,6 +1,21 @@
 import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: "white",
+  //   borderTopRightRadius: 20,
+  //   borderTopLeftRadius: 20,
+  //   alignSelf: "center",
+  //   width: "100%",
+  //   marginTop: 20,
+  //   height: "100%",
+  //   paddingBottom: 20,
+  // },
   container: {
+    flex: 1,
     backgroundColor: "white",
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
@@ -53,31 +68,40 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9D9D9",
     alignSelf: "center",
   },
+  separator3: {
+    flex: 1,
+    height: 1,
+    width: "85%",
+    backgroundColor: "#D9D9D9",
+    alignSelf: "center",
+  },
   productContainer: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     width: "80%",
     height: 120,
     alignSelf: "center",
+    justifyContent: "center",
   },
   imageContainer: {
-    flex: 1,
-    height: "80%",
-    width: "40%",
+    height: "60%",
+    width: "30%",
+    marginRight: 20,
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  productImage: {
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
   },
   productReq: {
     fontWeight: "normal",
     fontSize: 7,
     color: "#0CB669",
     marginTop: 5,
-  },
-  productImage: {
-    flex: 1,
-    resizeMode: "stretch",
-    width: "100%",
-    height: "100%",
-    marginLeft: -15,
   },
   productInfoContainer: {
     flex: 1,
@@ -100,6 +124,7 @@ const styles = StyleSheet.create({
     fontWeight: 300,
   },
   pmentDetailsContainer: {
+    flex: 1,
     marginTop: 20,
     width: "80%",
     alignSelf: "center",
@@ -139,6 +164,7 @@ const styles = StyleSheet.create({
     width: "80%",
     alignSelf: "center",
     marginTop: 20,
+    marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -176,10 +202,22 @@ const styles = StyleSheet.create({
     width: "60%",
   },
   bottomContainer: {
-    justifyContent: "flex-end",
+    flex: 1,
+    flexDirection: "column", // Display children in a column
+    alignItems: "center", // Center children horizontally
+    justifyContent: "flex-start", // Align content to the top
+  },
+  uploadPresCont: {
+    flex: 1,
+    marginTop: 20,
+    width: "80%",
+    alignSelf: "center",
+    height: "100%",
+    marginBottom: 10,
+    paddingBottom: 10,
   },
   reminderText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 200,
     fontStyle: "italic",
   },
@@ -188,38 +226,78 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
     width: "70%",
-    alignSelf: "center",
     justifyContent: "space-between",
-  },
-  selectedImageName: {
-    fontSize: 14,
-    color: "red",
-    maxWidth: 20,
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
   },
   uploadText: {
     fontSize: 14,
     fontWeight: 400,
   },
+  addStyle: {
+    fontSize: 20,
+    fontWeight: 600,
+    color: "white",
+    alignSelf: "center",
+  },
   uploadButton: {
+    flexDirection: "row",
     backgroundColor: "#EC6F56",
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 10,
-    marginLeft: 10,
   },
   uploadButtonText: {
     fontSize: 14,
     fontWeight: "bold",
     color: "white",
+    marginLeft: 5,
   },
+  prescriptionImageCont: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    height: "100%",
+    marginBottom: 10,
+  },
+  imageAndNameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 90,
+  },
+  selectedImageName: {
+    fontSize: 15,
+    alignSelf: "center",
+    overflow: "hidden",
+    maxWidth: "65%",
+    marginLeft: 10,
+  },
+  selectedImageCont: {
+    height: "60%",
+    width: "20%",
+  },
+  selectedImage: {
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+  },
+  // selectedImageName: {
+  //   fontSize: 14,
+  //   color: "red",
+  //   maxWidth: 20,
+  //   overflow: "hidden",
+  //   whiteSpace: "nowrap",
+  //   textOverflow: "ellipsis",
+  // },
+
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  xButtonWrapper: {
+    marginRight: 15,
   },
 });
 
