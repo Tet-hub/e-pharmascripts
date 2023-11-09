@@ -40,8 +40,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [isLoading, setLoading] = useState(true);
   const [branches, setBranches] = useState([]);
   const productId = route.params?.productId;
-  const sellerName = route.params?.branch;
-  const company = route.params?.name;
   const toast = useToast();
   const [createdBy, setCreatedBy] = useState(null); // Initialize createdBy state
 
@@ -117,29 +115,27 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const addToCart = async () => {
     try {
       const authToken = await getAuthToken();
-      const userId = authToken.userId;
+      const customerId = authToken.userId;
 
-      if (!userId) {
+      if (!customerId) {
         console.log("User ID is undefined or null.");
         return;
       }
-
       const storeItemUrl = `${BASE_URL}/api/mobile/post/items/cart`;
 
       // Create the item object to be sent
       const itemToAddToCart = {
-        userId,
+        customerId,
         productId: productId,
-        productName: item.productName,
-        price: item.price,
         quantity,
-        sellerId: item.createdBy,
-        img: item.img,
-        requiresPrescription: item.requiresPrescription,
-        category: item.category,
-        sellerName: sellerName,
+        // productName: item.productName,
+        // price: item.price, //should i save the current price when the user
+        // sellerId: item.createdBy,
+        // img: item.img,
+        // requiresPrescription: item.requiresPrescription,
+        // category: item.category,
       };
-      // console.log("item", itemToAddToCart);
+      console.log("item", itemToAddToCart);
       const response = await fetch(storeItemUrl, {
         method: "POST",
         headers: {
@@ -168,7 +164,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     } catch (error) {
       console.log("Error adding to cart:", error);
       // Optionally, you can show an error message here.
-      ToastAndroid.show("Item adding failed!", ToastAndroid.SHORT);
+      ToastAndroid.show("Item adding failed!", ToastAndroid.SHORT); //shdfasdfsdfldklsdklklfdflllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
     }
   };
 
@@ -176,25 +172,25 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const handleFavorites = async () => {
     try {
       const authToken = await getAuthToken();
-      const userId = authToken.userId;
+      const customerId = authToken.userId;
 
-      if (!userId) {
+      if (!customerId) {
         console.log("User ID is undefined or null.");
         return;
       }
-      const currentUserId = userId;
+      const currentCustomerId = customerId;
       const favoritesCollection = collection(db, "favorites");
 
       const data = {
         productId: productId,
-        userId: currentUserId,
+        customerId: currentCustomerId,
       };
 
       // Check if the item is already in favorites
       const favoritesQuery = query(
         favoritesCollection,
         where("productId", "==", productId),
-        where("userId", "==", currentUserId)
+        where("customerId", "==", currentCustomerId)
       );
 
       const favoritesQuerySnapshot = await getDocs(favoritesQuery);
@@ -220,19 +216,19 @@ const ProductDetailScreen = ({ navigation, route }) => {
     const checkFavorite = async () => {
       try {
         const authToken = await getAuthToken();
-        const userId = authToken.userId;
+        const customerId = authToken.userId;
 
-        if (!userId) {
+        if (!customerId) {
           console.log("User ID is undefined or null.");
           return;
         }
-        const currentUserId = userId;
+        const currentCustomerId = customerId;
         const favoritesCollection = collection(db, "favorites");
 
         const favoritesQuery = query(
           favoritesCollection,
           where("productId", "==", productId),
-          where("userId", "==", currentUserId)
+          where("customerId", "==", currentCustomerId)
         );
 
         const favoritesQuerySnapshot = await getDocs(favoritesQuery);
@@ -290,8 +286,12 @@ const ProductDetailScreen = ({ navigation, route }) => {
               {"\u20B1"} {item.price}
             </Text>
             <Text style={styles.categoriesText}>
-              Categories: {item.category}
+              Categories:{" "}
+              {Array.isArray(item.category)
+                ? item.category.join(", ")
+                : item.category}
             </Text>
+
             <View style={styles.productInformationView}>
               <Text style={styles.productInformationText}>
                 Product Information

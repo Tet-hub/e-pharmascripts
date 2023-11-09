@@ -9,14 +9,14 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     flex: 1,
   },
-  row: {
-    flexDirection: "row",
+  cardContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   productContainer: {
     paddingHorizontal: 8,
     paddingVertical: 10,
-    width: "50%",
-    flex: 1,
   },
   productCard: {
     borderRadius: 15,
@@ -25,10 +25,10 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    elevation: 4,
     height: "100%",
   },
+
   screenTitle: {
     fontSize: 18,
     fontWeight: 600,

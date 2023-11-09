@@ -33,7 +33,8 @@ import { TailwindProvider } from "tailwindcss-react-native";
 import { Iconify } from "react-native-iconify";
 import BranchDetailsScreen from "../screens/Branch/BranchDetailsScreen";
 import SearchProductsScreen from "../screens/Home/SearchProductsScreen";
-
+import AddressScreen from "../screens/Profile/AddressScreen";
+import AccountScreen from "../screens/Profile/AccountScreen";
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
   saveButton: {
@@ -286,6 +287,22 @@ const RootStack = () => {
               headerTitle: () => <View></View>,
               headerTintColor: "black",
               headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="AddressScreen"
+            component={AddressScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="AccountScreen"
+            component={AccountScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
             }}
           />
         </Stack.Navigator>

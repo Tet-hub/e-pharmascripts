@@ -16,6 +16,7 @@ const styles = StyleSheet.create({
   },
   searchButtonIcon: {},
   searchCont: {
+    height: "80%",
     padding: 10,
     borderRadius: 15,
     width: "100%",

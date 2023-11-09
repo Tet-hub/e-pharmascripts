@@ -1,11 +1,5 @@
 import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
-  safeAreaView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    flexGrow: 1, // This allows the ScrollView to grow to fill the screen
-  },
   container: {
     backgroundColor: "white",
     borderTopRightRadius: 20,
@@ -13,7 +7,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
     height: "100%",
-    marginTop: 0,
+    paddingBottom: 40,
+    marginTop: 20,
   },
   delAddressContainer: {
     width: "80%",

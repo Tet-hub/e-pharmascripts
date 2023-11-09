@@ -29,6 +29,7 @@ const EditProfileScreen = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFileImage, setSelectedFileImage] = useState(null);
   const [fetchedStatus, setFetchedStatus] = useState("Unverified");
+  const [rejectedReason, setRejectedReason] = useState("");
   const isEditingEnabled =
     fetchedStatus === "Verified" ||
     fetchedStatus === "Unverified" ||
@@ -102,10 +103,12 @@ const EditProfileScreen = () => {
           if (data.status) {
             setFetchedStatus(data.status);
           }
-
+          if (data.status === "Rejected") {
+            setRejectedReason(data.reason);
+          }
           if (data.validId) {
             setSelectedFileImage(
-              data.Status === "Rejected" ? "" : data.validId
+              data.status === "Rejected" ? "" : data.validId
             );
           }
         } else {
@@ -183,9 +186,9 @@ const EditProfileScreen = () => {
       }
 
       if (fetchedStatus === "Verified") {
-        userData.Status = "Verified";
+        userData.status = "Verified";
       } else {
-        userData.Status = fileImageUrl ? "Pending" : "Unverified";
+        userData.status = fileImageUrl ? "Pending" : "Unverified";
       }
 
       if (fetchedStatus === "Verified") {
@@ -217,6 +220,13 @@ const EditProfileScreen = () => {
       const selectedAsset = result.assets[0];
       setSelectedImage(selectedAsset.uri);
     }
+  };
+  const getFileNameFromURL = (url) => {
+    if (url) {
+      const parts = url.split("/");
+      return parts[parts.length - 1];
+    }
+    return "";
   };
   const uploadImageAsync = async (uri) => {
     const blob = await new Promise((resolve, reject) => {
@@ -457,6 +467,12 @@ const EditProfileScreen = () => {
               [ {fetchedStatus ? fetchedStatus : "Unverified"} ]
             </Text>
           </View>
+          {fetchedStatus === "Rejected" && rejectedReason !== null ? (
+            <View style={styles.reasonContainer}>
+              <Text style={styles.reasonLabel}>Reason:</Text>
+              <Text style={styles.rejectedReasonText}>{rejectedReason}</Text>
+            </View>
+          ) : null}
           <View style={styles.chooseFileTouchable}>
             {isEditingEnabled && fetchedStatus !== "Verified" ? (
               <TouchableOpacity onPress={handleChooseID}>
@@ -465,18 +481,53 @@ const EditProfileScreen = () => {
                 </View>
               </TouchableOpacity>
             ) : (
-              <View>
-                <View style={styles.chooseFileTextView}>
-                  <Text style={styles.chooseFileText}>Choose File</Text>
-                </View>
+              <View style={styles.accountVerificationText}>
+                {fetchedStatus === "Pending" ? (
+                  <View style={styles.verifyStatusCont}>
+                    <Iconify
+                      size={22}
+                      icon="ic:round-pending-actions"
+                      color="#ec6f56"
+                      style={{ marginLeft: 10 }}
+                    />
+                  </View>
+                ) : fetchedStatus === "Verified" ? (
+                  <View style={styles.verifyStatusCont}>
+                    <Iconify
+                      size={22}
+                      icon="material-symbols:verified"
+                      color="#0CB669"
+                      style={{ marginLeft: 10 }}
+                    />
+                  </View>
+                ) : null}
               </View>
             )}
-            <Text style={styles.fileDisplayText}>
-              {fetchedStatus === "Rejected"
-                ? "Submit again"
-                : selectedFileImage
-                ? "File submitted"
-                : "No file chosen"}
+
+            <Text style={styles.fileDisplayText} numberOfLines={1}>
+              {fetchedStatus === "Rejected" ? (
+                getFileNameFromURL(selectedFileImage) ? (
+                  getFileNameFromURL(selectedFileImage)
+                ) : (
+                  "Select a Valid ID"
+                )
+              ) : fetchedStatus === "Pending" ? (
+                <View style={styles.verifyStatusCont}>
+                  <Text style={styles.accountVerificationText}>
+                    Verifying ID
+                  </Text>
+                </View>
+              ) : fetchedStatus === "Verified" ? (
+                <View style={styles.verifyStatusCont}>
+                  <Text style={styles.accountVerificationText}>
+                    Account Verified
+                  </Text>
+                </View>
+              ) : getFileNameFromURL(selectedFileImage) ? (
+                getFileNameFromURL(selectedFileImage)
+              ) : (
+                "No file Chosen"
+              )}
             </Text>
           </View>
         </View>

@@ -201,15 +201,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   resetText: {
-    fontWeight: 700,
-    fontSize: 14,
+    fontWeight: 600,
+    fontSize: 13,
     color: "#8E8E8E",
     textAlign: "center",
   },
   applyText: {
     color: "white",
-    fontWeight: 700,
-    fontSize: 14,
+    fontWeight: 600,
+    fontSize: 13,
+    textAlign: "center",
+  },
+  closeText: {
+    fontWeight: 600,
+    fontSize: 13,
+    color: "white",
     textAlign: "center",
   },
   resetTO: {
@@ -217,13 +223,26 @@ const styles = StyleSheet.create({
     borderColor: "#8E8E8E",
     padding: 10,
     borderRadius: 5,
-    width: "45%",
+    width: "30%",
+  },
+  closeTO: {
+    borderWidth: 1,
+    borderColor: "black",
+    backgroundColor: "black",
+    padding: 10,
+    borderRadius: 5,
+    width: "30%",
   },
   applyTO: {
     backgroundColor: "#EC6F56",
     padding: 10,
     borderRadius: 5,
-    width: "45%",
+    width: "30%",
+  },
+  distanceText: {
+    color: "#4E4E4E",
+    fontSize: 10,
+    fontWeight: 500,
   },
 });
 

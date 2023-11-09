@@ -42,53 +42,54 @@ const ProductScreen = ({ navigation, route }) => {
     setShowModal(true);
   };
 
-  // sorting and select category
-  const applySorting = (data) => {
-    const sortedProduct = [...data];
-
-    if (sortingOption === "lowToHigh") {
-      sortedProduct.sort((a, b) => a.price - b.price);
-    } else if (sortingOption === "highToLow") {
-      sortedProduct.sort((a, b) => b.price - a.price);
-    } else {
-      setSortingOption(null);
-    }
-
-    return sortedProduct;
+  const closeModal = () => {
+    setShowModal(false);
   };
 
-  const applyFilters = (data) => {
-    let filteredProducts = [...data];
+  const sortProducts = () => {
+    let productsToSort = product.slice();
 
-    if (selectedCategory) {
-      filteredProducts = filteredProducts.filter((item) => {
-        if (Array.isArray(item.category)) {
-          return item.category.includes(selectedCategory);
+    if (sortingOption === "lowToHigh") {
+      productsToSort = productsToSort.sort((a, b) => a.price - b.price);
+    } else if (sortingOption === "highToLow") {
+      productsToSort = productsToSort.sort((a, b) => b.price - a.price);
+    }
+
+    let filteredProducts = productsToSort;
+    // Filter based on the selected category
+    if (selectedCategory !== "") {
+      filteredProducts = filteredProducts.filter((product) => {
+        if (Array.isArray(product.category)) {
+          return product.category.includes(selectedCategory);
         } else {
-          return item.category === selectedCategory;
+          return product.category === selectedCategory;
         }
       });
     }
 
-    if (isLocationButtonClicked) {
-      //
-    }
+    // Apply the search keyword filter
+    const trimmedSearchKeyword = searchKeyword.trim().toLowerCase();
+    filteredProducts = filteredProducts.filter((product) =>
+      product.productName.toLowerCase().includes(trimmedSearchKeyword)
+    );
 
-    // Apply sorting
-    return applySorting(filteredProducts);
-  };
-  //
-  const applyFiltersAndSorting = () => {
-    // First, apply sorting to the products
-    const sortedData = applySorting(product);
-
-    // Then, apply filters to the sorted data
-    const filteredAndSortedData = applyFilters(sortedData);
-
-    // Set the filtered and sorted data
-    setFilteredProduct(filteredAndSortedData);
+    // Update the state with the sorted and filtered products
+    setFilteredProduct(filteredProducts);
     setShowModal(false);
   };
+
+  //
+  useEffect(() => {
+    if (searchKeyword !== "") {
+      setSelectedCategory("");
+    }
+    const trimmedSearchKeyword = searchKeyword.trim().toLowerCase();
+    const filtered = product.filter((item) =>
+      item.productName.toLowerCase().includes(trimmedSearchKeyword)
+    );
+    setFilteredProduct(filtered);
+  }, [searchKeyword, product]);
+
   //
   const cancelSorting = () => {
     setSelectedCategory("");
@@ -196,15 +197,6 @@ const ProductScreen = ({ navigation, route }) => {
     fetchProductCategories();
   }, [sellerId]);
 
-  //
-  useEffect(() => {
-    const trimmedSearchKeyword = searchKeyword.trim().toLowerCase();
-    const filtered = product.filter((item) =>
-      item.productName.toLowerCase().includes(trimmedSearchKeyword)
-    );
-    setFilteredProduct(filtered);
-  }, [searchKeyword, product]);
-
   const renderProducts = ({ item }) => {
     return (
       <View style={[styles.productContainer, { width: cardWidth }]}>
@@ -280,15 +272,17 @@ const ProductScreen = ({ navigation, route }) => {
       </View>
 
       <Text style={styles.productSelectionText}>Product Selection</Text>
-
-      <FlatList
-        numColumns={2}
-        scrollEnabled={false}
-        data={filteredProduct}
-        keyExtractor={(item) => item.id}
-        renderItem={renderProducts}
-      />
-
+      {filteredProduct.length === 0 ? (
+        <Text style={styles.noResultsText}>No products</Text>
+      ) : (
+        <FlatList
+          numColumns={2}
+          scrollEnabled={false}
+          data={filteredProduct}
+          keyExtractor={(item) => item.id}
+          renderItem={renderProducts}
+        />
+      )}
       <Modal
         visible={showModal}
         animationType="fade"
@@ -323,28 +317,6 @@ const ProductScreen = ({ navigation, route }) => {
               </View>
               <View style={styles.separator} />
 
-              <View style={styles.locationView}>
-                <Text style={styles.locationText}>By Location</Text>
-
-                <TouchableOpacity
-                  style={{
-                    ...styles.locationTO,
-                    borderColor: isLocationButtonClicked
-                      ? "#EC6F56"
-                      : "#D9D9D9",
-                  }}
-                  onPress={() =>
-                    setLocationButtonClicked(!isLocationButtonClicked)
-                  }
-                >
-                  <Text style={styles.searchlocationText}>
-                    Search by location
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.separator} />
-
               <View style={styles.priceView}>
                 <Text style={styles.priceText}>By Price</Text>
                 <TouchableOpacity
@@ -355,11 +327,9 @@ const ProductScreen = ({ navigation, route }) => {
                   }}
                   onPress={() => {
                     if (isLowToHighSelected) {
-                      // If it's already selected, deselect it
                       setIsLowToHighSelected(false);
                       setSortingOption(null);
                     } else {
-                      // If it's not selected, select it
                       setIsLowToHighSelected(true);
                       setIsHighToLowSelected(false);
                       setSortingOption("lowToHigh");
@@ -376,12 +346,10 @@ const ProductScreen = ({ navigation, route }) => {
                   }}
                   onPress={() => {
                     if (isHighToLowSelected) {
-                      // If it's already selected, deselect it
                       setIsHighToLowSelected(false);
                       setSortingOption(null);
                     } else {
-                      // If it's not selected, select it
-                      setIsLowToHighSelected(false); // Deselect "Low to High" if selected
+                      setIsLowToHighSelected(false);
                       setIsHighToLowSelected(true);
                       setSortingOption("highToLow");
                     }
@@ -399,13 +367,17 @@ const ProductScreen = ({ navigation, route }) => {
                   onPress={cancelSorting}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.resetText}>CANCEL</Text>
+                  <Text style={styles.resetText}>RESET</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.closeTO} onPress={closeModal}>
+                  <Text style={styles.closeText}>CLOSE</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.applyTO}
                   onPress={() => {
-                    applyFiltersAndSorting();
+                    sortProducts();
                     setShowModal(false);
                   }}
                 >

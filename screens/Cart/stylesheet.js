@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   cartContainer: {
     width: "90%",
     alignSelf: "center",
-    bottom: 73, //brute force padding from the checkout container
+    bottom: 69, //brute force padding from the checkout container
   },
 
   selectedProductContainer: {
@@ -111,10 +111,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: "absolute",
-    bottom: 80,
+    bottom: 73,
     left: 0,
     right: 0,
-    backgroundColor: "#DFFF00",
+    // backgroundColor: "#DFFF00",
     // borderTopWidth: 1,
     // borderTopColor: "#E0E0E0",
     zIndex: 2, // Ensure the footer is on top
@@ -128,8 +128,8 @@ const styles = StyleSheet.create({
     right: "5%",
     borderRadius: 20,
     width: "90%",
-    paddingVertical: 15,
-    elevation: 15,
+    paddingVertical: 10,
+    elevation: 5,
     alignItems: "center",
     justifyContent: "flex-end",
     alignSelf: "center",
@@ -224,8 +224,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   sellerName: {
-    fontWeight: 700,
-    fontSize: 20,
+    fontWeight: 500,
+    fontSize: 18,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
 });
 

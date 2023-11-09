@@ -6,145 +6,128 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
+  ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
+import { useToast } from "react-native-toast-notifications";
 import { Iconify } from "react-native-iconify";
 import { Checkbox } from "expo-checkbox";
 import { useNavigation } from "@react-navigation/native";
 import { getAuthToken } from "../../src/authToken";
-import buildQueryUrl from "../../src/api/components/conditionalQuery";
 import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
+import buildQueryUrl from "../../src/api/components/conditionalQuery";
+import axios from "axios";
 import { BASE_URL } from "../../src/api/apiURL";
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 const ShoppingCartScreen = () => {
   const navigation = useNavigation();
-
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
         const authToken = await getAuthToken();
-        const userId = authToken.userId;
-        if (!userId) {
+        const customerId = authToken.userId;
+        if (!customerId) {
           console.log("User ID is undefined or null.");
           return;
         }
 
         const cartConditions = [
-          { fieldName: "userId", operator: "==", value: userId },
+          { fieldName: "customerId", operator: "==", value: customerId },
         ];
-        const cartApiUrl = buildQueryUrl("cart", cartConditions);
-        const cartResponse = await fetch(cartApiUrl, {
-          method: "GET",
-        });
-
-        if (!cartResponse.ok) {
-          console.log("API request failed with status:", cartResponse.status);
-          return;
-        }
-
-        const cartItemsData = await cartResponse.json();
-
-        const unsubscribe = listenForItem(
-          "cart",
-          cartConditions,
-          (updatedCartItems) => {
-            setCartItems(updatedCartItems);
-          }
-        );
-
-        const productSellerPromises = cartItemsData.map(async (cartItem) => {
-          const productDocumentId = cartItem.productId;
-          const productApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/products/${productDocumentId}`;
-          const productResponse = await fetch(productApiUrl, {
-            method: "GET",
+        listenForItem("cart", cartConditions, (updatedCartItems) => {
+          const promises = updatedCartItems.map(async (cartItem) => {
+            const productDocumentId = cartItem.productId;
+            const productDocumentRef = doc(db, "products", productDocumentId);
+            const productSnapshot = await getDoc(productDocumentRef);
+            if (productSnapshot.exists()) {
+              const productData = productSnapshot.data();
+              const sellerId = productData.createdBy;
+              const sellerDocumentRef = doc(db, "sellers", sellerId);
+              const sellerSnapshot = await getDoc(sellerDocumentRef);
+              if (sellerSnapshot.exists()) {
+                const sellerInfo = sellerSnapshot.data();
+                return { ...cartItem, productData, sellerInfo };
+              }
+            }
+            return null;
           });
 
-          if (!productResponse.ok) {
-            console.log(
-              "API request failed with status product:",
-              productResponse.status
+          Promise.all(promises).then((cartItemsWithProductDetails) => {
+            const filteredCartItems = cartItemsWithProductDetails.filter(
+              (item) => item !== null
             );
-            return null;
-          }
-
-          const productData = await productResponse.json();
-          const sellerId = productData.createdBy;
-
-          const sellerInfo = await fetchSellerData(sellerId);
-
-          return { ...cartItem, productData, sellerInfo };
+            setCartItems(filteredCartItems);
+          });
         });
-
-        const cartItemsWithProductDetails = await Promise.all(
-          productSellerPromises
-        );
-        setCartItems(cartItemsWithProductDetails);
-
-        return () => unsubscribe();
       } catch (error) {
         console.log("Error fetching products:", error);
-      }
-    };
-
-    const fetchSellerData = async (sellerId) => {
-      try {
-        const sellerApiUrl = `${BASE_URL}/api/mobile/get/fetch/docs/by/sellers/${sellerId}`;
-        const sellerResponse = await fetch(sellerApiUrl, {
-          method: "GET",
-        });
-
-        if (!sellerResponse.ok) {
-          console.log(
-            "API request failed with status seller:",
-            sellerResponse.status
-          );
-          return null;
-        }
-
-        const sellerInfo = await sellerResponse.json();
-
-        return sellerInfo;
-      } catch (error) {
-        console.log("Error fetching seller data:", error);
-        return null;
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCartItems();
   }, []);
 
-  const handleIncrement = (cartItemId) => {
-    const updatedCartItems = cartItems.map((cartItem) => {
+  const handleIncrement = async (cartItemId) => {
+    const updatedCartItems = cartItems.map(async (cartItem) => {
       if (cartItem.id === cartItemId) {
         if (cartItem.quantity < cartItem.productData.stock) {
+          const newQuantity = cartItem.quantity + 1;
+          // Update the quantity field in the cart collection
+          await updateDoc(doc(db, "cart", cartItem.id), {
+            quantity: newQuantity,
+          });
           return {
             ...cartItem,
-            quantity: cartItem.quantity + 1,
+            quantity: newQuantity,
           };
         }
       }
       return cartItem;
     });
 
-    setCartItems(updatedCartItems);
+    Promise.all(updatedCartItems).then((updatedItems) => {
+      setCartItems(updatedItems);
+    });
   };
 
-  const handleDecrement = (cartItemId) => {
-    const updatedCartItems = cartItems.map((cartItem) => {
+  const handleDecrement = async (cartItemId) => {
+    const updatedCartItems = cartItems.map(async (cartItem) => {
       if (cartItem.id === cartItemId) {
         if (cartItem.quantity > 1) {
+          const newQuantity = cartItem.quantity - 1;
+          // Update the quantity field in the cart collection
+          await updateDoc(doc(db, "cart", cartItem.id), {
+            quantity: newQuantity,
+          });
           return {
             ...cartItem,
-            quantity: cartItem.quantity - 1,
+            quantity: newQuantity,
           };
         }
       }
       return cartItem;
     });
 
-    setCartItems(updatedCartItems);
+    Promise.all(updatedCartItems).then((updatedItems) => {
+      setCartItems(updatedItems);
+    });
   };
 
   const handleSelectItem = (cartItemId) => {
@@ -153,9 +136,54 @@ const ShoppingCartScreen = () => {
       [cartItemId]: !prevSelectedItems[cartItemId],
     }));
   };
+  const removeCartItem = async (cartItemId) => {
+    try {
+      const response = await axios.delete(
+        `${BASE_URL}/api/mobile/delete/remove/doc/by/cart/${cartItemId}`
+      );
+      console.log(response.data); // Log the response data
 
+      // Remove the item from the local cartItems state to reflect the change in the UI
+      const updatedCartItems = cartItems.filter(
+        (item) => item.id !== cartItemId
+      );
+      setCartItems(updatedCartItems);
+      toast.show("Item removed successfully!", {
+        type: "normal ",
+        placement: "bottom",
+        duration: 3000,
+        offset: 10,
+        animationType: "slide-in",
+      });
+    } catch (error) {
+      console.error("Error removing item from the database:", error);
+    }
+  };
   const handleToValidateScreen = () => {
-    navigation.navigate("ToValidateScreen");
+    const selectedSellerId = new Set();
+    let selectedCartIds = [];
+    for (const cartItemId in selectedItems) {
+      if (selectedItems[cartItemId]) {
+        const cartItem = cartItems.find((item) => item.id === cartItemId);
+        if (cartItem) {
+          selectedSellerId.add(cartItem.sellerInfo.sellerId);
+          selectedCartIds.push(cartItem.id);
+        }
+      }
+    }
+    console.log("cart id:", selectedCartIds);
+    if (selectedSellerId.size === 1 && selectedCartIds.length > 0) {
+      // Proceed to the checkout screen
+      navigation.navigate("ToValidateScreen", { cartId: selectedCartIds });
+    } else {
+      toast.show("Please select items from the same seller to proceed!", {
+        type: "normal",
+        placement: "bottom",
+        duration: 3000,
+        offset: 10,
+        animationType: "slide-in",
+      });
+    }
   };
 
   const groupCartItemsBySeller = (cartItems) => {
@@ -270,7 +298,7 @@ const ShoppingCartScreen = () => {
                   </View>
                 </View>
                 <View style={styles.xButtonWrapper}>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => removeCartItem(cartItem.id)}>
                     <Iconify
                       icon="carbon:close-filled"
                       size={22}
@@ -294,20 +322,26 @@ const ShoppingCartScreen = () => {
         <Text style={styles.screenTitle}>MY CART</Text>
       </View>
       <View style={styles.bodyWrapper}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.selectedProductContainer}>
-            <View style={styles.cartContainer}>
-              <FlatList
-                data={groupCartItemsBySeller(cartItems)}
-                scrollEnabled={false}
-                keyExtractor={(item) =>
-                  `${item[0].sellerInfo.sellerId}-${item[0].id}`
-                }
-                renderItem={renderCartItem}
-              />
-            </View>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.selectedProductContainer}>
+              <View style={styles.cartContainer}>
+                <FlatList
+                  data={groupCartItemsBySeller(cartItems)}
+                  scrollEnabled={false}
+                  keyExtractor={(item) =>
+                    `${item[0].sellerInfo.sellerId}-${item[0].id}`
+                  }
+                  renderItem={renderCartItem}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        )}
       </View>
       <View>
         <View style={styles.footer}>

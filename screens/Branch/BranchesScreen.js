@@ -14,6 +14,10 @@ import {
 import { Iconify } from "react-native-iconify";
 import styles from "./bs";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
+import { getAuthToken } from "../../src/authToken";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import axios from "axios";
 const { width, height } = Dimensions.get("window");
 
 // Calculate the image dimensions based on screen size
@@ -26,6 +30,14 @@ const BranchesScreen = ({ navigation, route }) => {
 
   const [showModal, setShowModal] = useState(false);
   const [isLocationButtonClicked, setLocationButtonClicked] = useState(false);
+  const [customerAddress, setCustomerAddress] = useState(null);
+  const [branchesAddress, setBranchesAddress] = useState(null);
+  const [distances, setDistances] = useState({});
+  const [sortedBranches, setSortedBranches] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const isLocationFilterApplied =
+    isLocationButtonClicked && Object.keys(distances).length > 0;
+  const apiKey = "AIzaSyAErVuJDetH9oqE36Gx_sBDBv2JIUbXcJ4";
   //
   const handleFilterClick = () => {
     setShowModal(true);
@@ -36,6 +48,7 @@ const BranchesScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     const fetchBranches = async () => {
+      const branchesAddressArray = [];
       try {
         // Define the conditions array
         const conditions = [
@@ -52,7 +65,16 @@ const BranchesScreen = ({ navigation, route }) => {
 
         if (response.ok) {
           const branchesData = await response.json();
+
           setBranches(branchesData);
+          branchesData.forEach((branch) => {
+            branchesAddressArray.push({
+              branchAddress: branch.address,
+              branchesID: branch.sellerId,
+            });
+          });
+
+          setBranchesAddress(branchesAddressArray);
         } else {
           console.log("API request failed with status:", response.status);
         }
@@ -64,6 +86,124 @@ const BranchesScreen = ({ navigation, route }) => {
     fetchBranches();
   }, [branchCompany]);
 
+  useEffect(() => {
+    const fetchCustomerAddress = async () => {
+      try {
+        const authToken = await getAuthToken();
+        const customerId = authToken.userId;
+
+        const customerDocRef = doc(db, "customers", customerId);
+        const customerDocSnapshot = await getDoc(customerDocRef);
+
+        if (customerDocSnapshot.exists()) {
+          const customerData = customerDocSnapshot.data();
+          const address = customerData.customerAddress;
+          //console.log("Customer", address);
+          setCustomerAddress(address);
+        }
+      } catch (error) {
+        console.log("Error fetching customer address:", error);
+      }
+    };
+    fetchCustomerAddress();
+  }, []);
+
+  //
+  const fetchDistances = async () => {
+    if (!branchesAddress || branchesAddress.length === 0) {
+      return;
+    }
+
+    const distancePromises = branchesAddress.map((branch) =>
+      fetchDistance(customerAddress, branch.branchAddress)
+    );
+
+    const distances = await Promise.all(distancePromises);
+
+    const distancesObject = {};
+    branchesAddress.forEach((branch, index) => {
+      distancesObject[branch.branchAddress] = distances[index];
+    });
+
+    setDistances(distancesObject);
+  };
+
+  const fetchDistance = async (origin, destination) => {
+    try {
+      const apiUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
+        origin
+      )}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
+
+      const response = await axios.get(apiUrl);
+      const data = response.data;
+
+      if (data.status === "OK" && data.rows.length > 0) {
+        const distanceText = data.rows[0].elements[0].distance.text;
+        return distanceText;
+      } else {
+        console.error("Error fetching distance data for", origin, data.status);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching distance data for", origin, error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    fetchDistances();
+  }, [customerAddress, branchesAddress]);
+
+  //search
+  useEffect(() => {
+    if (searchKeyword !== "") {
+      setLocationButtonClicked(false);
+    }
+    const trimmedSearchKeyword = searchKeyword.trim().toLowerCase();
+    if (trimmedSearchKeyword === "") {
+      setSortedBranches(branches);
+    } else {
+      // Filter branches based on the search keyword
+      const filteredBranches = branches.filter((branch) => {
+        const branchName = extractBranchName(branch.branch).toLowerCase();
+        return branchName.includes(trimmedSearchKeyword);
+      });
+      setSortedBranches(filteredBranches);
+    }
+  }, [searchKeyword, branches]);
+
+  const sortBranches = () => {
+    // Create a copy of the branches array to avoid modifying the original data
+    const branchesCopy = [...branches];
+
+    if (isLocationButtonClicked) {
+      branchesCopy.sort((branchA, branchB) => {
+        const distanceA = distances[branchA.address];
+        const distanceB = distances[branchB.address];
+
+        if (distanceA && distanceB) {
+          return parseFloat(distanceA) - parseFloat(distanceB);
+        }
+
+        return 0;
+      });
+    }
+
+    setSortedBranches(branchesCopy);
+    setShowModal(false);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const cancelSorting = async () => {
+    setSearchKeyword("");
+    setLocationButtonClicked(false);
+    setSortedBranches(branches);
+    setShowModal(false);
+  };
+
   const extractBranchName = (branch) => {
     const match = branch.match(/\(([^)]+)\)/);
     return match ? branch.replace(match[0], "").trim() : branch;
@@ -72,9 +212,23 @@ const BranchesScreen = ({ navigation, route }) => {
   const renderBranchItem = ({ item }) => (
     <View style={[styles.pharmacyContainer, { width: cardWidth }]}>
       <View style={styles.pharmacyCard}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={styles.ratingText}>{item.rating}★</Text>
-          <Text style={styles.averageStar}></Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <Text style={styles.ratingText}>{item.rating}★</Text>
+          </View>
+          <View>
+            {isLocationFilterApplied && (
+              <Text style={styles.distanceText}>
+                {distances[item.address] ? distances[item.address] : ""}
+              </Text>
+            )}
+          </View>
         </View>
         <Image source={{ uri: item.img }} style={styles.image} />
         <Text style={styles.pharmacyName}>{item.companyName}</Text>
@@ -140,6 +294,8 @@ const BranchesScreen = ({ navigation, route }) => {
                 <TextInput
                   style={styles.searchTextInput}
                   placeholder="Search branch"
+                  value={searchKeyword}
+                  onChangeText={(text) => setSearchKeyword(text)}
                 />
               </View>
               {renderSearchIcon()}
@@ -156,7 +312,7 @@ const BranchesScreen = ({ navigation, route }) => {
         <Text style={styles.branchSelectionText}>Branch Selection</Text>
 
         <FlatList
-          data={branches}
+          data={sortedBranches.length > 0 ? sortedBranches : branches}
           scrollEnabled={false}
           keyExtractor={(item) => item.id}
           numColumns={2}
@@ -200,12 +356,20 @@ const BranchesScreen = ({ navigation, route }) => {
                   <TouchableOpacity
                     style={styles.resetTO}
                     activeOpacity={0.7}
-                    onPress={handleCloseDrawer}
+                    onPress={cancelSorting}
                   >
-                    <Text style={styles.resetText}>CANCEL</Text>
+                    <Text style={styles.resetText}>RESET</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.applyTO}>
+                  <TouchableOpacity style={styles.closeTO} onPress={closeModal}>
+                    <Text style={styles.closeText}>CLOSE</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.applyTO}
+                    activeOpacity={0.7}
+                    onPress={sortBranches}
+                  >
                     <Text style={styles.applyText}>APPLY</Text>
                   </TouchableOpacity>
                 </View>

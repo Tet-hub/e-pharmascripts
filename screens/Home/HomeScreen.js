@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Dimensions,
   FlatList,
+  Touchable,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
@@ -38,8 +39,8 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [mainPharmacy, setPharmacy] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchKeyword, setSearchKeyword] = useState("");
+  // const [filteredProducts, setFilteredProducts] = useState([]);
+  //const [searchKeyword, setSearchKeyword] = useState("");
 
   //
   //handleNavigateToProducts
@@ -61,6 +62,10 @@ const HomeScreen = () => {
 
     fetchPharmacyData();
   }, []);
+
+  const handlePressAddress = () => {
+    navigation.navigate("SearchProductsScreen");
+  };
 
   const handleSearchProducts = async () => {
     try {
@@ -132,7 +137,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Body circum:search */}
         <View className="pl-4 pr-4 pb-2">
@@ -151,17 +156,16 @@ const HomeScreen = () => {
             </Text>
           </View>
           <View style={styles.searchFilterCont}>
-            <View style={styles.searchCont}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={styles.searchCont}
+              onPress={handlePressAddress}
+            >
               <View style={styles.searchTexInputView}>
-                <TextInput
-                  style={styles.searchTextInput}
-                  placeholder="Search product"
-                  value={searchKeyword}
-                  onChangeText={(text) => setSearchKeyword(text)}
-                />
+                <Text style={styles.searchTextInput}>Search product</Text>
               </View>
               {renderSearchIcon()}
-            </View>
+            </TouchableOpacity>
           </View>
           <View className="justify-center items-center mt-3 bg-gray-200">
             <SwiperFlatList
