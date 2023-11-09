@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "E-pharmaScripts",
+    "slug": "E-pharmaScripts",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/e-pharmascripts-logo.png",
+    "userInterfaceStyle": "light",
+
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/e-pharmascripts-logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.epharmascripts.EpharmaScripts"
+    },
+    "web": {
+      "favicon": "./assets/e-pharmascripts-logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9c7726c5-0fef-4fe1-842b-b491eab51ce5"
+      }
+    }
+  }
+}

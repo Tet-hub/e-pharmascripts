@@ -1,0 +1,26 @@
+Installed packages starting from Oct 03, 2023
+
+oct 3
+npm install @react-native-firebase/storage
+
+oct 10
+npm add react-native-toast-notifications
+
+oct 12
+npm install react-native-modal
+npm install luxon
+npm install date-fns
+
+oct 13
+npm install @react-native-picker/picker --save 
+npx expo install @react-native-picker/picker@2.4.8
+npx expo install expo-image-picker
+npm install @firebase/storage
+npm install base-64
+
+oct 22
+npm install @react-navigation/native
+
+oct 27
+npm install react-native-animated-loader --save
+npm install react-native-animatable --save

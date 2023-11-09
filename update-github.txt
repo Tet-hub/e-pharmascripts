@@ -1,0 +1,36 @@
+git add *
+git commit -m "Updated source"
+git push //for branch
+
+//how to go back to parent folder
+cd ..
+
+//how to push github for the first time
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Tet-hub/e-pharmascripts.git
+git push -u origin main
+
+//how to pull
+git init
+git remote add origin https://github.com/Tet-hub/e-pharmascripts.git //if you don't have origin yet
+git fetch --all
+git reset --hard origin/main
+git pull origin main
+
+
+
+git remote set-url origin https://github.com/00Frans/E-pharmaScripts.git
+How to check the repo
+git remote -v
+
+How to push
+git add *
+git commit -m "Updated source"
+git push
+
+git push -u origin master
+
+
