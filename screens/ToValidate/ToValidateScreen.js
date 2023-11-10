@@ -36,18 +36,23 @@ const ToValidateScreen = ({ navigation, route }) => {
   const deviceWidth = Dimensions.get("window").width;
   const [itemSelectedImages, setItemSelectedImages] = useState([]);
   const [itemSelectedImageNames, setItemSelectedImageNames] = useState([]);
-  const [item, setProductData] = useState(null); // Initialize as null
+  const [itemSelectedOriginalNames, setItemSelectedOriginalNames] = useState(
+    []
+  );
+  const [item, setProductData] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [productSubtotal, setProductSubtotal] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [user, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
   const [sellerData, setSellerData] = useState(null);
   const [prescription, setPrescriptionRequired] = useState();
   const productId = route.params?.productId;
   // const quantity = route.params?.quantity;
   const { cartId } = route.params;
   console.log("CART ID:", cartId);
+  // console.log("productData:", item);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -131,8 +136,6 @@ const ToValidateScreen = ({ navigation, route }) => {
         setLoading(false);
       }
     };
-    console.log("selecta:", itemSelectedImageNames);
-    console.log("selecta c:", itemSelectedImages);
 
     fetchData();
   }, [cartId, productId]);
@@ -178,7 +181,7 @@ const ToValidateScreen = ({ navigation, route }) => {
       } else if (quantity) {
         totalQuantity = quantity;
       }
-      console.log("item quantity", totalQuantity);
+      // console.log("item quantity", totalQuantity);
       //"orders" collection
       const data = {
         customerId: user.id,
@@ -426,7 +429,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                 />
               </TouchableOpacity>
             </View>
-            {user ? ( // Check if userData is not null
+            {user ? (
               <React.Fragment>
                 <Text style={styles.customerName}>
                   {user.firstName} {user.lastName}
@@ -451,15 +454,15 @@ const ToValidateScreen = ({ navigation, route }) => {
           <FlatList
             data={Array.isArray(item) ? item : [item]}
             scrollEnabled={false}
-            keyExtractor={(item) => item.id} // Make sure to replace this with the correct unique key for each item
+            keyExtractor={(item) => item.id}
             renderItem={renderOrderItems}
           />
         </View>
 
         <View style={styles.bottomContainer}>
-          {item && (
-            <>
-              <View style={styles.uploadPresCont}>
+          <View style={styles.uploadPresCont}>
+            {Array.isArray(item) ? (
+              <>
                 {item.some(
                   (product) => product.requiresPrescription === "Yes"
                 ) && (
@@ -485,10 +488,74 @@ const ToValidateScreen = ({ navigation, route }) => {
                     </View>
                   </>
                 )}
-              </View>
-              <View style={styles.separator3} />
-            </>
-          )}
+              </>
+            ) : item.requiresPrescription === "Yes" ? (
+              <>
+                <Text style={styles.reminderText}>
+                  Upload your prescription/s here *
+                </Text>
+                <View style={styles.uploadContainer}>
+                  <TouchableOpacity
+                    style={styles.uploadButton}
+                    onPress={handleItemSelection}
+                  >
+                    <Iconify
+                      icon="zondicons:add-outline"
+                      size={20}
+                      color="white"
+                    />
+                    <Text style={styles.uploadButtonText}> Choose Image</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : null}
+            <View style={styles.prescriptionImageCont}>
+              {itemSelectedImages.map((image, index) => {
+                if (image.uri) {
+                  return (
+                    <View key={index} style={styles.imageAndNameContainer}>
+                      <View style={styles.xButtonWrapper}>
+                        <TouchableOpacity
+                          onPress={() =>
+                            removePrescImage(
+                              itemSelectedImages[index].uri,
+                              itemSelectedImageNames[index]
+                            )
+                          }
+                        >
+                          <Iconify
+                            icon="clarity:remove-solid"
+                            size={25}
+                            color="#FF6666"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.selectedImageCont}>
+                        <Image
+                          source={{ uri: itemSelectedImages[index].uri }}
+                          style={styles.selectedImage}
+                          onError={() => console.log("Error loading image")}
+                        />
+                      </View>
+                      <Text numberOfLines={1} style={styles.selectedImageName}>
+                        {itemSelectedImageNames[index]}
+                      </Text>
+                    </View>
+                  );
+                } else {
+                  // Handle the case when the 'uri' property is not present
+                  return (
+                    <View key={index}>
+                      <Text style={styles.errorMessage}>
+                        Image URI not found
+                      </Text>
+                    </View>
+                  );
+                }
+              })}
+            </View>
+          </View>
+          <View style={styles.separator3} />
 
           <View style={styles.pmentDetailsContainer}>
             <Text style={styles.pmentDetailsText}>Payment Details :</Text>
