@@ -1,6 +1,12 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+  safeAreaView: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -8,7 +14,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     alignSelf: "center",
     width: "100%",
-    height: "100%",
   },
   delAddressContainer: {
     width: "80%",
@@ -62,8 +67,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   imageContainer: {
-    flex: 1,
-    width: "40%",
+    height: "80%",
+    width: "35%",
+    marginRight: 15,
   },
   productReq: {
     fontWeight: "normal",
@@ -72,11 +78,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   productImage: {
-    height: 120,
-    width: "100%",
-    marginLeft: -15,
     flex: 1,
-    resizeMode: "contain",
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
   },
   productInfoContainer: {
     flex: 1,
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
   totalAmountText: {
     fontWeight: 700,
     color: "#EC6F56",
-    fontSize: 12,
+    fontSize: 16,
     marginRight: 11,
   },
   delArrowContainer: {
@@ -185,10 +190,14 @@ const styles = StyleSheet.create({
   },
   methodContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start",
     marginLeft: 20,
     alignItems: "center",
+    justifyContent: "center",
     marginTop: 10,
+    borderWidth: 0.5,
+    borderRadius: 12,
+    width: "40%",
+    padding: 12,
   },
   paymentMethodContainer: {
     width: "80%",
@@ -200,6 +209,12 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     marginBottom: 10,
   },
+  pmOptions: {
+    flex: 1,
+    padding: 5,
+    justifyContent: "center",
+    flexDirection: "row",
+  },
   methodSeparator: {
     marginTop: 8,
     height: 1,
@@ -207,10 +222,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9D9D9",
     alignSelf: "center",
   },
+  methodsIcon: {
+    color: "black",
+  },
   methodsText: {
     fontWeight: 400,
-    fontSize: 12,
-    marginLeft: 20,
+    marginLeft: 12,
+  },
+  selectedMethod: {
+    backgroundColor: "#EC6F56",
+    borderBottomWidth: 2.5,
+    borderRightWidth: 2.5,
+  },
+  selectedText: {
+    color: "white",
+    fontWeight: 700,
+    fontSize: 15,
+  },
+  selectedIcon: {
+    color: "white",
+  },
+  loadingContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
 });
 

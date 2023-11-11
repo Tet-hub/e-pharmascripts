@@ -8,7 +8,9 @@ import {
   Image,
   FlatList,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/native";
 import { Iconify } from "react-native-iconify";
 import styles from "./stylesheet";
@@ -111,73 +113,91 @@ const ViewCompletedOrderScreen = () => {
   );
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={[styles.container]}>
-        <View style={styles.delAddressContainer}>
-          <View>
-            <Iconify icon="system-uicons:location" size={35} color="black" />
-          </View>
-          <View style={styles.delInfoContainer}>
-            <Text style={styles.deliveryTitle}>Delivery Address</Text>
-            <Text style={styles.customerName}>| {item.customerName || ""}</Text>
-            <Text style={styles.customerNumber}>
-              | {item.customerPhoneNumber || ""}
-            </Text>
-            <Text style={styles.customerAddress}>
-              | {item.deliveryAddress || ""}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.separator} />
-
-        <FlatList
-          data={productData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
-        />
-        <View style={styles.separator2} />
-
-        <View style={styles.pmentContainer}>
-          <Text style={styles.methodText}>Payment Method :</Text>
-          <View style={styles.choseMethodTextContainer}>
-            <Text style={styles.choseMethodText}>Cash on Delivery</Text>
-          </View>
-        </View>
-        <View style={styles.separator2} />
-        {/* until here */}
-        <View style={styles.pmentDetailsContainer}>
-          <Text style={styles.pmentDetailsText}>Payment Details :</Text>
-          <View style={styles.subtotalContainer}>
-            <View style={styles.psSubtotalContainer}>
-              <Text style={styles.psSubtotalText}>Product Subtotal</Text>
-              <Text style={styles.psSubtotalText}>
-                {"\u20B1"}
-                {item.orderSubTotalPrice || ""}
-              </Text>
+    <SafeAreaView style={styles.safeAreaView}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollView}
+      >
+        <View style={[styles.container]}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
             </View>
-            <View style={styles.psSubtotalContainer}>
-              <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
-              <Text style={styles.psSubtotalText}>₱50.00</Text>
-            </View>
-          </View>
+          ) : (
+            <React.Fragment>
+              <View style={styles.delAddressContainer}>
+                <View>
+                  <Iconify
+                    icon="system-uicons:location"
+                    size={35}
+                    color="black"
+                  />
+                </View>
+                <View style={styles.delInfoContainer}>
+                  <Text style={styles.deliveryTitle}>Delivery Address</Text>
+                  <Text style={styles.customerName}>
+                    | {item.customerName || ""}
+                  </Text>
+                  <Text style={styles.customerNumber}>
+                    | {item.customerPhoneNumber || ""}
+                  </Text>
+                  <Text style={styles.customerAddress}>
+                    | {item.deliveryAddress || ""}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.separator} />
+
+              <FlatList
+                data={productData}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id.toString()}
+                scrollEnabled={false}
+              />
+              <View style={styles.separator2} />
+
+              <View style={styles.pmentContainer}>
+                <Text style={styles.methodText}>Payment Method :</Text>
+                <View style={styles.choseMethodTextContainer}>
+                  <Text style={styles.choseMethodText}>Cash on Delivery</Text>
+                </View>
+              </View>
+              <View style={styles.separator2} />
+              <View style={styles.pmentDetailsContainer}>
+                <Text style={styles.pmentDetailsText}>Payment Details :</Text>
+                <View style={styles.subtotalContainer}>
+                  <View style={styles.psSubtotalContainer}>
+                    <Text style={styles.psSubtotalText}>Product Subtotal</Text>
+                    <Text style={styles.psSubtotalText}>
+                      {"\u20B1"}
+                      {item.orderSubTotalPrice || ""}
+                    </Text>
+                  </View>
+                  <View style={styles.psSubtotalContainer}>
+                    <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
+                    <Text style={styles.psSubtotalText}>₱50.00</Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.separator} />
+              <View style={styles.totalContainer}>
+                <Text style={styles.totalPmentText}>Total Payment</Text>
+                <Text style={styles.totalAmountText}>
+                  {"\u20B1"}
+                  {item.totalPrice || ""}
+                </Text>
+              </View>
+              <View style={styles.separator3} />
+              <View>
+                <TouchableOpacity style={styles.removerOrderButton}>
+                  <Text style={styles.removerOrderText}>Remove Order</Text>
+                </TouchableOpacity>
+              </View>
+            </React.Fragment>
+          )}
         </View>
-        <View style={styles.separator} />
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalPmentText}>Total Payment</Text>
-          <Text style={styles.totalAmountText}>
-            {"\u20B1"}
-            {item.totalPrice || ""}
-          </Text>
-        </View>
-        <View style={styles.separator3} />
-        <View>
-          <TouchableOpacity style={styles.removerOrderButton}>
-            <Text style={styles.removerOrderText}>Remove Order</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

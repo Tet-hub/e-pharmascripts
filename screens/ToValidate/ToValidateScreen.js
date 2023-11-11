@@ -36,9 +36,6 @@ const ToValidateScreen = ({ navigation, route }) => {
   const deviceWidth = Dimensions.get("window").width;
   const [itemSelectedImages, setItemSelectedImages] = useState([]);
   const [itemSelectedImageNames, setItemSelectedImageNames] = useState([]);
-  const [itemSelectedOriginalNames, setItemSelectedOriginalNames] = useState(
-    []
-  );
   const [item, setProductData] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [productSubtotal, setProductSubtotal] = useState(0);
@@ -320,7 +317,7 @@ const ToValidateScreen = ({ navigation, route }) => {
       quality: 1,
       // aspect: [4, 3],
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true, // Enable image editing
+      allowsEditing: true,
     });
 
     if (!results.canceled) {
@@ -412,196 +409,204 @@ const ToValidateScreen = ({ navigation, route }) => {
   };
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.delAddressContainer}>
-          <View>
-            <Iconify icon="system-uicons:location" size={35} color="black" />
-          </View>
-          <View style={styles.delInfoContainer}>
-            <View style={styles.delArrowContainer}>
-              <Text style={styles.deliveryTitle}>Delivery Address</Text>
-              <TouchableOpacity>
-                <Iconify
-                  icon="iconoir:nav-arrow-right"
-                  size={25}
-                  color="black"
-                />
-              </TouchableOpacity>
+    <SafeAreaView style={styles.safeAreaView}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollView}
+      >
+        <View style={styles.container}>
+          <View style={styles.delAddressContainer}>
+            <View>
+              <Iconify icon="system-uicons:location" size={35} color="black" />
             </View>
-            {user ? (
-              <React.Fragment>
-                <Text style={styles.customerName}>
-                  {user.firstName} {user.lastName}
-                </Text>
-                <Text style={styles.customerNumber}>{user.phone}</Text>
-                {user.address ? (
-                  <Text>{user.address}</Text>
-                ) : (
-                  <Text style={styles.customerAddress}>
-                    252- I Ascencion St., Sambag I Cebu City, Cebu, Visayas,
-                    6000
+            <View style={styles.delInfoContainer}>
+              <View style={styles.delArrowContainer}>
+                <Text style={styles.deliveryTitle}>Delivery Address</Text>
+                <TouchableOpacity>
+                  <Iconify
+                    icon="iconoir:nav-arrow-right"
+                    size={25}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              </View>
+              {user ? (
+                <React.Fragment>
+                  <Text style={styles.customerName}>
+                    {user.firstName} {user.lastName}
                   </Text>
-                )}
-              </React.Fragment>
-            ) : (
-              <Text>Loading user data...</Text>
-            )}
-          </View>
-        </View>
-        <View style={styles.separator} />
-        <View>
-          <FlatList
-            data={Array.isArray(item) ? item : [item]}
-            scrollEnabled={false}
-            keyExtractor={(item) => item.id}
-            renderItem={renderOrderItems}
-          />
-        </View>
-
-        <View style={styles.bottomContainer}>
-          <View style={styles.uploadPresCont}>
-            {Array.isArray(item) ? (
-              <>
-                {item.some(
-                  (product) => product.requiresPrescription === "Yes"
-                ) && (
-                  <>
-                    <Text style={styles.reminderText}>
-                      Upload your prescription/s here *
+                  <Text style={styles.customerNumber}>{user.phone}</Text>
+                  {user.address ? (
+                    <Text>{user.address}</Text>
+                  ) : (
+                    <Text style={styles.customerAddress}>
+                      252- I Ascencion St., Sambag I Cebu City, Cebu, Visayas,
+                      6000
                     </Text>
-                    <View style={styles.uploadContainer}>
-                      <TouchableOpacity
-                        style={styles.uploadButton}
-                        onPress={handleItemSelection}
-                      >
-                        <Iconify
-                          icon="zondicons:add-outline"
-                          size={20}
-                          color="white"
-                        />
-                        <Text style={styles.uploadButtonText}>
-                          {" "}
-                          Choose Image
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                )}
-              </>
-            ) : item.requiresPrescription === "Yes" ? (
-              <>
-                <Text style={styles.reminderText}>
-                  Upload your prescription/s here *
-                </Text>
-                <View style={styles.uploadContainer}>
-                  <TouchableOpacity
-                    style={styles.uploadButton}
-                    onPress={handleItemSelection}
-                  >
-                    <Iconify
-                      icon="zondicons:add-outline"
-                      size={20}
-                      color="white"
-                    />
-                    <Text style={styles.uploadButtonText}> Choose Image</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            ) : null}
-            <View style={styles.prescriptionImageCont}>
-              {itemSelectedImages.map((image, index) => {
-                if (image.uri) {
-                  return (
-                    <View key={index} style={styles.imageAndNameContainer}>
-                      <View style={styles.xButtonWrapper}>
-                        <TouchableOpacity
-                          onPress={() =>
-                            removePrescImage(
-                              itemSelectedImages[index].uri,
-                              itemSelectedImageNames[index]
-                            )
-                          }
-                        >
-                          <Iconify
-                            icon="clarity:remove-solid"
-                            size={25}
-                            color="#FF6666"
-                          />
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.selectedImageCont}>
-                        <Image
-                          source={{ uri: itemSelectedImages[index].uri }}
-                          style={styles.selectedImage}
-                          onError={() => console.log("Error loading image")}
-                        />
-                      </View>
-                      <Text numberOfLines={1} style={styles.selectedImageName}>
-                        {itemSelectedImageNames[index]}
-                      </Text>
-                    </View>
-                  );
-                } else {
-                  // Handle the case when the 'uri' property is not present
-                  return (
-                    <View key={index}>
-                      <Text style={styles.errorMessage}>
-                        Image URI not found
-                      </Text>
-                    </View>
-                  );
-                }
-              })}
-            </View>
-          </View>
-          <View style={styles.separator3} />
-
-          <View style={styles.pmentDetailsContainer}>
-            <Text style={styles.pmentDetailsText}>Payment Details :</Text>
-            <View style={styles.subtotalContainer}>
-              <View style={styles.psSubtotalContainer}>
-                <Text style={styles.psSubtotalText}>Product Subtotal </Text>
-                <Text style={styles.psSubtotalText}>
-                  {"\u20B1"}
-                  {productSubtotal.toFixed(2)}{" "}
-                  {/* Display the product subtotal */}
-                </Text>
-              </View>
-              <View style={styles.psSubtotalContainer}>
-                <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
-                <Text style={styles.psSubtotalText}>₱50.00</Text>
-              </View>
-              <View style={styles.pdTotalContainer}>
-                <Text style={styles.pdTotalText}>Total</Text>
-                <Text style={styles.pdTotalAmountText}>
-                  {"\u20B1"}
-                  {totalPrice.toFixed(2)} {/* Display the total price */}
-                </Text>
-              </View>
+                  )}
+                </React.Fragment>
+              ) : (
+                <Text>Loading user data...</Text>
+              )}
             </View>
           </View>
           <View style={styles.separator} />
-          <View style={styles.totalContainer}>
-            <Text style={styles.totalPmentText}>Total Payment</Text>
-            <View style={styles.tpContainer}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.pdTotalAmountText}>
-                  {"\u20B1"}
-                  {totalPrice.toFixed(2)} {/* Display the total price */}
-                </Text>
+          <View>
+            <FlatList
+              data={Array.isArray(item) ? item : [item]}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.id}
+              renderItem={renderOrderItems}
+            />
+          </View>
+
+          <View style={styles.bottomContainer}>
+            <View style={styles.uploadPresCont}>
+              {Array.isArray(item) ? (
+                <>
+                  {item.some(
+                    (product) => product.requiresPrescription === "Yes"
+                  ) && (
+                    <>
+                      <Text style={styles.reminderText}>
+                        Upload your prescription/s here *
+                      </Text>
+                      <View style={styles.uploadContainer}>
+                        <TouchableOpacity
+                          style={styles.uploadButton}
+                          onPress={handleItemSelection}
+                        >
+                          <Iconify
+                            icon="zondicons:add-outline"
+                            size={20}
+                            color="white"
+                          />
+                          <Text style={styles.uploadButtonText}>
+                            {" "}
+                            Choose Image
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
+                </>
+              ) : item.requiresPrescription === "Yes" ? (
+                <>
+                  <Text style={styles.reminderText}>
+                    Upload your prescription/s here *
+                  </Text>
+                  <View style={styles.uploadContainer}>
+                    <TouchableOpacity
+                      style={styles.uploadButton}
+                      onPress={handleItemSelection}
+                    >
+                      <Iconify
+                        icon="zondicons:add-outline"
+                        size={20}
+                        color="white"
+                      />
+                      <Text style={styles.uploadButtonText}> Choose Image</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : null}
+              <View style={styles.prescriptionImageCont}>
+                {itemSelectedImages.map((image, index) => {
+                  if (image.uri) {
+                    return (
+                      <View key={index} style={styles.imageAndNameContainer}>
+                        <View style={styles.xButtonWrapper}>
+                          <TouchableOpacity
+                            onPress={() =>
+                              removePrescImage(
+                                itemSelectedImages[index].uri,
+                                itemSelectedImageNames[index]
+                              )
+                            }
+                          >
+                            <Iconify
+                              icon="clarity:remove-solid"
+                              size={25}
+                              color="#FF6666"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.selectedImageCont}>
+                          <Image
+                            source={{ uri: itemSelectedImages[index].uri }}
+                            style={styles.selectedImage}
+                            onError={() => console.log("Error loading image")}
+                          />
+                        </View>
+                        <Text
+                          numberOfLines={1}
+                          style={styles.selectedImageName}
+                        >
+                          {itemSelectedImageNames[index]}
+                        </Text>
+                      </View>
+                    );
+                  } else {
+                    // Handle the case when the 'uri' property is not present
+                    return (
+                      <View key={index}>
+                        <Text style={styles.errorMessage}>
+                          Image URI not found
+                        </Text>
+                      </View>
+                    );
+                  }
+                })}
               </View>
-              <TouchableOpacity
-                style={styles.ordernowButton}
-                onPress={handlePlaceOrderScreen}
-              >
-                <Text style={styles.ordernowText}>ORDER NOW</Text>
-              </TouchableOpacity>
+            </View>
+            <View style={styles.separator3} />
+
+            <View style={styles.pmentDetailsContainer}>
+              <Text style={styles.pmentDetailsText}>Payment Details :</Text>
+              <View style={styles.subtotalContainer}>
+                <View style={styles.psSubtotalContainer}>
+                  <Text style={styles.psSubtotalText}>Product Subtotal </Text>
+                  <Text style={styles.psSubtotalText}>
+                    {"\u20B1"}
+                    {productSubtotal.toFixed(2)}{" "}
+                    {/* Display the product subtotal */}
+                  </Text>
+                </View>
+                <View style={styles.psSubtotalContainer}>
+                  <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
+                  <Text style={styles.psSubtotalText}>₱50.00</Text>
+                </View>
+                <View style={styles.pdTotalContainer}>
+                  <Text style={styles.pdTotalText}>Total</Text>
+                  <Text style={styles.pdTotalAmountText}>
+                    {"\u20B1"}
+                    {totalPrice.toFixed(2)} {/* Display the total price */}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.totalContainer}>
+              <Text style={styles.totalPmentText}>Total Payment</Text>
+              <View style={styles.tpContainer}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.pdTotalAmountText}>
+                    {"\u20B1"}
+                    {totalPrice.toFixed(2)} {/* Display the total price */}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.ordernowButton}
+                  onPress={handlePlaceOrderScreen}
+                >
+                  <Text style={styles.ordernowText}>ORDER NOW</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </SafeAreaView>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

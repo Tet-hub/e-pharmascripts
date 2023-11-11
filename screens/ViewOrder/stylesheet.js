@@ -1,5 +1,11 @@
 import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
+  safeAreaView: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -8,7 +14,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
     height: "100%",
-    marginBottom: 20,
   },
   delAddressContainer: {
     width: "80%",
@@ -71,7 +76,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     height: "80%",
-    width: "40%",
+    width: "35%",
     marginRight: 15,
   },
   productReq: {
@@ -183,6 +188,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 600,
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
 });
 

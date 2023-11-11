@@ -1,7 +1,10 @@
 import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
-  scrollView: {
+  safeAreaView: {
     flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
   },
   // container: {
   //   flex: 1,
@@ -22,7 +25,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
     height: "100%",
-    paddingBottom: 40,
     marginTop: 20,
   },
   delAddressContainer: {
@@ -202,7 +204,6 @@ const styles = StyleSheet.create({
     width: "60%",
   },
   bottomContainer: {
-    flex: 1,
     flexDirection: "column", // Display children in a column
     alignItems: "center", // Center children horizontally
     justifyContent: "flex-start", // Align content to the top

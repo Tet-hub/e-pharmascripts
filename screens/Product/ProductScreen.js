@@ -251,7 +251,7 @@ const ProductScreen = ({ navigation, route }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View className="items-center flex-row mt-5 ml-3 mr-3 ">
         <Text style={styles.screenTitle}>
           {route.params?.name} ({route.params?.branch})

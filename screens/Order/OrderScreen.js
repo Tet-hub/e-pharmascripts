@@ -44,7 +44,7 @@ const OrderScreen = () => {
   const [loading, setLoading] = useState(true);
   const [orderData, setOrderData] = useState([]);
   const [ordersData, setOrdersData] = useState([]);
-  const [selectedItems, setSelectedItems] = useState({});
+  const [orderLength, setOrderLength] = useState(true);
 
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
@@ -169,7 +169,7 @@ const OrderScreen = () => {
   }, [currentCustomerId, trackerTab]);
 
   const handleNavigateToHome = () => {
-    navigation.navigate("HomeScreen"); // Replace "HomeScreen" with the name of your homescreen component
+    navigation.navigate("HomeScreen");
   };
 
   const handleRateScreen = (orderId) => {
@@ -177,6 +177,9 @@ const OrderScreen = () => {
   };
   const handleViewOrderScreen = (orderId) => {
     navigation.navigate("ViewCompletedOrderScreen", { orderId: orderId });
+  };
+  const handlePlaceOrderScreen = (orderId) => {
+    navigation.navigate("PlaceOrderScreen", { orderId: orderId });
   };
   const handleApprovedProductDetailScreen = () => {
     navigation.navigate("ApprovedProductDetailScreen");
@@ -223,13 +226,13 @@ const OrderScreen = () => {
     }
   }, [orderId]);
   // Fetch pending orders from the database
+  useEffect(() => {
+    if (orderData.length !== 0) {
+      setOrderLength(false);
+      setLoading(false);
+    }
+  }, [orderData]);
 
-  const handleSelectItem = (item) => {
-    setSelectedItems((prevSelectedItems) => ({
-      ...prevSelectedItems,
-      [item]: !prevSelectedItems[item],
-    }));
-  };
   return (
     <View style={styles.container}>
       <Text style={styles.screenTitle}>MY ORDERS</Text>
@@ -253,19 +256,7 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : orderData.length === 0 ? (
-            <View style={styles.noOrdersCont}>
-              <View style={styles.noOrders}>
-                <Iconify
-                  icon="fluent-mdl2:deactivate-orders"
-                  size={50}
-                  color="black"
-                  style={styles.noOrdersIcon}
-                />
-                <Text>No Orders Yet</Text>
-              </View>
-            </View>
-          ) : (
+          ) : orderData.length !== 0 ? (
             <FlatList
               showsVerticalScrollIndicator={false}
               data={orderData}
@@ -373,6 +364,18 @@ const OrderScreen = () => {
                 </View>
               )}
             />
+          ) : (
+            <View style={styles.noOrdersCont}>
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="fluent-mdl2:deactivate-orders"
+                  size={50}
+                  color="black"
+                  style={styles.noOrdersIcon}
+                />
+                <Text>No Orders Yet</Text>
+              </View>
+            </View>
           )}
         </View>
       )}
@@ -404,13 +407,6 @@ const OrderScreen = () => {
                 renderItem={({ item }) => (
                   <View key={item.id} style={styles.orderGroupContainer}>
                     <View style={styles.sellerCont}>
-                      <Checkbox
-                        color="#EC6F56"
-                        value={selectedItems[item.id] || false}
-                        onValueChange={() => handleSelectItem(item.id)}
-                        style={styles.checkBoxIcon}
-                      />
-                      <View style={styles.verticalSeparator} />
                       <Iconify
                         icon="healthicons:market-stall-outline"
                         size={23}
@@ -490,16 +486,21 @@ const OrderScreen = () => {
                                     </View>
                                   </View>
                                   <View style={styles.separator2} />
-                                  <View style={styles.viewButtonCont}>
+                                  <View style={styles.proceedButtonContainer}>
                                     <TouchableOpacity
                                       onPress={() =>
-                                        handleViewOrderScreen(item.id)
+                                        handlePlaceOrderScreen(item.id)
                                       }
-                                      style={styles.viewButton}
+                                      style={styles.proceedButton}
                                     >
-                                      <Text style={styles.viewText}>
-                                        VIEW DETAILS
+                                      <Text style={styles.proceedText}>
+                                        Proceed To Order
                                       </Text>
+                                      <Iconify
+                                        icon="iconoir:nav-arrow-right"
+                                        size={22}
+                                        color="white"
+                                      />
                                     </TouchableOpacity>
                                   </View>
                                 </View>
@@ -516,7 +517,7 @@ const OrderScreen = () => {
               />
             )}
           </View>
-          <View style={styles.proceedButtonContainer}>
+          {/* <View style={styles.proceedButtonContainer}>
             <TouchableOpacity
               onPress={handleApprovedProductDetailScreen}
               style={styles.proceedButton}
@@ -524,7 +525,7 @@ const OrderScreen = () => {
               <Text style={styles.proceedText}>Proceed to payment</Text>
               <Iconify icon="iconoir:nav-arrow-right" size={22} color="white" />
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
       )}
 
@@ -635,7 +636,7 @@ const OrderScreen = () => {
                                 <View style={styles.viewButtonCont}>
                                   <TouchableOpacity
                                     onPress={() =>
-                                      handleViewOrderScreen(item.id)
+                                      handlePlaceOrderScreen(item.id)
                                     }
                                     style={styles.viewButton}
                                   >
@@ -796,18 +797,7 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : orderData.length === 0 ? (
-            <View style={styles.noOrdersCont}>
-              <View style={styles.noOrders}>
-                <Iconify
-                  icon="fluent-mdl2:deactivate-orders"
-                  size={50}
-                  color="black"
-                />
-                <Text>No Orders Yet</Text>
-              </View>
-            </View>
-          ) : (
+          ) : orderData.length !== 0 ? (
             <FlatList
               showsVerticalScrollIndicator={false}
               data={orderData}
@@ -928,6 +918,17 @@ const OrderScreen = () => {
                 </View>
               )}
             />
+          ) : (
+            <View style={styles.noOrdersCont}>
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="fluent-mdl2:deactivate-orders"
+                  size={50}
+                  color="black"
+                />
+                <Text>No Orders Yet</Text>
+              </View>
+            </View>
           )}
         </View>
       )}

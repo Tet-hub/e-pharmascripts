@@ -20,7 +20,6 @@ const styles = StyleSheet.create({
     // elevation: 3,
     width: "90%",
     alignSelf: "center",
-    marginBottom: 5,
   },
   productDataContainer: {
     flexDirection: "row",
@@ -95,19 +94,7 @@ const styles = StyleSheet.create({
   cocont: {
     flexDirection: "row",
   },
-  proceedButton: {
-    backgroundColor: "#DC3642",
-    borderRadius: 30,
-    flexDirection: "row",
-    alignSelf: "center",
-    paddingTop: 15,
-    paddingBottom: 15,
-    paddingRight: 30,
-    paddingLeft: 30,
-    zIndex: 3,
-    width: "80%",
-    justifyContent: "center",
-  },
+
   footer: {
     position: "absolute",
     bottom: 0,
@@ -117,15 +104,22 @@ const styles = StyleSheet.create({
     zIndex: 2, // Ensure the footer is on top
   },
   proceedButtonContainer: {
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginBottom: 10,
+    alignItems: "flex-end",
+    justifyContent: "center",
+    marginTop: 2,
   },
   proceedText: {
     color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginRight: 20,
+    fontWeight: 500,
+    fontSize: 15,
+  },
+  proceedButton: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 9,
+    borderRadius: 10,
+    backgroundColor: "#EC6F56",
+    padding: 9,
   },
   completedOrderContainer: {
     backgroundColor: "white",
@@ -163,7 +157,7 @@ const styles = StyleSheet.create({
   viewButton: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 4,
+    marginTop: 9,
     borderRadius: 10,
     backgroundColor: "#EC6F56",
   },
@@ -221,7 +215,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     margin: 10,
     padding: 10,
-    marginBottom: 10,
   },
   viewOrderDetails: {
     flexDirection: "row",
@@ -232,7 +225,7 @@ const styles = StyleSheet.create({
   },
   viewMoreTextCont: {
     color: "#EC6F56",
-    marginTop: 10,
+    marginTop: 12,
   },
   viewMoreText: {
     textAlign: "right",
