@@ -21,6 +21,7 @@ import {
   getDownloadURL,
 } from "@firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useToast } from "react-native-toast-notifications";
 import { ScrollView } from "react-native-gesture-handler";
 import { Timestamp } from "firebase/firestore";
 import { storeProductData } from "../../database/storing/storeData";
@@ -30,10 +31,13 @@ import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
 import { listenForItem } from "../../database/component/realTimeListenerByCondition";
 import styles from "./stylesheet";
 import * as ImagePicker from "expo-image-picker";
+import AddressScreen from "../Address/AddressScreen";
+import { db } from "../../firebase/firebase";
 
 const ToValidateScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
   const deviceWidth = Dimensions.get("window").width;
+  const toast = useToast();
   const [itemSelectedImages, setItemSelectedImages] = useState([]);
   const [itemSelectedImageNames, setItemSelectedImageNames] = useState([]);
   const [item, setProductData] = useState(null);
@@ -57,7 +61,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         const authToken = await getAuthToken();
         const customerId = authToken.userId; // Get customerId from AsyncStorage
         const userData = await fetchSingleDocumentById(customerId, "customers");
-        console.log("user:", userData.id);
+        console.log("users:", userData.id);
 
         //fetching data from "ProductDetailsScreen"
         if (productId) {
@@ -143,15 +147,12 @@ const ToValidateScreen = ({ navigation, route }) => {
       let subtotal = 0;
       if (Array.isArray(item)) {
         for (const product of item) {
-          console.log("item price", product.price);
           const currentQuantity = cartId ? product.quantity : quantity;
           subtotal += product.price * currentQuantity;
-          console.log("cart quantity", product.quantity);
         }
       } else if (item.price && quantity !== undefined) {
         const currentQuantity = item.quantity ? item.quantity : quantity;
         subtotal += item.price * currentQuantity;
-        console.log("product screen quantity", currentQuantity);
       }
 
       setProductSubtotal(subtotal);
@@ -169,6 +170,16 @@ const ToValidateScreen = ({ navigation, route }) => {
         console.error("User data, product data, or seller data is missing.");
         return;
       }
+      if (!user.address) {
+        toast.show("Please set your address before placing an order.", {
+          type: "normal",
+          placement: "bottom",
+          duration: 4000,
+          offset: 10,
+          animationType: "slide-in",
+        });
+        return;
+      }
       const orderCreatedTimestamp = Timestamp.now();
       let totalQuantity = 0;
       if (Array.isArray(item)) {
@@ -183,8 +194,8 @@ const ToValidateScreen = ({ navigation, route }) => {
       const data = {
         customerId: user.id,
         customerName: `${user.firstName} ${user.lastName}`,
-        deliveryAddress: user.customerAddress, //google map api
-        customerPhoneNumber: user.phone, //temp for now
+        deliveryAddress: user.customerAddress,
+        customerPhoneNumber: user.phone,
         totalPrice: totalPrice.toFixed(2),
         sellerId: sellerData.id,
         status: "Pending Validation",
@@ -359,7 +370,9 @@ const ToValidateScreen = ({ navigation, route }) => {
       console.error("Error removing the image:", error);
     }
   };
-
+  const handlePress = () => {
+    navigation.navigate("AddressScreen"); // Replace "AddressScreen" with the name of your address screen in the navigation stack
+  };
   // Show loading indicator while data is being fetched
   if (loading) {
     return (
@@ -422,7 +435,7 @@ const ToValidateScreen = ({ navigation, route }) => {
             <View style={styles.delInfoContainer}>
               <View style={styles.delArrowContainer}>
                 <Text style={styles.deliveryTitle}>Delivery Address</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handlePress}>
                   <Iconify
                     icon="iconoir:nav-arrow-right"
                     size={25}
@@ -436,12 +449,11 @@ const ToValidateScreen = ({ navigation, route }) => {
                     {user.firstName} {user.lastName}
                   </Text>
                   <Text style={styles.customerNumber}>{user.phone}</Text>
-                  {user.address ? (
-                    <Text>{user.address}</Text>
+                  {user.customerAddress ? (
+                    <Text>{user.customerAddress}</Text>
                   ) : (
-                    <Text style={styles.customerAddress}>
-                      252- I Ascencion St., Sambag I Cebu City, Cebu, Visayas,
-                      6000
+                    <Text style={styles.noCustomerAddress}>
+                      Delivery address not specified
                     </Text>
                   )}
                 </React.Fragment>

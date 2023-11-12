@@ -56,6 +56,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 3,
   },
+  noCustomerAddress: {
+    fontWeight: 300,
+    fontSize: 13,
+    marginTop: 3,
+    color: "red",
+  },
   separator: {
     marginTop: 20,
     height: 1,
