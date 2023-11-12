@@ -21,6 +21,16 @@ export const getCurrentEmail = async () => {
   }
 };
 
+export const getCurrentCustomerName = async () => {
+  try {
+    const customerName = await AsyncStorage.getItem("customerName");
+    return customerName;
+  } catch (error) {
+    console.log("Error retrieving name:", error);
+    return null;
+  }
+};
+
 // Save the user's email and authentication token to AsyncStorage
 export const saveAuthToken = async (
   email,

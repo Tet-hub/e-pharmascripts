@@ -20,6 +20,9 @@ import { updateById } from "../../database/update/updateDataById";
 import { updateDoc, doc, Timestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useToast } from "react-native-toast-notifications";
+import { CreditCardInput } from "../../components/credit-card.component";
+import { getCurrentCustomerName } from "../../src/authToken";
+import { payRequest } from "../../service/checkout.service";
 
 const PlaceOrderScreen = ({ navigation, route }) => {
   const toast = useToast();
@@ -30,9 +33,10 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   const [productData, setProductData] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [isPaymentMethodSelected, setIsPaymentMethodSelected] = useState(false);
-  const { orderId } = route.params;
-  console.log("Screen Dimensions: ", Dimensions.get("window"));
-  // console.log("order id", orderId);
+  const { orderId, totalPrice, customerName } = route.params;
+  const [card, setCard] = useState(null);
+  console.log(`CustomerName: ${customerName}`);
+  console.log(`TotalPrice: ${totalPrice}`);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,6 +98,41 @@ const PlaceOrderScreen = ({ navigation, route }) => {
           animationType: "slide-in",
         });
         return;
+      }
+      if (orderId && selectedPaymentMethod === "Card") {
+        if (!card || !card.id) {
+          console.log("Error card");
+          return;
+        }
+
+        try {
+          const response = await payRequest(card.id, totalPrice, customerName);
+          const paymentIntentId = response.paymentIntentId;
+
+          console.log("Payment Intent ID:", paymentIntentId);
+          await updateById(orderId, "orders", "status", "Ordered");
+          await updateById(
+            orderId,
+            "orders",
+            "paymentMethod",
+            selectedPaymentMethod
+          );
+          console.log(`Value of paymentId before updating: ${paymentIntentId}`);
+          const orderCreatedTimestamp = Timestamp.now();
+          const orderDocRef = doc(db, "orders", orderId);
+          await updateDoc(
+            orderDocRef,
+            {
+              paymentId: paymentIntentId,
+              orderedAt: orderCreatedTimestamp,
+            },
+            { merge: true }
+          );
+          console.log("Order placed successfully!");
+          navigation.navigate("OrderScreen");
+        } catch (error) {
+          console.error("Error processing payment:", error);
+        }
       }
 
       console.log("sss id", orderId);
@@ -242,32 +281,31 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                   <TouchableOpacity
                     style={[
                       styles.methodContainer,
-                      selectedPaymentMethod === "eWallet" &&
-                        styles.selectedMethod,
+                      selectedPaymentMethod === "Card" && styles.selectedMethod,
                     ]}
-                    onPress={() => setSelectedPaymentMethod("eWallet")}
+                    onPress={() => setSelectedPaymentMethod("Card")}
                   >
                     <Iconify
                       icon="ph:wallet-light"
                       size={30}
                       style={[
                         styles.methodsIcon,
-                        selectedPaymentMethod === "eWallet" &&
-                          styles.selectedText,
+                        selectedPaymentMethod === "Card" && styles.selectedText,
                       ]}
                     />
                     <Text
                       style={[
                         styles.methodsText,
-                        selectedPaymentMethod === "eWallet" &&
-                          styles.selectedText,
+                        selectedPaymentMethod === "Card" && styles.selectedText,
                       ]}
                     >
-                      Gcash{"\n"}e-Wallet
+                      Credit Card
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
+              {/* CreditCard Input */}
+              <CreditCardInput name={customerName} onSuccess={setCard} />
               <View style={styles.bottomContainer}>
                 <View style={styles.separator2} />
                 <View style={styles.pmentDetailsContainer}>
