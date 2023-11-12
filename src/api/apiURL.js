@@ -8,5 +8,5 @@ export const BASE_URL =
 //   "http://127.0.0.1:5001/e-pharmascripts/us-central1/userApp";
 
 export const PAYMENT_URL =
-  "http://10.0.2.2:5001/e-pharmascripts/us-central1/paymentApp";
-//"https://us-central1-e-pharmascripts.cloudfunctions.net/paymentApp";
+  // "http://10.0.2.2:5001/e-pharmascripts/us-central1/paymentApp";
+  "https://us-central1-e-pharmascripts.cloudfunctions.net/paymentApp";

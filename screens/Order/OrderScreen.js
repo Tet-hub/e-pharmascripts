@@ -30,6 +30,8 @@ import { db } from "../../firebase/firebase";
 import { getAuthToken } from "../../src/authToken";
 import { BASE_URL } from "../../src/api/apiURL";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
+import { getCurrentCustomerName } from "../../src/authToken";
+
 const OrderScreen = () => {
   const navigation = useNavigation();
   const [orderId, setOrderId] = useState("rOHz230V7aygWyLmQ6MR");
@@ -45,6 +47,7 @@ const OrderScreen = () => {
   const [orderData, setOrderData] = useState([]);
   const [ordersData, setOrdersData] = useState([]);
   const [orderLength, setOrderLength] = useState(true);
+  const [customerName, setCustomerName] = useState(null);
 
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
@@ -171,12 +174,23 @@ const OrderScreen = () => {
     navigation.navigate("ViewCompletedOrderScreen", { orderId: orderId });
   };
   const handlePlaceOrderScreen = (orderId, totalPrice) => {
-    navigation.navigate("PlaceOrderScreen", { orderId: orderId, totalPrice });
+    navigation.navigate("PlaceOrderScreen", {
+      orderId: orderId,
+      totalPrice,
+      customerName,
+    });
   };
   const handleApprovedProductDetailScreen = () => {
     navigation.navigate("ApprovedProductDetailScreen");
   };
+  useEffect(() => {
+    const fetchCustomerName = async () => {
+      const name = await getCurrentCustomerName();
+      setCustomerName(name);
+    };
 
+    fetchCustomerName();
+  }, []);
   //
   useEffect(() => {
     async function getUserData() {
@@ -502,7 +516,8 @@ const OrderScreen = () => {
                                           onPress={() =>
                                             handlePlaceOrderScreen(
                                               item.id,
-                                              item.totalPrice
+                                              item.totalPrice,
+                                              customerName
                                             )
                                           }
                                           style={styles.proceedButton}
