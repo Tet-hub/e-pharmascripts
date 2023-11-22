@@ -58,16 +58,39 @@ const MessageScreen = ({ navigation }) => {
               const otherUserId =
                 userId === data.senderId ? data.receiverId : data.senderId;
 
+              const messageDate = new Date(data.timestamp.seconds * 1000);
+              const currentDate = new Date();
+
+              let timestamp;
+
+              if (
+                messageDate.getDate() === currentDate.getDate() &&
+                messageDate.getMonth() === currentDate.getMonth() &&
+                messageDate.getFullYear() === currentDate.getFullYear()
+              ) {
+                // If the message is from the same day, format with hours and minutes
+                timestamp = new Date(
+                  data.timestamp.seconds * 1000
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              } else {
+                // If the message is from a different day, format with full date
+                timestamp = new Date(
+                  data.timestamp.seconds * 1000
+                ).toLocaleDateString();
+              }
+
               if (!latestMessagesMap.has(otherUserId)) {
                 latestMessagesMap.set(otherUserId, {
                   id: doc.id,
                   sellerName: data.sellerName,
                   lastMessage: data.message,
                   sellerId: data.sellerId,
+                  sellerBranch: data.sellerBranch,
                   img: data.img,
-                  timestamp: new Date(
-                    data.timestamp.seconds * 1000
-                  ).toLocaleTimeString(),
+                  timestamp: timestamp,
                 });
               }
               setSellerId(sellerId);
@@ -116,15 +139,13 @@ const MessageScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[
-              styles.chatItem,
-              { paddingHorizontal: dynamicPadding }, // Add padding here
-            ]}
+            style={[styles.chatItem, { paddingHorizontal: dynamicPadding }]}
             onPress={() =>
               navigation.navigate("ChatScreen", {
-                name: item.sellerName,
+                sellerBranch: item.sellerBranch,
                 sellerId: item.sellerId,
                 img: item.img,
+                name: item.sellerName,
               })
             }
           >
@@ -144,8 +165,22 @@ const MessageScreen = ({ navigation }) => {
                 )}
               </View>
               <View style={styles.chatText}>
-                <Text style={styles.chatName}>{item.sellerName}</Text>
-                <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+                <Text
+                  style={styles.chatName}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item.sellerBranch}
+                </Text>
+
+                {/* Display "Sent an image" if there is no messageText */}
+                <Text style={styles.lastMessage}>
+                  {item.lastMessage ? (
+                    item.lastMessage
+                  ) : (
+                    <Text style={{ fontStyle: "italic" }}>Sent an image</Text>
+                  )}
+                </Text>
               </View>
               <Text style={styles.timestamp}>{item.timestamp}</Text>
             </View>
