@@ -29,5 +29,6 @@ nov 11
 npm install stripe-client --save
 npm install react-native-credit-card-input
 
-nov 21
-npm install react-native-lightbox
+nov 22
+npm install react-native-root-toast
+

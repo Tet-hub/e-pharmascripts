@@ -65,7 +65,7 @@ const ProfileScreen = () => {
   };
 
   const handlePressAccount = () => {
-    navigation.navigate("TestScreen");
+    navigation.navigate("EmailScreen");
   };
 
   const handlePressAddress = () => {
@@ -73,7 +73,7 @@ const ProfileScreen = () => {
   };
 
   const handlePressSecurity = () => {
-    navigation.navigate("TestScreen");
+    navigation.navigate("SecurityScreen");
   };
 
   const handlePressDeleteAccount = () => {
@@ -158,7 +158,7 @@ const ProfileScreen = () => {
           <View style={styles.line} />
 
           <View style={styles.lowerContainer}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePressAccount}>
               <View style={styles.viewCont}>
                 <View style={styles.iconsBG}>
                   <Iconify icon="codicon:account" size={22} color="black" />
@@ -194,7 +194,7 @@ const ProfileScreen = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePressSecurity}>
               <View style={styles.viewCont}>
                 <View style={styles.iconsBG}>
                   <Iconify

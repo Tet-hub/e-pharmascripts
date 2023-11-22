@@ -35,6 +35,9 @@ import { Iconify } from "react-native-iconify";
 import BranchDetailsScreen from "../screens/Branch/BranchDetailsScreen";
 import SearchProductsScreen from "../screens/Home/SearchProductsScreen";
 import AddressScreen from "../screens/Address/AddressScreen";
+import EmailScreen from "../screens/Account/EmailScreen";
+import SecurityScreen from "../screens/Account/SecurityScreen";
+import ChangePasswordScreen from "../screens/Account/ChangePasswordScreen";
 
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
@@ -307,6 +310,31 @@ const RootStack = () => {
               headerTintColor: "black",
             }}
           />
+          <Stack.Screen
+            name="EmailScreen"
+            component={EmailScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="SecurityScreen"
+            component={SecurityScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="ChangePasswordScreen"
+            component={ChangePasswordScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          
         </Stack.Navigator>
       </MessageProvider>
     </TailwindProvider>
