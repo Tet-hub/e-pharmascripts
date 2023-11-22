@@ -36,7 +36,10 @@ const { orange } = Colors;
 
 //keyboard avoiding wrapper
 import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
-
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { authentication } from "../firebase/firebase";
+import { doc, getDoc, userDocRef } from 'firebase/firestore';
+import { db } from "../firebase/firebase";
 //firebase
 import { AuthContext } from "../src/context";
 import { saveAuthToken } from "../src/authToken";
@@ -53,38 +56,35 @@ const Login = ({ navigation }) => {
   const SignInUser = async () => {
     setIsLoading(true); // Start loading
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/mobile/post/customer/login`,
-        {
-          email,
-          password,
-        }
-      );
+      const auth = authentication;
+      await signInWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
+      const userId = user.uid;
+      const userDocRef = doc(db, 'customers', userId);
+      const userDocSnapshot = await getDoc(userDocRef);
+      if (userDocSnapshot.exists()) {
+        const customerData = userDocSnapshot.data();
+        const profileImageValue = customerData.profileImage || "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
 
-      if (response.status === 200) {
-        // Login successful
-        const userId = response.data.userId;
-        const user = response.data.user;
-        const userToken = response.data.token;
-        const profileImageValue =
-          user.profileImage !== null
-            ? user.profileImage
-            : "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
         await saveAuthToken(
-          user.email,
-          userToken,
+          customerData.email,
+          (await user.getIdToken()).toString(),
           userId,
           profileImageValue,
-          user.firstName + " " + user.lastName
-        ); // Save user's email, token, and userId to AsyncStorage
-        signIn(userToken); // Update the user's token in the context
-        console.log("UserId fetched from login", userId);
+          `${customerData.firstName} ${customerData.lastName}`
+        );
+
+        signIn((await user.getIdToken()).toString()); // Update the user's token in the context
+  
+      } else {
+        console.log("User document does not exist");
       }
+      console.log("UserId fetched from login", userId);
     } catch (error) {
-      if (error.response && error.response.status === 401) {
+      console.log("Error signing in:", error);
+      if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
         setError("Invalid credentials");
       } else {
-        console.log("Error signing in:", error);
         setError("Log In failed!");
       }
     } finally {
