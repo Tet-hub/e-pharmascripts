@@ -259,7 +259,7 @@ const RootStack = () => {
             name="ChatScreen"
             component={ChatScreen}
             options={({ route }) => ({
-              title: route.params.name,
+              title: route.params.sellerBranch,
               headerStyle: {
                 backgroundColor: "#EC6F56",
               },

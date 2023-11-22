@@ -333,6 +333,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                   name: branches.displayName,
                   img: branches.img,
                   sellerId: item.createdBy,
+                  sellerBranch: branches.branch,
                 })
               }
             >
