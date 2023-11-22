@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   chatName: {
     fontSize: 18,
     fontWeight: "bold",
+    marginRight: 20,
   },
   lastMessage: {
     color: "#555",
