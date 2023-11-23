@@ -28,6 +28,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 // Get authentication service instance
 // export const authentication = getAuth(app);
+//
 export const authentication = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
