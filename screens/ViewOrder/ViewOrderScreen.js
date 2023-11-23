@@ -9,17 +9,17 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/native";
 import { Iconify } from "react-native-iconify";
-import styles from "./stylesheet";
+import styles from "./viewOrderStyles";
 import { BASE_URL } from "../../src/api/apiURL";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
-// import { ScrollView } from "react-native-gesture-handler";
+import { updateById } from "../../database/update/updateDataById";
 
-const ViewCompletedOrderScreen = () => {
-  const route = useRoute();
+const ViewCancelledOrderScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
   const deviceWidth = Dimensions.get("window").width;
   const [loading, setLoading] = useState(true);
@@ -79,6 +79,32 @@ const ViewCompletedOrderScreen = () => {
 
     fetchData();
   }, [orderId]);
+  const handleRemoveOrder = () => {
+    Alert.alert(
+      "Confirm Removal",
+      "Are you sure you want to remove this order?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          onPress: async () => {
+            try {
+              await updateById(orderId, "orders", "status", "Cancelled");
+              console.log("Order removed and status updated.");
+              navigation.navigate("OrderScreen");
+            } catch (error) {
+              console.error("Error while updating order status:", error);
+            }
+          },
+          style: "destructive",
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.productContainer}>
@@ -157,12 +183,9 @@ const ViewCompletedOrderScreen = () => {
               <View style={styles.separator2} />
 
               <View style={styles.pmentContainer}>
-                <Text style={styles.methodText}>Payment Method :</Text>
-                <View style={styles.choseMethodTextContainer}>
-                  <Text style={styles.choseMethodText}>
-                    {item.paymentMethod || ""}
-                  </Text>
-                </View>
+                <Text style={styles.reminderText}>
+                  Order/s currently being verified.
+                </Text>
               </View>
               <View style={styles.separator2} />
               <View style={styles.pmentDetailsContainer}>
@@ -189,12 +212,20 @@ const ViewCompletedOrderScreen = () => {
                   {item.totalPrice || ""}
                 </Text>
               </View>
-              {/* <View style={styles.separator3} />
+              <View style={styles.separator3} />
               <View>
-                <TouchableOpacity style={styles.removerOrderButton}>
+                <TouchableOpacity
+                  style={styles.removerOrderButton}
+                  onPress={handleRemoveOrder}
+                >
+                  <Iconify
+                    icon="mingcute:delete-2-line"
+                    size={28}
+                    color="white"
+                  />
                   <Text style={styles.removerOrderText}>Remove Order</Text>
                 </TouchableOpacity>
-              </View> */}
+              </View>
             </React.Fragment>
           )}
         </View>
@@ -203,4 +234,4 @@ const ViewCompletedOrderScreen = () => {
   );
 };
 
-export default ViewCompletedOrderScreen;
+export default ViewCancelledOrderScreen;

@@ -48,12 +48,19 @@ const OrderScreen = () => {
   const [ordersData, setOrdersData] = useState([]);
   const [orderLength, setOrderLength] = useState(true);
   const [customerName, setCustomerName] = useState(null);
-
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
     setLoading(true);
   };
   const { width, height } = Dimensions.get("window");
+  const formatDate = (timestamp) => {
+    const date = timestamp.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    return date; // Returns formatted date string
+  };
 
   useEffect(() => {
     const fetchOrdersRealTime = () => {
@@ -81,6 +88,7 @@ const OrderScreen = () => {
                 (item.status === "Ordered" ||
                   item.status === "To Deliver" ||
                   item.status === "Pending Rider" ||
+                  item.status === "Rider Declined" ||
                   item.status === "On Delivery")
               ) {
                 return true;
@@ -147,6 +155,8 @@ const OrderScreen = () => {
             );
           } catch (error) {
             console.error("Error processing fetched data: ", error);
+          } finally {
+            setLoading(false);
           }
         });
 
@@ -155,8 +165,6 @@ const OrderScreen = () => {
         };
       } catch (error) {
         console.error("Error fetching pending orders: ", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -171,7 +179,10 @@ const OrderScreen = () => {
     navigation.navigate("RateScreen", { orderId });
   };
   const handleViewOrderScreen = (orderId) => {
-    navigation.navigate("ViewCompletedOrderScreen", { orderId: orderId });
+    navigation.navigate("ViewOrderScreen", { orderId: orderId });
+  };
+  const handleViewCancelledOrders = (orderId) => {
+    navigation.navigate("ViewCancelledOrderScreen", { orderId: orderId });
   };
   const handlePlaceOrderScreen = (orderId, totalPrice) => {
     navigation.navigate("PlaceOrderScreen", {
@@ -180,8 +191,8 @@ const OrderScreen = () => {
       customerName,
     });
   };
-  const handleApprovedProductDetailScreen = () => {
-    navigation.navigate("ApprovedProductDetailScreen");
+  const handleOrderPlacedScreen = (orderId) => {
+    navigation.navigate("ViewCompletedOrderScreen", { orderId: orderId });
   };
   useEffect(() => {
     const fetchCustomerName = async () => {
@@ -282,8 +293,15 @@ const OrderScreen = () => {
                           color="black"
                         />
                         <Text style={styles.groupTitle}>
-                          {item.branchName ? item.branchName : "branchName"}
+                          {item.branchName ? item.branchName : "Seller"}
                         </Text>
+                        <View style={styles.rightContainer}>
+                          <Text style={styles.groupTitleRight}>
+                            {item.createdAt
+                              ? formatDate(item.createdAt.toDate())
+                              : ""}
+                          </Text>
+                        </View>
                       </View>
                       {filteredProductData.map((orders, index) => (
                         <View key={index}>
@@ -423,8 +441,15 @@ const OrderScreen = () => {
                             color="black"
                           />
                           <Text style={styles.groupTitle}>
-                            {item.branchName ? item.branchName : "branchName"}
+                            {item.branchName ? item.branchName : "Seller"}
                           </Text>
+                          <View style={styles.rightContainer}>
+                            <Text style={styles.groupTitleRight}>
+                              {item.createdAt
+                                ? formatDate(item.createdAt.toDate())
+                                : ""}
+                            </Text>
+                          </View>
                         </View>
                         {filteredProductData.map((orders, index) => (
                           <View key={index}>
@@ -601,8 +626,15 @@ const OrderScreen = () => {
                           color="black"
                         />
                         <Text style={styles.groupTitle}>
-                          {item.branchName ? item.branchName : "branchName"}
+                          {item.branchName ? item.branchName : "Seller"}
                         </Text>
+                        <View style={styles.rightContainer}>
+                          <Text style={styles.groupTitleRight}>
+                            {item.createdAt
+                              ? formatDate(item.createdAt.toDate())
+                              : ""}
+                          </Text>
+                        </View>
                       </View>
                       {filteredProductData.map((orders, index) => (
                         <View key={index}>
@@ -680,7 +712,7 @@ const OrderScreen = () => {
                                     <View style={styles.viewButtonCont}>
                                       <TouchableOpacity
                                         onPress={() =>
-                                          handlePlaceOrderScreen(item.id)
+                                          handleOrderPlacedScreen(item.id)
                                         }
                                         style={styles.viewButton}
                                       >
@@ -743,8 +775,15 @@ const OrderScreen = () => {
                           color="black"
                         />
                         <Text style={styles.groupTitle}>
-                          {item.branchName ? item.branchName : "branchName"}
+                          {item.branchName ? item.branchName : "Seller"}
                         </Text>
+                        <View style={styles.rightContainer}>
+                          <Text style={styles.groupTitleRight}>
+                            {item.createdAt
+                              ? formatDate(item.createdAt.toDate())
+                              : ""}
+                          </Text>
+                        </View>
                       </View>
                       {filteredProductData.map((orders, index) => (
                         <View key={index}>
@@ -820,7 +859,7 @@ const OrderScreen = () => {
                                     <View style={styles.viewButtonCont}>
                                       <TouchableOpacity
                                         onPress={() =>
-                                          handleViewOrderScreen(item.id)
+                                          handleViewCancelledOrders(item.id)
                                         }
                                         style={styles.viewButton}
                                       >
@@ -883,8 +922,15 @@ const OrderScreen = () => {
                           style={styles.noOrdersIcon}
                         />
                         <Text style={styles.groupTitle}>
-                          {item.branchName ? item.branchName : "branchName"}
+                          {item.branchName ? item.branchName : "Seller"}
                         </Text>
+                        <View style={styles.rightContainer}>
+                          <Text style={styles.groupTitleRight}>
+                            {item.createdAt
+                              ? formatDate(item.createdAt.toDate())
+                              : ""}
+                          </Text>
+                        </View>
                       </View>
                       {filteredProductData.map((orders, index) => (
                         <View key={index}>
@@ -963,19 +1009,18 @@ const OrderScreen = () => {
                                           onPress={() =>
                                             handleRateScreen(item.id)
                                           }
+                                          style={styles.rateButton}
                                         >
-                                          <View style={styles.rateButton}>
-                                            <Text style={styles.rateText}>
-                                              {item.isRated
-                                                ? "VIEW RATE"
-                                                : "RATE"}
-                                            </Text>
-                                          </View>
+                                          <Text style={styles.rateText}>
+                                            {item.isRated
+                                              ? "VIEW RATE"
+                                              : "RATE"}
+                                          </Text>
                                         </TouchableOpacity>
                                         <View style={{ marginHorizontal: 5 }} />
                                         <TouchableOpacity
                                           onPress={() =>
-                                            handleViewOrderScreen(item.id)
+                                            handleOrderPlacedScreen(item.id)
                                           }
                                           style={styles.viewButton}
                                         >

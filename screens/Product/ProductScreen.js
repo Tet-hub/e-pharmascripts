@@ -286,13 +286,15 @@ const ProductScreen = ({ navigation, route }) => {
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
       ) : filteredProduct.length !== 0 ? (
-        <FlatList
-          numColumns={2}
-          scrollEnabled={false}
-          data={filteredProduct}
-          keyExtractor={(item) => item.id}
-          renderItem={renderProducts}
-        />
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <FlatList
+            numColumns={2}
+            scrollEnabled={false}
+            data={filteredProduct}
+            keyExtractor={(item) => item.id}
+            renderItem={renderProducts}
+          />
+        </View>
       ) : (
         <View style={styles.noOrdersCont}>
           <View style={styles.noOrders}>

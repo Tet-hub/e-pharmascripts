@@ -19,6 +19,8 @@ import ProfileScreen from "../screens/Profile/ProfileScreen";
 import MenuScreen from "../screens/Menu/MenuScreen";
 import RateScreen from "../screens/Rate/RateScreen";
 import ViewCompletedOrderScreen from "../screens/ViewOrder/ViewCompletedOrderScreen";
+import ViewOrderScreen from "../screens/ViewOrder/ViewOrderScreen";
+import ViewCancelledOrderScreen from "../screens/ViewOrder/ViewCancelledOrderScreen";
 import ToValidateScreen from "../screens/ToValidate/ToValidateScreen";
 import PlaceOrderScreen from "../screens/PlaceOrder/PlaceOrderScreen";
 import ProductDetailScreen from "../screens/ProductDetails/ProductDetailScreen";
@@ -192,6 +194,24 @@ const RootStack = () => {
             }}
           />
           <Stack.Screen
+            name="ViewOrderScreen"
+            component={ViewOrderScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ViewCancelledOrderScreen"
+            component={ViewCancelledOrderScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
             name="ToValidateScreen"
             component={ToValidateScreen}
             options={{
@@ -334,7 +354,6 @@ const RootStack = () => {
               headerTintColor: "black",
             }}
           />
-          
         </Stack.Navigator>
       </MessageProvider>
     </TailwindProvider>
