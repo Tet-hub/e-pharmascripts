@@ -74,6 +74,7 @@ const Login = ({ navigation }) => {
           profileImageValue,
           `${customerData.firstName} ${customerData.lastName}`
         );
+
         signIn(response.user.uid); // Update the user's token in the context
       } else {
         console.log("User document does not exist");
