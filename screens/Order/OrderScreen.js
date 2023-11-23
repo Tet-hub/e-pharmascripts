@@ -894,7 +894,7 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : orderData.length != 0 ? (
+          ) : orderData.length === 0 ? (
             <View style={styles.noOrdersCont}>
               <View style={styles.noOrders}>
                 <Iconify
