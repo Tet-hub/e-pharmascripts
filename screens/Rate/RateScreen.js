@@ -144,7 +144,7 @@ const RateScreen = () => {
         pharmacyRating,
         reviewDescription,
         sellerId: seller,
-        userId: customerId,
+        customerId: customerId,
         orderId: orderId,
       };
 

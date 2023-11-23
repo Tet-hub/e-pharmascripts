@@ -100,6 +100,13 @@ const styles = StyleSheet.create({
     marginLeft: 35,
     marginTop: 10,
   },
+  note: {
+    fontStyle: "italic",
+    margin: 5,
+    alignSelf: "center",
+    color: "#808080",
+    fontWeight: 500,
+  },
   ratingsView: {
     flexDirection: "row",
     alignItems: "center",

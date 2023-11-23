@@ -170,16 +170,16 @@ const ToValidateScreen = ({ navigation, route }) => {
         console.error("User data, product data, or seller data is missing.");
         return;
       }
-      if (!user.address) {
-        toast.show("Please set your address before placing an order.", {
-          type: "normal",
-          placement: "bottom",
-          duration: 4000,
-          offset: 10,
-          animationType: "slide-in",
-        });
-        return;
-      }
+      // if (!user.address) {
+      //   toast.show("Please set your address before placing an order.", {
+      //     type: "normal",
+      //     placement: "bottom",
+      //     duration: 4000,
+      //     offset: 10,
+      //     animationType: "slide-in",
+      //   });
+      //   return;
+      // }
       const orderCreatedTimestamp = Timestamp.now();
       let totalQuantity = 0;
       if (Array.isArray(item)) {
@@ -247,7 +247,6 @@ const ToValidateScreen = ({ navigation, route }) => {
             quantity: product.quantity,
             price: product.price,
             productImg: product.img,
-            requiresPrescription: product.requiresPrescription,
             productSubTotalPrice: subtotal.toFixed(2),
           };
 
@@ -279,8 +278,6 @@ const ToValidateScreen = ({ navigation, route }) => {
           quantity: quantity,
           price: item.price,
           productImg: item.img,
-          requiresPrescription: item.requiresPrescription,
-          prescriptionImg: "Image not available",
           productSubTotalPrice: subtotal.toFixed(2),
         };
 
@@ -435,13 +432,13 @@ const ToValidateScreen = ({ navigation, route }) => {
             <View style={styles.delInfoContainer}>
               <View style={styles.delArrowContainer}>
                 <Text style={styles.deliveryTitle}>Delivery Address</Text>
-                <TouchableOpacity onPress={handlePress}>
+                {/* <TouchableOpacity onPress={handlePress}>
                   <Iconify
                     icon="iconoir:nav-arrow-right"
                     size={25}
                     color="black"
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
               {user ? (
                 <React.Fragment>

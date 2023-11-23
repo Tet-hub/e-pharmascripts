@@ -95,7 +95,7 @@ const ViewCompletedOrderScreen = () => {
       <View style={styles.productInfoContainer}>
         <View>
           <Text style={styles.productName}>{item.productName || ""}</Text>
-          {item.requiresPrescription === "Yes" ? (
+          {item.prescription === "Yes" ? (
             <Text style={styles.productReq}>[ Requires Prescription ]</Text>
           ) : (
             <Text style={styles.productReq}></Text>
