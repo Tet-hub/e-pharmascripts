@@ -39,7 +39,7 @@ const AddressScreen = () => {
         const unsubscribe = onSnapshot(customerDocRef, (doc) => {
           if (doc.exists()) {
             const customerData = doc.data();
-            const address = customerData.customerAddress;
+            const address = customerData.address;
             setCustomerAddress(address);
           }
         });
@@ -106,6 +106,7 @@ const AddressScreen = () => {
         query={{
           key: "AIzaSyAErVuJDetH9oqE36Gx_sBDBv2JIUbXcJ4",
           language: "en",
+          components: "country:ph",
         }}
         styles={{
           textInputContainer: {

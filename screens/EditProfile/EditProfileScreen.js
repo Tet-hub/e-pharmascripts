@@ -435,7 +435,7 @@ const EditProfileScreen = () => {
                 ? formatDate(selectedDate)
                 : updateUserData.dateOfBirth
                 ? formatFetchDate(updateUserData.dateOfBirth)
-                : ""}
+                : "Select birthdate"}
             </Text>
 
             {isEditingEnabled && fetchedStatus !== "Verified" && (
