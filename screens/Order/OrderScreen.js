@@ -333,8 +333,7 @@ const OrderScreen = () => {
                                             </Text>
                                           </View>
                                           <View>
-                                            {order.requiresPrescription ===
-                                            "Yes" ? (
+                                            {order.prescription === "Yes" ? (
                                               <Text style={styles.productReq}>
                                                 [ Requires Prescription ]
                                               </Text>
@@ -487,8 +486,7 @@ const OrderScreen = () => {
                                               </Text>
                                             </View>
                                             <View>
-                                              {order.requiresPrescription ===
-                                              "Yes" ? (
+                                              {order.prescription === "Yes" ? (
                                                 <Text style={styles.productReq}>
                                                   [ Requires Prescription ]
                                                 </Text>
@@ -666,8 +664,7 @@ const OrderScreen = () => {
                                             </Text>
                                           </View>
                                           <View>
-                                            {order.requiresPrescription ===
-                                            "Yes" ? (
+                                            {order.prescription === "Yes" ? (
                                               <Text style={styles.productReq}>
                                                 [ Requires Prescription ]
                                               </Text>
@@ -815,8 +812,7 @@ const OrderScreen = () => {
                                             </Text>
                                           </View>
                                           <View>
-                                            {order.requiresPrescription ===
-                                            "Yes" ? (
+                                            {order.prescription === "Yes" ? (
                                               <Text style={styles.productReq}>
                                                 [ Requires Prescription ]
                                               </Text>
@@ -963,8 +959,7 @@ const OrderScreen = () => {
                                             </Text>
                                           </View>
                                           <View>
-                                            {order.requiresPrescription ===
-                                            "Yes" ? (
+                                            {order.prescription === "Yes" ? (
                                               <Text style={styles.productReq}>
                                                 [ Requires Prescription ]
                                               </Text>

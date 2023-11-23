@@ -34,6 +34,8 @@ const BranchDetailsScreen = () => {
   const [branch, setBranch] = useState("");
   const [address, setAddress] = useState("");
   const [img, setImage] = useState(null);
+  const [timeClose, setTimeClose] = useState("");
+  const [timeOpen, setTimeOpen] = useState("");
   const [pharmacyRating, setPharmacyRating] = useState(0);
   //rater
   const [raterFirstName, setRaterFirstName] = useState("");
@@ -46,6 +48,12 @@ const BranchDetailsScreen = () => {
   const [showAllReviews, setShowAllReviews] = useState(false);
 
   //console.log("SELLER", sellerId);
+  function convertToAmPm(time24) {
+    const [hours, minutes] = time24.split(":");
+    let period = hours >= 12 ? "PM" : "AM";
+    let hour = hours % 12 || 12;
+    return `${hour}:${minutes} ${period}`;
+  }
 
   const fetchUserData = async (userId) => {
     try {
@@ -119,6 +127,14 @@ const BranchDetailsScreen = () => {
           setAddress(sellerInfo.address);
           setBranch(sellerInfo.branch);
           setImage(sellerInfo.img);
+          if (sellerInfo.timeClose && sellerInfo.timeOpen) {
+            setTimeClose(convertToAmPm(sellerInfo.timeClose));
+            setTimeOpen(convertToAmPm(sellerInfo.timeOpen));
+          } else {
+            // Set default values or handle the case when time values are not available
+            setTimeClose(" Not Specified");
+            setTimeOpen("");
+          }
 
           // Fetch rating and review data
           fetchRatingAndReviewData();
@@ -239,6 +255,24 @@ const BranchDetailsScreen = () => {
             <Text style={styles.locationText}>Location/Address:</Text>
           </View>
           <Text style={styles.addressText}>{address}</Text>
+        </View>
+        <View>
+          <View style={styles.locationView}>
+            <Iconify
+              icon="icomoon-free:hour-glass"
+              size={21}
+              color="#EC6F56"
+              style={{ marginRight: 10 }}
+            />
+            <Text style={styles.locationText}>Store Hours:</Text>
+          </View>
+          <Text style={styles.addressText}>
+            {timeOpen} - {timeClose}
+          </Text>
+          <Text style={styles.note}>
+            Note: Orders created after store hours will be delivered on the
+            following day.
+          </Text>
         </View>
 
         <View style={styles.ratingsView}>

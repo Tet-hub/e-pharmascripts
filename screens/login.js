@@ -63,20 +63,27 @@ const Login = ({ navigation }) => {
       const userDocSnapshot = await getDoc(userDocRef);
       if (userDocSnapshot.exists()) {
         const customerData = userDocSnapshot.data();
-        const profileImageValue =
-          customerData.profileImage ||
-          "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
+        const { status } = customerData;
 
-        const asynch = await saveAuthToken(
-          customerData.email,
-          response.user.uid,
-          userId,
-          profileImageValue,
-          `${customerData.firstName} ${customerData.lastName}`
-        );
-        signIn(response.user.uid); // Update the user's token in the context
+        if (status === "Disabled") {
+          setError("Your account is disabled.");
+        } else {
+          const profileImageValue =
+            customerData.profileImage ||
+            "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
+
+          const asynch = await saveAuthToken(
+            customerData.email,
+            response.user.uid,
+            userId,
+            profileImageValue,
+            `${customerData.firstName} ${customerData.lastName}`
+          );
+          signIn(response.user.uid); // Update the user's token in the context
+        }
       } else {
         console.log("User document does not exist");
+        setError("Only customers can log in.");
       }
       console.log("UserId fetched from login", userId);
     } catch (error) {
