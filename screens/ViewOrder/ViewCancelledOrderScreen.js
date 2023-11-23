@@ -11,15 +11,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRoute } from "@react-navigation/native";
 import { Iconify } from "react-native-iconify";
-import styles from "./stylesheet";
+import styles from "./viewCancelledOrderStyles";
 import { BASE_URL } from "../../src/api/apiURL";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
-// import { ScrollView } from "react-native-gesture-handler";
 
-const ViewCompletedOrderScreen = () => {
-  const route = useRoute();
+const ViewCancelledOrderScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
   const deviceWidth = Dimensions.get("window").width;
   const [loading, setLoading] = useState(true);
@@ -154,16 +151,15 @@ const ViewCompletedOrderScreen = () => {
                 keyExtractor={(item) => item.id.toString()}
                 scrollEnabled={false}
               />
-              <View style={styles.separator2} />
+              {/* <View style={styles.separator2} />
 
               <View style={styles.pmentContainer}>
-                <Text style={styles.methodText}>Payment Method :</Text>
-                <View style={styles.choseMethodTextContainer}>
-                  <Text style={styles.choseMethodText}>
-                    {item.paymentMethod || ""}
-                  </Text>
-                </View>
-              </View>
+                <Text style={styles.methodText}>Order has been cancelled:</Text>
+                <Text style={styles.reminderText}>
+                  Your order has been cancelled. We apologize for any
+                  inconvenience caused during your experience with our service.
+                </Text>
+              </View> */}
               <View style={styles.separator2} />
               <View style={styles.pmentDetailsContainer}>
                 <Text style={styles.pmentDetailsText}>Payment Details :</Text>
@@ -189,12 +185,17 @@ const ViewCompletedOrderScreen = () => {
                   {item.totalPrice || ""}
                 </Text>
               </View>
-              {/* <View style={styles.separator3} />
+              <View style={styles.separator3} />
               <View>
-                <TouchableOpacity style={styles.removerOrderButton}>
-                  <Text style={styles.removerOrderText}>Remove Order</Text>
-                </TouchableOpacity>
-              </View> */}
+                <View style={styles.removerOrderButton}>
+                  <Iconify
+                    icon="pajamas:canceled-circle"
+                    size={30}
+                    color="red"
+                  />
+                  <Text style={styles.removerOrderText}>ORDER CANCELLED</Text>
+                </View>
+              </View>
             </React.Fragment>
           )}
         </View>
@@ -203,4 +204,4 @@ const ViewCompletedOrderScreen = () => {
   );
 };
 
-export default ViewCompletedOrderScreen;
+export default ViewCancelledOrderScreen;

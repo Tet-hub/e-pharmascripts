@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   separator2: {
-    marginTop: 60,
+    marginTop: 20,
     height: 1,
     width: "85%",
     backgroundColor: "#D9D9D9",
@@ -117,8 +117,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   methodText: {
+    color: "green",
     fontWeight: 500,
-    fontSize: 14,
+    fontSize: 20,
+    marginBottom: 10,
   },
   choseMethodTextContainer: {
     backgroundColor: "#8E8E8E",
@@ -177,18 +179,27 @@ const styles = StyleSheet.create({
     marginRight: 11,
   },
   removerOrderButton: {
-    backgroundColor: "#DC3642",
-    borderRadius: 20,
+    // backgroundColor: "#DC3642",
+    borderRadius: 15,
     padding: 15,
     width: "90%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     alignSelf: "center",
     marginBottom: 15,
   },
   removerOrderText: {
-    color: "white",
+    marginLeft: 10,
+    color: "#DC3642",
     fontSize: 16,
     fontWeight: 600,
     textAlign: "center",
+  },
+  reminderText: {
+    fontSize: 15,
+    fontWeight: 200,
+    fontStyle: "italic",
   },
   loadingContainer: {
     flex: 1,
@@ -196,6 +207,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  destructiveButton: {
+    backgroundColor: "red", // Change the background color to red (or any color indicating danger)
+    // Add more styles as needed (e.g., padding, border-radius, etc.)
   },
 });
 

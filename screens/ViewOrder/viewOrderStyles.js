@@ -181,6 +181,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 15,
     width: "90%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     alignSelf: "center",
     marginBottom: 15,
   },
@@ -189,6 +192,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 600,
     textAlign: "center",
+    marginLeft: 5,
+  },
+  reminderText: {
+    fontSize: 12,
+    fontWeight: 200,
+    fontStyle: "italic",
   },
   loadingContainer: {
     flex: 1,
@@ -196,6 +205,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  destructiveButton: {
+    backgroundColor: "red", // Change the background color to red (or any color indicating danger)
+    // Add more styles as needed (e.g., padding, border-radius, etc.)
   },
 });
 

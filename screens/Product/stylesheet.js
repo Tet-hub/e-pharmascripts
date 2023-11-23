@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
     color: "#3C3C3C",
   },
   container: {
+    flex: 1,
     width: "95%",
     alignSelf: "center",
   },
@@ -51,18 +52,20 @@ const styles = StyleSheet.create({
   //Product Container/Card
 
   productContainer: {
-    width: "45%",
-    alignSelf: "center",
+    paddingHorizontal: 8,
     paddingVertical: 10,
-    marginHorizontal: 4,
+    justifyContent: "center",
   },
   productCard: {
-    backgroundColor: "white",
-    height: 250,
     borderRadius: 15,
-    padding: 17,
-    width: 180,
-    elevation: 2,
+    backgroundColor: "white",
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+    marginBottom: 12,
   },
   productName: {
     color: "black",

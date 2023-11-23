@@ -14,7 +14,6 @@ const styles = StyleSheet.create({
   },
 
   productContainer: {
-    // Added to provide some spacing
     // backgroundColor: "white",
     borderRadius: 10,
     // elevation: 3,
@@ -23,7 +22,7 @@ const styles = StyleSheet.create({
   },
   productDataContainer: {
     flexDirection: "row",
-    alignItems: "center", // Added to vertically align the image and info
+    alignItems: "center",
     paddingHorizontal: 16,
     height: 120,
   },
@@ -163,9 +162,11 @@ const styles = StyleSheet.create({
   },
   rateButton: {
     backgroundColor: "#DCDCDC",
-    elevation: 4,
+    // elevation: 4,
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 10,
-    marginTop: 4,
+    marginTop: 9,
   },
   //image style for completed screen
   imageContainerCompletedScreen: {
@@ -262,6 +263,16 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     fontWeight: 500,
+  },
+  rightContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+    marginRight: 7,
+  },
+  groupTitleRight: {
+    justifyContent: "flex-end",
+    fontSize: 14,
+    color: "#778899",
   },
   orderTotalText: {
     fontWeight: 400,
