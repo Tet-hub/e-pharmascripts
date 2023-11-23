@@ -38,7 +38,7 @@ const { orange } = Colors;
 import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { authentication } from "../firebase/firebase";
-import { doc, getDoc, userDocRef } from 'firebase/firestore';
+import { doc, getDoc, userDocRef } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 //firebase
 import { AuthContext } from "../src/context";
@@ -57,32 +57,36 @@ const Login = ({ navigation }) => {
     setIsLoading(true); // Start loading
     try {
       const auth = authentication;
-      await signInWithEmailAndPassword(auth, email, password);
+      const response = await signInWithEmailAndPassword(auth, email, password);
       const user = auth.currentUser;
       const userId = user.uid;
-      const userDocRef = doc(db, 'customers', userId);
+      const userDocRef = doc(db, "customers", userId);
       const userDocSnapshot = await getDoc(userDocRef);
       if (userDocSnapshot.exists()) {
         const customerData = userDocSnapshot.data();
-        const profileImageValue = customerData.profileImage || "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
+        const profileImageValue =
+          customerData.profileImage ||
+          "https://firebasestorage.googleapis.com/v0/b/e-pharmascripts.appspot.com/o/profile%2Fdefault-profiel-image.jpg?alt=media&token=778d7daf-739a-4aef-bef2-e4ee6907db3f";
 
-        await saveAuthToken(
+        const asynch = await saveAuthToken(
           customerData.email,
-          (await user.getIdToken()).toString(),
+          response.user.uid,
           userId,
           profileImageValue,
           `${customerData.firstName} ${customerData.lastName}`
         );
-
-        signIn((await user.getIdToken()).toString()); // Update the user's token in the context
-  
+        console.log("asyncStoraage:", asynch);
+        signIn(response.user.uid); // Update the user's token in the context
       } else {
         console.log("User document does not exist");
       }
       console.log("UserId fetched from login", userId);
     } catch (error) {
       console.log("Error signing in:", error);
-      if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+      if (
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/user-not-found"
+      ) {
         setError("Invalid credentials");
       } else {
         setError("Log In failed!");

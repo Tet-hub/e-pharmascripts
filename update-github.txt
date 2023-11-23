@@ -1,6 +1,6 @@
 git add *//Git stages all files and changes in the current directory 
 //or
-git add . a//add untracked files
+git add . //add untracked files
 
 git commit -m "Updated source"
 git push //for branch

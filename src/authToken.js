@@ -69,10 +69,10 @@ export const getAuthToken = async () => {
     const customerName = await AsyncStorage.getItem("customerName");
     console.log(
       "Retrieved from AsyncStorage/getAuthToken:",
-      // email,
-      // token,
+      email,
+      token,
       userId,
-      // profileImage,
+      profileImage,
       customerName
     );
     return { email, token, userId };
@@ -87,8 +87,10 @@ export const deleteAuthToken = async () => {
     const email = await AsyncStorage.deleteItem("email");
     const token = await AsyncStorage.deleteItem("token");
     const userId = await AsyncStorage.deleteItem("userId");
+    const profileImage = await AsyncStorage.deleteItem("profileImage");
+    const customerName = await AsyncStorage.deleteItem("customerName");
     console.log(
-      "Retrieved email, token and uid from AsyncStorage/getAuthToken:",
+      "Deleted email, token and uid from AsyncStorage/getAuthToken:",
       email,
       token,
       userId
