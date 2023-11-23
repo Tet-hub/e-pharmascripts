@@ -894,13 +894,14 @@ const OrderScreen = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
-          ) : orderData.length === 0 ? (
+          ) : orderData.length != 0 ? (
             <View style={styles.noOrdersCont}>
               <View style={styles.noOrders}>
                 <Iconify
                   icon="fluent-mdl2:deactivate-orders"
                   size={50}
                   color="black"
+                  style={styles.noOrdersIcon}
                 />
                 <Text>No Orders Yet</Text>
               </View>
