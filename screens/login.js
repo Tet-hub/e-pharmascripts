@@ -34,7 +34,6 @@ import axios from "axios";
 const { darkLight } = Colors;
 const { orange } = Colors;
 
-//keyboard avoiding wrapper
 import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { authentication } from "../firebase/firebase";

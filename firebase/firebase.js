@@ -23,7 +23,6 @@ const firebaseConfig = {
   appId: "1:1015681631923:web:a77aa06c1a7be16bd812c6",
   measurementId: "G-YTL888T38X",
 };
-
 // Initialize Firebase
 // Initialize Firebase Authentication and get a reference to the service
 const app = initializeApp(firebaseConfig);
