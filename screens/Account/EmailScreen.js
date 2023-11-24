@@ -1,16 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useNavigation } from "@react-navigation/native";
 import { Iconify } from "react-native-iconify";
 
 const EmailScreen = () => {
-    
+    const navigation = useNavigation();
 
     const handleVerifyEmail = () => {
-        
+      navigation.navigate("VerifyEmailScreen");
     };
 
     const handleChangeEmail = () => {
-        
+      navigation.navigate("ChangeEmailScreen");
     };
 
     return (
