@@ -40,6 +40,8 @@ import AddressScreen from "../screens/Address/AddressScreen";
 import EmailScreen from "../screens/Account/EmailScreen";
 import SecurityScreen from "../screens/Account/SecurityScreen";
 import ChangePasswordScreen from "../screens/Account/ChangePasswordScreen";
+import ChangeEmailScreen from "../screens/Account/ChangeEmailScreen";
+import VerifyEmailScreen from "../screens/Account/VerifyEmailScreen";
 
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
@@ -354,6 +356,21 @@ const RootStack = () => {
               headerTintColor: "black",
             }}
           />
+          <Stack.Screen
+            name="ChangeEmailScreen"
+            component={ChangeEmailScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          /><Stack.Screen
+          name="VerifyEmailScreen"
+          component={VerifyEmailScreen}
+          options={{
+            headerTitle: () => <View></View>,
+            headerTintColor: "black",
+          }}
+        />
         </Stack.Navigator>
       </MessageProvider>
     </TailwindProvider>

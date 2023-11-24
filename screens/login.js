@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik"; // Import Formik
 import { Octicons, Ionicons } from "@expo/vector-icons"; //Icons
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import {
   StyledContainer,
   InnerContainer,
@@ -35,14 +35,16 @@ const { darkLight } = Colors;
 const { orange } = Colors;
 
 import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import emailValidator from 'email-validator';
 import { authentication } from "../firebase/firebase";
-import { doc, getDoc, userDocRef } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 //firebase
 import { AuthContext } from "../src/context";
 import { saveAuthToken } from "../src/authToken";
 import { BASE_URL, EMU_URL } from "../src/api/apiURL";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const Login = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
@@ -51,6 +53,37 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const { signIn } = React.useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleForgot = async () => {
+    try {
+      if (!email) {
+        console.log('Type your email first');
+        Alert.alert("Blank Email", "Type your email first");
+        return;
+      }
+      if (!emailValidator.validate(email)) {
+        Alert.alert("Invalid Email", "Please enter a valid email address.");
+        return;
+      }
+  
+      // Check if the email exists in the "customers" collection
+      const customersCollectionRef = collection(db, 'customers');
+      const q = query(customersCollectionRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+  
+      if (querySnapshot.empty) {
+        // Email does not exist in the "customers" collection
+        Alert.alert('Invalid Email', 'This email is not associated with a customers account.');
+      } else {
+        // Email exists in the "customers" collection, send password reset email
+        await sendPasswordResetEmail(authentication, email);
+        Alert.alert('Password Reset Email Sent', 'Check your email for further instructions.');
+      }
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      Alert.alert('Error', 'Failed to send password reset email. Please try again later.');
+    }
+  };  
 
   const SignInUser = async () => {
     setIsLoading(true); // Start loading
@@ -167,9 +200,12 @@ const Login = ({ navigation }) => {
                   setHidePassword={setHidePassword}
                   style={{ marginTop: -15 }}
                 />
-                <MsgBox style={{ marginTop: 3, marginBottom: 10 }}>
-                  Forgot password?
-                </MsgBox>
+                <TouchableOpacity style={{ marginTop: 3, marginBottom: 10 }} onPress={handleForgot}>
+                  <MsgBox>
+                    Forgot password?
+                  </MsgBox>
+                </TouchableOpacity>
+                  
                 {}
                 <StyledButton onPress={SignInUser} disabled={isLoading}>
                   {isLoading ? (

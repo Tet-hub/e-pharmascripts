@@ -32,3 +32,5 @@ npm install react-native-credit-card-input
 nov 22
 npm install react-native-root-toast
 
+nov 24
+npm install email-validator

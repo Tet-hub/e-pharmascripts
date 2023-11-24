@@ -104,7 +104,7 @@ const ChangePasswordScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Text style={styles.text}>Change Password</Text>
-
+        <View style={styles.line} />
         <Text
           style={{
             marginTop: 20,
@@ -192,6 +192,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  line: {
+    height: 0.5,
+    width: "100%",
+    backgroundColor: "#8E8E8E",
+    marginTop: 20,
   },
 });
 export default ChangePasswordScreen;
