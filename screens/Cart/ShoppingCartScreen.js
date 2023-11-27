@@ -56,7 +56,7 @@ const ShoppingCartScreen = () => {
             const productSnapshot = await getDoc(productDocumentRef);
             if (productSnapshot.exists()) {
               const productData = productSnapshot.data();
-              const sellerId = productData.createdBy;
+              const sellerId = productData.sellerId;
               const sellerDocumentRef = doc(db, "sellers", sellerId);
               const sellerSnapshot = await getDoc(sellerDocumentRef);
               if (sellerSnapshot.exists()) {

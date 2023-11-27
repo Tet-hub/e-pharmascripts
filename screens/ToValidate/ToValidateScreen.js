@@ -48,6 +48,8 @@ const ToValidateScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [sellerData, setSellerData] = useState(null);
   const [prescription, setPrescriptionRequired] = useState();
+  const [btnLoading, setBtnLoading] = useState(false);
+
   const productId = route.params?.productId;
   // const quantity = route.params?.quantity;
   const { cartId } = route.params;
@@ -71,9 +73,9 @@ const ToValidateScreen = ({ navigation, route }) => {
             "products"
           );
           setQuantity(route.params?.quantity);
-          if (productData && productData.createdBy) {
+          if (productData && productData.sellerId) {
             const sellerData = await fetchSingleDocumentById(
-              productData.createdBy,
+              productData.sellerId,
               "sellers"
             );
             if (sellerData) {
@@ -110,7 +112,7 @@ const ToValidateScreen = ({ navigation, route }) => {
             // setQuantity(quantity);
             // console.log("quantity: ", fetchedCartQuantity);
             // Fetch seller data for each product
-            const sellerId = fetchedProductData[0]?.createdBy;
+            const sellerId = fetchedProductData[0]?.sellerId;
             if (sellerId) {
               const seller = await fetchSingleDocumentById(sellerId, "sellers");
               setSellerData(seller);
@@ -164,6 +166,7 @@ const ToValidateScreen = ({ navigation, route }) => {
 
   //handle place order for products checked out from productDetailsScreen
   const handlePlaceOrderScreen = async () => {
+    setBtnLoading(true);
     try {
       // Ensure both user data and product data are available
       if (!user || !item || !sellerData) {
@@ -212,7 +215,7 @@ const ToValidateScreen = ({ navigation, route }) => {
       const data = {
         customerId: user.id,
         customerName: `${user.firstName} ${user.lastName}`,
-        deliveryAddress: user.customerAddress,
+        deliveryAddress: user.address,
         customerPhoneNumber: user.phone,
         totalPrice: totalPrice.toFixed(2),
         sellerId: sellerData.id,
@@ -337,6 +340,8 @@ const ToValidateScreen = ({ navigation, route }) => {
       navigation.navigate("OrderScreen");
     } catch (error) {
       console.error("Error placing the order:", error);
+    } finally {
+      setBtnLoading(false);
     }
   };
 
@@ -487,8 +492,8 @@ const ToValidateScreen = ({ navigation, route }) => {
                     {user.firstName} {user.lastName}
                   </Text>
                   <Text style={styles.customerNumber}>{user.phone}</Text>
-                  {user.customerAddress ? (
-                    <Text>{user.customerAddress}</Text>
+                  {user.address ? (
+                    <Text>{user.address}</Text>
                   ) : (
                     <Text style={styles.noCustomerAddress}>
                       Delivery address not specified
@@ -648,8 +653,13 @@ const ToValidateScreen = ({ navigation, route }) => {
                 <TouchableOpacity
                   style={styles.ordernowButton}
                   onPress={handlePlaceOrderScreen}
+                  disabled={btnLoading}
                 >
-                  <Text style={styles.ordernowText}>ORDER NOW</Text>
+                  {btnLoading ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <Text style={styles.ordernowText}>ORDER NOW</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>

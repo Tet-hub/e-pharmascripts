@@ -41,9 +41,9 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [branches, setBranches] = useState([]);
   const productId = route.params?.productId;
   const toast = useToast();
-  const [createdBy, setCreatedBy] = useState(null); // Initialize createdBy state
+  const [sellerId, setSellerId] = useState(null); // Initialize sellerId state
 
-  // First useEffect to fetch product data and set createdBy
+  // First useEffect to fetch product data and set sellerId
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -55,8 +55,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
             const productData = await response.json();
             setProductData(productData);
 
-            // Set the createdBy value obtained from productData
-            setCreatedBy(productData.createdBy);
+            // Set the sellerId value obtained from productData
+            setSellerId(productData.sellerId);
           } else {
             console.log("API request failed with status:", response.status);
           }
@@ -71,14 +71,14 @@ const ProductDetailScreen = ({ navigation, route }) => {
     fetchData();
   }, [productId]);
 
-  //Fetch seller details based on createdBy
+  //Fetch seller details based on sellerId
   useEffect(() => {
-    if (createdBy) {
+    if (sellerId) {
       const fetchBranches = async () => {
-        //console.log(`Createdby before conditition: ${createdBy}`);
+        //console.log(`sellerId before conditition: ${sellerId}`);
         try {
           // Construct the Firestore document reference by its ID
-          const sellerDocRef = doc(db, "sellers", createdBy);
+          const sellerDocRef = doc(db, "sellers", sellerId);
 
           // Fetch the seller document
           const sellerDocSnap = await getDoc(sellerDocRef);
@@ -87,7 +87,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
             const sellerData = sellerDocSnap.data();
             setBranches(sellerData);
           } else {
-            console.log("Seller document not found for createdBy:", createdBy);
+            console.log("Seller document not found for sellerId:", sellerId);
           }
         } catch (error) {
           console.log("Error fetching seller document:", error);
@@ -96,7 +96,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
       fetchBranches();
     }
-  }, [createdBy]);
+  }, [sellerId]);
 
   const handleIncrement = () => {
     if (quantity < item.stock) {
@@ -130,7 +130,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         quantity,
         // productName: item.productName,
         // price: item.price, //should i save the current price when the user
-        sellerId: item.createdBy,
+        sellerId: item.sellerId,
         // img: item.img,
         // requiresPrescription: item.requiresPrescription,
         // category: item.category,
@@ -211,7 +211,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     }
   };
   const handleSellerInfo = async () => {
-    navigation.navigate("BranchDetailsScreen", { sellerId: createdBy });
+    navigation.navigate("BranchDetailsScreen", { sellerId: sellerId });
   };
   // Initial check if the product is in favorites
   useEffect(() => {
@@ -366,7 +366,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                   // img: branches ? branches.img : null,
                   name: branches.displayName,
                   img: branches.img,
-                  sellerId: item.createdBy,
+                  sellerId: item.sellerId,
                   sellerBranch: branches.branch,
                 })
               }

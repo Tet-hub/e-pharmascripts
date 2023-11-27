@@ -87,7 +87,7 @@ const FavoritesScreen = ({ navigation, route }) => {
   //     const productsCollection = collection(db, "products");
   //     const productQuery = query(
   //       productsCollection,
-  //       where("createdBy", "==", sellerId),
+  //       where("sellerId", "==", sellerId),
   //       where("productStatus", "==", "Display")
   //     );
   //     const productDocs = await getDocs(productQuery);
