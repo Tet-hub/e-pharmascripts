@@ -90,7 +90,7 @@ const ChatScreen = ({ route }) => {
 
         return () => unsubscribe();
       } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.log("Error fetching messages:", error);
       }
     };
 
@@ -110,7 +110,7 @@ const ChatScreen = ({ route }) => {
       // Set scrollToEnd to true to scroll to the end when a new message is sent
       setScrollToEnd(true);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.log("Error sending message:", error);
     }
   };
   const sameDate = (date1, date2) => {
@@ -131,16 +131,15 @@ const ChatScreen = ({ route }) => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
         quality: 1,
       });
 
       console.log("ImagePicker result:", result);
 
       // Check if the user canceled the image picker
-      if (result.canceled) {
-        console.log("Image picking canceled by the user");
-        return;
+      if (!result.canceled) {
+        const selectedAsset = result.assets[0];
+        setSelectedImageUrl(selectedAsset.uri);
       }
 
       // Check if assets array is defined and not empty
@@ -152,13 +151,13 @@ const ChatScreen = ({ route }) => {
           const downloadUrl = await uploadImageToFirebase(imageUri);
           sendMessage("", sellerId, downloadUrl);
         } else {
-          console.error("Image URI is undefined");
+          console.log("Image URI is undefined");
         }
       } else {
-        console.error("No assets selected from the image picker");
+        console.log("No assets selected from the image picker");
       }
     } catch (error) {
-      console.error("Error picking an image:", error);
+      console.log("Error picking an image:", error);
     }
   };
 
@@ -179,8 +178,7 @@ const ChatScreen = ({ route }) => {
 
       return downloadUrl;
     } catch (error) {
-      console.error("Error uploading image to Firebase Storage:", error);
-      throw error;
+      console.log("Error uploading image to Firebase Storage:", error);
     }
   };
 
@@ -210,8 +208,7 @@ const ChatScreen = ({ route }) => {
 
       await addDoc(messagesCollection, message);
     } catch (error) {
-      console.error("Error sending message:", error);
-      throw error;
+      console.log("Error sending message:", error);
     }
   };
 

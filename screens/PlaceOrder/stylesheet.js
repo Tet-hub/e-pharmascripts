@@ -200,14 +200,16 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   paymentMethodContainer: {
-    width: "80%",
+    width: "97%",
     alignSelf: "center",
     marginTop: 10,
+    marginLeft: -22,
   },
   pmText: {
     fontSize: 14,
     fontWeight: 500,
-    marginBottom: 10,
+    marginBottom: 4,
+    marginLeft: 30,
   },
   pmOptions: {
     flex: 1,

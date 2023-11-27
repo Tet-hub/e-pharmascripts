@@ -109,7 +109,7 @@ const ProductScreen = ({ navigation, route }) => {
       try {
         const conditions = [
           { fieldName: "sellerId", operator: "==", value: sellerId },
-          { fieldName: "sellerId", operator: ">", value: "0" },
+          { fieldName: "stock", operator: "in", value: ["0", 0] },
           {
             fieldName: "productStatus",
             operator: "in",
@@ -141,8 +141,7 @@ const ProductScreen = ({ navigation, route }) => {
           operator: "==",
           value: sellerId,
         },
-        { fieldName: "sellerId", operator: ">", value: "0" },
-
+        { fieldName: "stock", operator: "!=", value: "0" },
         {
           fieldName: "productStatus",
           operator: "in",
