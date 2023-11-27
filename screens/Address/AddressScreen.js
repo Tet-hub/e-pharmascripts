@@ -60,7 +60,7 @@ const AddressScreen = () => {
         const customerRef = doc(db, "customers", currentCustomerId);
         await setDoc(
           customerRef,
-          { customerAddress: selectedAddress.description },
+          { address: selectedAddress.description },
           { merge: true }
         );
 
