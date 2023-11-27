@@ -59,22 +59,22 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   productInformationText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 600,
-    color: "white",
-    textAlign: "center",
+    color: "black",
+    // textAlign: "center",
   },
   productInformationView: {
-    backgroundColor: "black",
-    borderRadius: 20,
-    padding: 15,
+    // backgroundColor: "black",
+    // borderRadius: 20,
+    // padding: 15,
     marginTop: 30,
     width: "50%",
   },
   informationView: {
     backgroundColor: "#F5F5F5",
     padding: 20,
-    marginTop: 30,
+    marginTop: 20,
     borderRadius: 10,
   },
   informationContent: {
@@ -162,6 +162,46 @@ const styles = StyleSheet.create({
     padding: 15,
     width: "85%",
     justifyContent: "space-between",
+  },
+  sellerInfo: {
+    flexDirection: "row",
+    padding: 10,
+    marginTop: 30,
+    borderRadius: 5,
+    borderWidth: 0.25,
+    // backgroundColor: "#BEBEBE",
+    // elevation: 0.5,
+  },
+  sellerImageCont: {
+    height: 70,
+    width: 70,
+  },
+  sellerImg: {
+    flex: 1,
+    resizeMode: "stretch",
+    width: "100%",
+    height: "100%",
+    borderRadius: 35,
+    borderWidth: 1,
+    borderColor: "#BEBEBE",
+  },
+  sellerTextCont: {
+    justifyContent: "center",
+  },
+  sellerText: {
+    fontSize: 15,
+    fontWeight: 700,
+    marginLeft: 10,
+  },
+  sellerRating: {
+    flexDirection: "row",
+    marginLeft: 10,
+    marginTop: 6,
+  },
+  sellerRatingIcon: {},
+  sellerRatingText: {
+    marginLeft: 5,
+    marginRight: 5,
   },
 });
 

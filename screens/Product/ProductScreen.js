@@ -108,7 +108,8 @@ const ProductScreen = ({ navigation, route }) => {
     const fetchInitialData = async () => {
       try {
         const conditions = [
-          { fieldName: "createdBy", operator: "==", value: sellerId },
+          { fieldName: "sellerId", operator: "==", value: sellerId },
+          { fieldName: "sellerId", operator: ">", value: "0" },
           {
             fieldName: "productStatus",
             operator: "in",
@@ -136,10 +137,12 @@ const ProductScreen = ({ navigation, route }) => {
     const setUpRealTimeListener = () => {
       const multipleConditions = [
         {
-          fieldName: "createdBy",
+          fieldName: "sellerId",
           operator: "==",
           value: sellerId,
         },
+        { fieldName: "sellerId", operator: ">", value: "0" },
+
         {
           fieldName: "productStatus",
           operator: "in",
@@ -168,7 +171,7 @@ const ProductScreen = ({ navigation, route }) => {
       const productsCollection = collection(db, "products");
       const productQuery = query(
         productsCollection,
-        where("createdBy", "==", sellerId),
+        where("sellerId", "==", sellerId),
         where("productStatus", "==", "Display")
       );
       const productDocs = await getDocs(productQuery);
