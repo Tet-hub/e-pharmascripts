@@ -170,16 +170,35 @@ const ToValidateScreen = ({ navigation, route }) => {
         console.error("User data, product data, or seller data is missing.");
         return;
       }
-      // if (!user.address) {
-      //   toast.show("Please set your address before placing an order.", {
-      //     type: "normal",
-      //     placement: "bottom",
-      //     duration: 4000,
-      //     offset: 10,
-      //     animationType: "slide-in",
-      //   });
-      //   return;
-      // }
+      if (Array.isArray(item)) {
+        for (const product of item) {
+          if (product.stock < product.quantity) {
+            toast.show(`Insufficient stock for ${product.productName}`, {
+              type: "normal ",
+              placement: "bottom",
+              duration: 3000,
+              offset: 10,
+              animationType: "slide-in",
+            });
+            return; // Exit the function if stock is insufficient
+          }
+        }
+      } else {
+        if (item.stock < quantity) {
+          // console.error(
+          //   `Quantity for ${item.productName} exceeds available stock.`
+          // );
+          // Display a message to the user indicating insufficient stock
+          toast.show(`Insufficient stock for ${item.productName}`, {
+            type: "normal ",
+            placement: "bottom",
+            duration: 3000,
+            offset: 10,
+            animationType: "slide-in",
+          });
+          return; // Exit the function if stock is insufficient
+        }
+      }
       const orderCreatedTimestamp = Timestamp.now();
       let totalQuantity = 0;
       if (Array.isArray(item)) {
@@ -189,7 +208,6 @@ const ToValidateScreen = ({ navigation, route }) => {
       } else if (quantity) {
         totalQuantity = quantity;
       }
-      // console.log("item quantity", totalQuantity);
       //"orders" collection
       const data = {
         customerId: user.id,
@@ -258,12 +276,35 @@ const ToValidateScreen = ({ navigation, route }) => {
           console.log("Order placed with ID:", orderId);
           console.log("ProductList ID", productListId);
           //updating the stock on the "products" collection
-          await updateById(
-            product.productId,
-            "products",
-            "stock",
-            product.stock - product.quantity
-          );
+          for (const product of item) {
+            // Ensure that each product has a valid productId
+            if (!product.productId) {
+              console.error("Product ID is missing or invalid.");
+              continue;
+            }
+
+            const updatedStock = product.stock - product.quantity;
+            // Update the stock on the "products" collection
+            await updateById(
+              product.productId,
+              "products",
+              "stock",
+              updatedStock
+            );
+
+            // Check if the updated stock is 0 and update the product status
+            if (updatedStock === 0) {
+              await updateById(
+                product.productId,
+                "products",
+                "status",
+                "Hidden"
+              );
+              console.log(
+                `Product ${product.productName} status updated to hidden.`
+              );
+            }
+          }
         }
       }
       //will be rendered if the item came from the "ProductDetailsScreen.js"

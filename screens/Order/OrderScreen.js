@@ -94,7 +94,10 @@ const OrderScreen = () => {
                 return true;
               } else if (trackerTab === 4 && item.status === "Cancelled") {
                 return true;
-              } else if (trackerTab === 5 && item.status === "Completed") {
+              } else if (
+                (trackerTab === 5 && item.status === "Completed") ||
+                item.status === "Payment Released"
+              ) {
                 return true;
               } else {
                 return false;
@@ -613,6 +616,7 @@ const OrderScreen = () => {
                   item.status === "Ordered" ||
                   item.status === "To Deliver" ||
                   item.status === "Pending Rider" ||
+                  item.status === "Rider Declined" ||
                   item.status === "On Delivery"
                 ) {
                   return (
@@ -908,7 +912,10 @@ const OrderScreen = () => {
               data={orderData}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => {
-                if (item.status === "Completed") {
+                if (
+                  item.status === "Payment Released" ||
+                  item.status === "Completed"
+                ) {
                   return (
                     <View key={item.id} style={styles.orderGroupContainer}>
                       <View style={styles.sellerCont}>

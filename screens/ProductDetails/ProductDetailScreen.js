@@ -210,7 +210,9 @@ const ProductDetailScreen = ({ navigation, route }) => {
       console.error("Error adding to favorites:", error);
     }
   };
-
+  const handleSellerInfo = async () => {
+    navigation.navigate("BranchDetailsScreen", { sellerId: createdBy });
+  };
   // Initial check if the product is in favorites
   useEffect(() => {
     const checkFavorite = async () => {
@@ -294,7 +296,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
             <View style={styles.productInformationView}>
               <Text style={styles.productInformationText}>
-                Product Information
+                Product Information:
               </Text>
             </View>
             <View style={styles.informationView}>
@@ -303,6 +305,38 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 {item.productInfo}
               </Text>
             </View>
+            <TouchableOpacity
+              style={styles.sellerInfo}
+              onPress={handleSellerInfo}
+            >
+              <View style={styles.sellerImageCont}>
+                {branches.img ? (
+                  <Image
+                    source={{ uri: branches.img }}
+                    style={styles.sellerImg}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../assets/img/default-image.jpg")}
+                    style={styles.sellerImg}
+                  />
+                )}
+              </View>
+              <View style={styles.sellerTextCont}>
+                <Text style={styles.sellerText}> {branches.branch || ""}</Text>
+                <View style={styles.sellerRating}>
+                  <Iconify
+                    icon="solar:star-bold"
+                    size={20}
+                    color="#FFD700"
+                    style={styles.sellerRatingIcon}
+                  />
+                  <Text style={styles.sellerRatingText}>
+                    {branches.ratings || "0"} / 5
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
             <View style={styles.quantityStockRow}>
               <View style={styles.quantityButton}>
                 <TouchableOpacity
