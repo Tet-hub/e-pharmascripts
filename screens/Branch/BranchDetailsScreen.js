@@ -19,7 +19,7 @@ import {
   query,
   where,
   isEmpty,
-  addDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { getAuthToken } from "../../src/authToken";
@@ -55,9 +55,9 @@ const BranchDetailsScreen = () => {
     return `${hour}:${minutes} ${period}`;
   }
 
-  const fetchUserData = async (userId) => {
+  const fetchUserData = async (customerId) => {
     try {
-      const userRef = doc(db, "customers", userId);
+      const userRef = doc(db, "customers", customerId);
       const userSnapshot = await getDoc(userRef);
 
       if (userSnapshot.exists()) {
@@ -93,10 +93,10 @@ const BranchDetailsScreen = () => {
         const ratingsAndReviews = [];
         for (const doc of querySnapshot.docs) {
           const data = doc.data();
-          const { pharmacyRating, reviewDescription, userId } = data;
+          const { pharmacyRating, reviewDescription, customerId } = data;
 
-          // Fetch user data for this userId
-          await fetchUserData(userId);
+          // Fetch user data for this customerId
+          await fetchUserData(customerId);
 
           // Add the review data to the array
           ratingsAndReviews.push({
@@ -174,6 +174,30 @@ const BranchDetailsScreen = () => {
 
   // Get the average rating
   const averageRating = calculateAverageRating();
+  /*
+  useEffect(() => {
+    const updateSellerRating = async () => {
+      try {
+        const sellerRef = doc(db, "sellers", sellerId);
+        const sellerSnapshot = await getDoc(sellerRef);
+
+        if (sellerSnapshot.exists()) {
+          await updateDoc(sellerRef, {
+            averageRating: averageRating,
+          });
+          console.log("Average rating updated in seller collection.");
+        } else {
+          console.log("Seller not found");
+        }
+      } catch (error) {
+        console.error("Error updating seller rating:", error);
+      }
+    };
+
+    if (averageRating !== 0) {
+      updateSellerRating();
+    }
+  }, [averageRating, sellerId]);*/
 
   return (
     <ScrollView style={styles.container}>

@@ -10,6 +10,7 @@ import {
   TextInput,
   Text,
   ToastAndroid,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useToast } from "react-native-toast-notifications";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
@@ -184,7 +185,7 @@ const Signup = ({ navigation }) => {
         dateOfBirth: null,
         profileImage: null,
         createdAt: Timestamp.fromDate(new Date()),
-        status: "Active",
+        status: "Unverified",
       };
 
       // Use 'doc' to specify a document ID (user's UID)

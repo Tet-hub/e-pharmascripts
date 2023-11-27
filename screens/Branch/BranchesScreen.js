@@ -102,7 +102,7 @@ const BranchesScreen = ({ navigation, route }) => {
 
         if (customerDocSnapshot.exists()) {
           const customerData = customerDocSnapshot.data();
-          const address = customerData.customerAddress;
+          const address = customerData.address;
           //console.log("Customer", address);
           setCustomerAddress(address);
         }
