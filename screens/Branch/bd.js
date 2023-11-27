@@ -186,6 +186,16 @@ const styles = StyleSheet.create({
   reviewTextView: {
     width: "100%",
   },
+  missingData: {
+    fontWeight: 400,
+    fontSize: 12,
+    marginLeft: 20,
+  },
+  missingDataDesc: {
+    fontWeight: 400,
+    fontSize: 12,
+    marginLeft: 20,
+  },
 });
 
 export default styles;

@@ -143,7 +143,7 @@ const SearchProductsScreen = ({ navigation, route }) => {
 
         if (customerDocSnapshot.exists()) {
           const customerData = customerDocSnapshot.data();
-          const address = customerData.customerAddress;
+          const address = customerData.address;
           setCustomerAddress(address);
         }
       } catch (error) {
@@ -164,7 +164,7 @@ const SearchProductsScreen = ({ navigation, route }) => {
         const sellerCollection = collection(db, "sellers");
         const productDocs = await getDocs(productQuery);
 
-        const sellerIds = productDocs.docs.map((doc) => doc.data().createdBy);
+        const sellerIds = productDocs.docs.map((doc) => doc.data().sellerId);
         //console.log("SELLERS", sellerIds);
 
         const sellerQuery = query(
@@ -206,11 +206,11 @@ const SearchProductsScreen = ({ navigation, route }) => {
 
         productDocs.forEach((doc) => {
           const data = doc.data();
-          const sellerId = data.createdBy;
+          const sellerId = data.sellerId;
           // console.log("Seller ID:", sellerId);
 
           const sellerBranch = sellerDataArray.find(
-            (sellerBranch) => sellerBranch.sellerId === String(data.createdBy)
+            (sellerBranch) => sellerBranch.sellerId === String(data.sellerId)
           );
 
           productDataArray.push({
@@ -236,6 +236,7 @@ const SearchProductsScreen = ({ navigation, route }) => {
         setDisplayAllProducts(productDataArray);
       } catch (error) {
         console.error("Error fetching all product data:", error);
+        setDisplayAllProducts([]);
       }
     };
 
@@ -364,7 +365,7 @@ const SearchProductsScreen = ({ navigation, route }) => {
       </View>
 
       <Text style={styles.productSelectionText}>Product Selection</Text>
-      {filteredProducts.length === 0 ? ( // Check if productData is empty
+      {filteredProducts.length === 0 ? (
         <Text style={styles.noResultsText}>No results matched</Text>
       ) : (
         <ScrollView style={{ marginBottom: 20 }}>
