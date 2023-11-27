@@ -90,18 +90,19 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   const handlePlaceOrder = async () => {
     try {
       if (!isPaymentMethodSelected) {
-        toast.show("Please Select a Payment Method", {
-          type: "normal",
-          placement: "bottom",
-          duration: 3000,
-          offset: 10,
-          animationType: "slide-in",
-        });
         return;
       }
+
       if (orderId && selectedPaymentMethod === "Card") {
         if (!card || !card.id) {
-          console.log("Error card");
+          // console.log("Error card");
+          toast.show(`Error card`, {
+            type: "normal ",
+            placement: "bottom",
+            duration: 3000,
+            offset: 10,
+            animationType: "slide-in",
+          });
           return;
         }
 
@@ -110,14 +111,15 @@ const PlaceOrderScreen = ({ navigation, route }) => {
           const paymentIntentId = response.paymentIntentId;
 
           console.log("Payment Intent ID:", paymentIntentId);
-          await updateById(orderId, "orders", "status", "Ordered");
+
+          // Update the order status only when payment is successful
           await updateById(
             orderId,
             "orders",
             "paymentMethod",
             selectedPaymentMethod
           );
-          console.log(`Value of paymentId before updating: ${paymentIntentId}`);
+
           const orderCreatedTimestamp = Timestamp.now();
           const orderDocRef = doc(db, "orders", orderId);
           await updateDoc(
@@ -125,18 +127,25 @@ const PlaceOrderScreen = ({ navigation, route }) => {
             {
               paymentId: paymentIntentId,
               orderedAt: orderCreatedTimestamp,
+              status: "Ordered", // Update the status here
             },
             { merge: true }
           );
+
           console.log("Order placed successfully!");
           navigation.navigate("OrderScreen");
         } catch (error) {
-          console.error("Error processing payment:", error);
+          // console.error("Error processing payment:", error);
+          toast.show(`Error processing payment`, {
+            type: "normal ",
+            placement: "bottom",
+            duration: 3000,
+            offset: 10,
+            animationType: "slide-in",
+          });
         }
-      }
-
-      console.log("sss id", orderId);
-      if (orderId && selectedPaymentMethod) {
+      } else if (orderId && selectedPaymentMethod) {
+        // Update the order status for other payment methods
         await updateById(orderId, "orders", "status", "Ordered");
         await updateById(
           orderId,
@@ -144,6 +153,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
           "paymentMethod",
           selectedPaymentMethod
         );
+
         const orderCreatedTimestamp = Timestamp.now();
         const orderDocRef = doc(db, "orders", orderId);
         await updateDoc(
@@ -153,6 +163,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
           },
           { merge: true }
         );
+
         console.log("Order placed successfully!");
         navigation.navigate("OrderScreen");
       }
@@ -305,7 +316,20 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                 </View>
               </View>
               {/* CreditCard Input */}
-              <CreditCardInput name={customerName} onSuccess={setCard} />
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginRight: 24,
+                  marginLeft: 23,
+                }}
+              > 
+                {selectedPaymentMethod === "Card" && (
+                  <CreditCardInput name={customerName} onSuccess={setCard} />
+                )}
+              </View>
+
               <View style={styles.bottomContainer}>
                 <View style={styles.separator2} />
                 <View style={styles.pmentDetailsContainer}>
