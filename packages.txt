@@ -34,3 +34,6 @@ npm install react-native-root-toast
 
 nov 24
 npm install email-validator
+
+nov 29
+npm install deprecated-react-native-prop-types
