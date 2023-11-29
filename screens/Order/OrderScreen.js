@@ -59,7 +59,6 @@ const OrderScreen = () => {
 
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
-    setLoading(true);
   };
   const { width, height } = Dimensions.get("window");
   const formatDate = (timestamp) => {
@@ -296,7 +295,7 @@ const OrderScreen = () => {
         <OrderSwitchTabs
           selectionMode={1}
           option1="PENDING"
-          option2="APPROVED"
+          option2="VALIDATED"
           option3="TO RECEIVE"
           option4="CANCELLED"
           option5="COMPLETED"
@@ -304,15 +303,14 @@ const OrderScreen = () => {
           style={{ fontSize: 20, fontWeight: "bold" }}
         />
       </View>
-      {trackerTab === 1 && (
-        <PendingOrderList
-          trackerTab={trackerTab}
-          loading={loading}
-          orderData={orderData}
-          filteredProductData={filteredProductData}
-          handleViewOrderScreen={handleViewOrderScreen}
-        />
-      )}
+
+      <PendingOrderList
+        trackerTab={trackerTab}
+        loading={loading}
+        orderData={orderData}
+        filteredProductData={filteredProductData}
+        handleViewOrderScreen={handleViewOrderScreen}
+      />
 
       <ValidatedOrderList
         trackerTab={trackerTab}
@@ -322,36 +320,30 @@ const OrderScreen = () => {
         handlePlaceOrderScreen={handlePlaceOrderScreen}
       />
 
-      {trackerTab === 3 && (
-        <ToReceiveOrderList
-          trackerTab={trackerTab}
-          loading={loading}
-          orderData={orderData}
-          filteredProductData={filteredProductData}
-          handleOrderPlacedScreen={handleOrderPlacedScreen}
-        />
-      )}
+      <ToReceiveOrderList
+        trackerTab={trackerTab}
+        loading={loading}
+        orderData={orderData}
+        filteredProductData={filteredProductData}
+        handleOrderPlacedScreen={handleOrderPlacedScreen}
+      />
 
-      {trackerTab === 4 && (
-        <CancelledOrderList
-          trackerTab={trackerTab}
-          loading={loading}
-          orderData={orderData}
-          filteredProductData={filteredProductData}
-          handleViewCancelledOrders={handleViewCancelledOrders}
-        />
-      )}
+      <CancelledOrderList
+        trackerTab={trackerTab}
+        loading={loading}
+        orderData={orderData}
+        filteredProductData={filteredProductData}
+        handleViewCancelledOrders={handleViewCancelledOrders}
+      />
 
-      {trackerTab === 5 && (
-        <CompletedOrderList
-          trackerTab={trackerTab}
-          loading={loading}
-          orderData={orderData}
-          filteredProductData={filteredProductData}
-          handleOrderPlacedScreen={handleOrderPlacedScreen}
-          handleRateScreen={handleRateScreen}
-        />
-      )}
+      <CompletedOrderList
+        trackerTab={trackerTab}
+        loading={loading}
+        orderData={orderData}
+        filteredProductData={filteredProductData}
+        handleOrderPlacedScreen={handleOrderPlacedScreen}
+        handleRateScreen={handleRateScreen}
+      />
       <TouchableOpacity
         style={styles.homeButton}
         onPress={handleNavigateToHome}
