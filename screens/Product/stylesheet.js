@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   productContainer: {
     paddingHorizontal: 8,
     paddingVertical: 10,
-    justifyContent: "center",
+    justifyContent: "space-between",
   },
   productCard: {
     borderRadius: 15,
