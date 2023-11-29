@@ -36,6 +36,7 @@ import ValidatedOrderList from "./ValidatedOrder";
 import ToReceiveOrderList from "./ToReceiveOrder";
 import CompletedOrderList from "./CompletedOrder";
 import CancelledOrderList from "./CancelledOrder";
+import { useIsFocused } from "@react-navigation/native";
 
 const OrderScreen = () => {
   const navigation = useNavigation();
@@ -54,6 +55,7 @@ const OrderScreen = () => {
   const [orderLength, setOrderLength] = useState(true);
   const [customerName, setCustomerName] = useState(null);
   const [outerLoading, setOuterLoading] = useState(false);
+  const isFocused = useIsFocused();
 
   const onSelectSwitch = (value) => {
     setTrackerTab(value);
@@ -186,6 +188,7 @@ const OrderScreen = () => {
           );
         } catch (error) {
           console.error("Error processing fetched data: ", error);
+          setLoading(false);
         } finally {
           setLoading(false);
           console.log("Loading completed...");
@@ -194,6 +197,7 @@ const OrderScreen = () => {
 
       return () => {
         unsubscribe();
+        setLoading(false);
         console.log("Unsubscribed from snapshot updates...");
       };
     } catch (error) {
@@ -205,12 +209,13 @@ const OrderScreen = () => {
   // Use fetchOrdersRealTime in the initial useEffect
   useEffect(() => {
     fetchOrdersRealTime();
-  }, [trackerTab]);
+  }, [trackerTab, isFocused]);
 
-  // Use fetchOrdersRealTime in the second useEffect
   useEffect(() => {
-    fetchOrdersRealTime();
-  }, [trackerTab]);
+    if (isFocused) {
+      setLoading(true);
+    }
+  }, [isFocused]);
 
   const handleNavigateToHome = () => {
     navigation.navigate("HomeScreen");
@@ -309,15 +314,13 @@ const OrderScreen = () => {
         />
       )}
 
-      {trackerTab === 2 && (
-        <ValidatedOrderList
-          trackerTab={trackerTab}
-          loading={loading}
-          orderData={orderData}
-          filteredProductData={filteredProductData}
-          handlePlaceOrderScreen={handlePlaceOrderScreen}
-        />
-      )}
+      <ValidatedOrderList
+        trackerTab={trackerTab}
+        loading={loading}
+        orderData={orderData}
+        filteredProductData={filteredProductData}
+        handlePlaceOrderScreen={handlePlaceOrderScreen}
+      />
 
       {trackerTab === 3 && (
         <ToReceiveOrderList

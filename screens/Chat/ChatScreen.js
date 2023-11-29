@@ -98,10 +98,12 @@ const ChatScreen = ({ route, navigation }) => {
           console.log("Error fetching messages:", error);
         }
       };
-      setScrollToEnd(true);
+
       (async () => {
         await fetchMessages();
       })();
+
+      // Ensure that you don't return anything from the callback.
     }, [sellerId, scrollToEnd])
   );
 
@@ -221,7 +223,7 @@ const ChatScreen = ({ route, navigation }) => {
         message: messageText,
         sellerName: name,
         sellerId: sellerId,
-        userId: userId,
+        customerId: userId,
         timestamp: new Date(),
         userEmail: email,
         userFullName: customerName,

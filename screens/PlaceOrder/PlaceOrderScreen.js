@@ -38,6 +38,11 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   console.log(`CustomerName: ${customerName}`);
   console.log(`TotalPrice: ${totalPrice}`);
 
+  const exchangeRate = 53;
+
+  const amountInUSD = totalPrice / exchangeRate;
+  console.log(`Amount in Dollars : ${amountInUSD.toFixed(2)}`);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -324,7 +329,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                   marginRight: 24,
                   marginLeft: 23,
                 }}
-              > 
+              >
                 {selectedPaymentMethod === "Card" && (
                   <CreditCardInput name={customerName} onSuccess={setCard} />
                 )}
