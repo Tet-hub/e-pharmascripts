@@ -9,8 +9,8 @@ import { AuthContext } from "./src/context";
 import { getAuthToken } from "./src/authToken";
 import CustomSplashScreen from "./screens/CustomSplashScreen";
 import { ToastProvider } from "react-native-toast-notifications";
+import "./console-log";
 const Stack = createStackNavigator();
-
 const App = () => {
   const [appReady, setAppReady] = useState(false);
   const [userToken, setUserToken] = useState(null);

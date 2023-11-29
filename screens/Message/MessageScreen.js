@@ -142,8 +142,8 @@ const MessageScreen = ({ navigation }) => {
             style={[styles.chatItem, { paddingHorizontal: dynamicPadding }]}
             onPress={() =>
               navigation.navigate("ChatScreen", {
-                sellerBranch: item.sellerBranch,
                 sellerId: item.sellerId,
+                sellerBranch: item.sellerBranch,
                 img: item.img,
                 name: item.sellerName,
               })

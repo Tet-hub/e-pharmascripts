@@ -3,7 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import "../console-log";
 import TabNavigator from "./tabNavigator";
 import NotificationScreen from "../screens/Notification/NotificationScreen";
 import OrderScreen from "../screens/Order/OrderScreen";
@@ -363,14 +363,15 @@ const RootStack = () => {
               headerTitle: () => <View></View>,
               headerTintColor: "black",
             }}
-          /><Stack.Screen
-          name="VerifyEmailScreen"
-          component={VerifyEmailScreen}
-          options={{
-            headerTitle: () => <View></View>,
-            headerTintColor: "black",
-          }}
-        />
+          />
+          <Stack.Screen
+            name="VerifyEmailScreen"
+            component={VerifyEmailScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
         </Stack.Navigator>
       </MessageProvider>
     </TailwindProvider>

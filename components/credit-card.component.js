@@ -3,6 +3,21 @@ import { LiteCreditCardInput } from "react-native-credit-card-input";
 import { cardTokenRequest } from "../service/checkout.service";
 import { getCurrentCustomerName } from "../src/authToken";
 
+const originalConsoleWarn = console.warn;
+
+// Override console.warn to filter out the specific warning
+console.warn = (...args) => {
+  if (
+    args.length > 0 &&
+    typeof args[0] === "string" &&
+    args[0].includes("componentWillReceiveProps has been renamed")
+  ) {
+    console.log("Filtered warning:", args[0]);
+  } else {
+    originalConsoleWarn.apply(console, args);
+  }
+};
+
 export const CreditCardInput = ({ name, onSuccess }) => {
   const onChange = async (formData) => {
     const { values, status } = formData;

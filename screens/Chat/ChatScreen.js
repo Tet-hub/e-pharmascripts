@@ -34,8 +34,9 @@ import {
 } from "../../src/authToken";
 import * as ImagePicker from "expo-image-picker";
 import { getDownloadURL, uploadBytes, ref } from "@firebase/storage";
+import { useFocusEffect } from "@react-navigation/native";
 
-const ChatScreen = ({ route }) => {
+const ChatScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [user, setUser] = useState(null);
@@ -46,6 +47,7 @@ const ChatScreen = ({ route }) => {
   const flatListRef = useRef(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState(null);
+  const { name, sellerId, img, sellerBranch } = route.params;
 
   useEffect(() => {
     // Call the getUserId function and set the result to the state variable
@@ -61,41 +63,47 @@ const ChatScreen = ({ route }) => {
     fetchCustomerName();
   }, []);
 
-  const { name, sellerId, img, sellerBranch } = route.params;
   //console.log(`seller img url: ${img}`);
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const messagesCollection = collection(db, "messages");
-        const messagesQuery = query(
-          messagesCollection,
-          orderBy("timestamp", "asc"),
-          where("senderId", "in", [userId, sellerId]),
-          where("receiverId", "in", [userId, sellerId])
-        );
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchMessages = async () => {
+        try {
+          const authToken = await getAuthToken();
+          const currentUserId = authToken.userId;
 
-        const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-          const messageData = [];
-          snapshot.forEach((doc) => {
-            messageData.push({ id: doc.id, ...doc.data() });
+          const messagesCollection = collection(db, "messages");
+
+          const messagesQuery = query(
+            messagesCollection,
+            orderBy("timestamp", "asc"),
+            where("senderId", "in", [currentUserId, sellerId]),
+            where("receiverId", "in", [currentUserId, sellerId])
+          );
+
+          const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+            const messageData = [];
+            snapshot.forEach((doc) => {
+              messageData.push({ id: doc.id, ...doc.data() });
+            });
+
+            setMessages(messageData);
+
+            if (scrollToEnd && flatListRef.current) {
+              flatListRef.current.scrollToEnd({ animated: true });
+            }
           });
 
-          setMessages(messageData);
-
-          // Scroll to the end of the list when new messages arrive
-          if (scrollToEnd && flatListRef.current) {
-            flatListRef.current.scrollToEnd({ animated: true });
-          }
-        });
-
-        return () => unsubscribe();
-      } catch (error) {
-        console.log("Error fetching messages:", error);
-      }
-    };
-
-    fetchMessages();
-  }, [userId, sellerId, scrollToEnd]);
+          return () => unsubscribe();
+        } catch (error) {
+          console.log("Error fetching messages:", error);
+        }
+      };
+      setScrollToEnd(true);
+      (async () => {
+        await fetchMessages();
+      })();
+    }, [sellerId, scrollToEnd])
+  );
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === "") return;
@@ -128,13 +136,31 @@ const ChatScreen = ({ route }) => {
 
   const handleImageUpload = async () => {
     try {
+      //convert console.error to console.log
+      const originalConsoleWarn = console.warn;
+      console.warn = (...args) => {
+        if (
+          args.length > 0 &&
+          typeof args[0] === "string" &&
+          args[0].includes(
+            'Key "cancelled" in the image picker result is deprecated'
+          )
+        ) {
+          console.log("Filtered warning:", args[0]);
+        } else {
+          originalConsoleWarn.apply(console, args);
+        }
+      };
+
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 1,
       });
 
       console.log("ImagePicker result:", result);
+
+      // Restore the original console.warn after the ImagePicker call
+      console.warn = originalConsoleWarn;
 
       // Check if the user canceled the image picker
       if (!result.canceled) {
