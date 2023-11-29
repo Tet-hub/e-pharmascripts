@@ -300,7 +300,7 @@ const ToValidateScreen = ({ navigation, route }) => {
               await updateById(
                 product.productId,
                 "products",
-                "status",
+                "productStatus",
                 "Hidden"
               );
               console.log(
@@ -331,7 +331,16 @@ const ToValidateScreen = ({ navigation, route }) => {
         );
 
         //updating the stock on the "products" collection
+        const updatedStock = item.stock - quantity;
         await updateById(productId, "products", "stock", item.stock - quantity);
+        if (updatedStock === 0) {
+          await updateById(
+            item.productId,
+            "products",
+            "productStatus",
+            "Hidden"
+          );
+        }
 
         console.log("Order placed with ID:", orderId);
         console.log("ProductList ID", productListId);

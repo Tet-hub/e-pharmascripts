@@ -109,7 +109,7 @@ const ProductScreen = ({ navigation, route }) => {
       try {
         const conditions = [
           { fieldName: "sellerId", operator: "==", value: sellerId },
-          { fieldName: "stock", operator: "in", value: ["0", 0] },
+          // { fieldName: "stock", operator: "!=", value: 0 },
           {
             fieldName: "productStatus",
             operator: "in",
@@ -141,7 +141,7 @@ const ProductScreen = ({ navigation, route }) => {
           operator: "==",
           value: sellerId,
         },
-        { fieldName: "stock", operator: "!=", value: "0" },
+        // { fieldName: "stock", operator: "!=", value: 0 },
         {
           fieldName: "productStatus",
           operator: "in",
@@ -288,7 +288,7 @@ const ProductScreen = ({ navigation, route }) => {
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
       ) : filteredProduct.length !== 0 ? (
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <View style={{ justifyContent: "center" }}>
           <FlatList
             numColumns={2}
             scrollEnabled={false}
