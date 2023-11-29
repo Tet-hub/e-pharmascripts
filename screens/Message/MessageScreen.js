@@ -46,7 +46,7 @@ const MessageScreen = ({ navigation }) => {
           const chatQuery = query(
             messagesCollection,
             orderBy("timestamp", "desc"),
-            where("userId", "==", userId)
+            where("customerId", "==", userId)
           );
 
           // Create a real-time listener
