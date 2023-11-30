@@ -16,9 +16,15 @@ import { Iconify } from "react-native-iconify";
 import styles from "./bs";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
 import { getAuthToken } from "../../src/authToken";
-import { getDoc, doc } from "firebase/firestore";
+import {
+  getDoc,
+  doc,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import axios from "axios";
 import { GOOGLE_MAPS_API_KEY } from "../../src/api/googleApiKey";
 const { width, height } = Dimensions.get("window");
 
@@ -29,17 +35,12 @@ const cardWidth = (width - 30) / 2;
 const BranchesScreen = ({ navigation, route }) => {
   const [branches, setBranches] = useState([]);
   const branchCompany = route.params?.name;
-
   const [showModal, setShowModal] = useState(false);
   const [isLocationButtonClicked, setLocationButtonClicked] = useState(false);
   const [customerAddress, setCustomerAddress] = useState(null);
-  const [branchesAddress, setBranchesAddress] = useState(null);
-  const [distances, setDistances] = useState({});
   const [sortedBranches, setSortedBranches] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [loading, setLoading] = useState(true);
-  const isLocationFilterApplied =
-    isLocationButtonClicked && Object.keys(distances).length > 0;
+  const [isLoading, setIsLoading] = useState(true);
   const apiKey = GOOGLE_MAPS_API_KEY;
   //
   const handleFilterClick = () => {
@@ -50,60 +51,16 @@ const BranchesScreen = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    const fetchBranches = async () => {
-      const branchesAddressArray = [];
-      try {
-        // Define the conditions array
-        const conditions = [
-          { fieldName: "companyName", operator: "==", value: branchCompany },
-        ];
-
-        // Generate the API URL with conditions
-        const apiUrl = buildQueryUrl("sellers", conditions);
-
-        // GET request to the apiUrl
-        const response = await fetch(apiUrl, {
-          method: "GET", // Set the request method to GET
-        });
-
-        if (response.ok) {
-          const branchesData = await response.json();
-
-          setBranches(branchesData);
-          branchesData.forEach((branch) => {
-            branchesAddressArray.push({
-              branchAddress: branch.address,
-              branchesID: branch.sellerId,
-            });
-          });
-
-          setBranchesAddress(branchesAddressArray);
-        } else {
-          console.log("API request failed with status:", response.status);
-        }
-      } catch (error) {
-        console.log("Error fetching branches:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBranches();
-  }, [branchCompany]);
-
-  useEffect(() => {
     const fetchCustomerAddress = async () => {
       try {
         const authToken = await getAuthToken();
         const customerId = authToken.userId;
-
         const customerDocRef = doc(db, "customers", customerId);
         const customerDocSnapshot = await getDoc(customerDocRef);
 
         if (customerDocSnapshot.exists()) {
           const customerData = customerDocSnapshot.data();
           const address = customerData.address;
-          //console.log("Customer", address);
           setCustomerAddress(address);
         }
       } catch (error) {
@@ -113,51 +70,66 @@ const BranchesScreen = ({ navigation, route }) => {
     fetchCustomerAddress();
   }, []);
 
-  //
-  const fetchDistances = async () => {
-    if (!branchesAddress || branchesAddress.length === 0) {
-      return;
-    }
-
-    const distancePromises = branchesAddress.map((branch) =>
-      fetchDistance(customerAddress, branch.branchAddress)
-    );
-
-    const distances = await Promise.all(distancePromises);
-
-    const distancesObject = {};
-    branchesAddress.forEach((branch, index) => {
-      distancesObject[branch.branchAddress] = distances[index];
-    });
-
-    setDistances(distancesObject);
-  };
-
-  const fetchDistance = async (origin, destination) => {
-    try {
-      const apiUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
-        origin
-      )}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
-
-      const response = await axios.get(apiUrl);
-      const data = response.data;
-
-      if (data.status === "OK" && data.rows.length > 0) {
-        const distanceText = data.rows[0].elements[0].distance.text;
-        return distanceText;
-      } else {
-        console.error("Error fetching distance data for", origin, data.status);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching distance data for", origin, error);
-      return null;
-    }
-  };
-
   useEffect(() => {
-    fetchDistances();
-  }, [customerAddress, branchesAddress]);
+    const fetchBranches = async () => {
+      setIsLoading(true);
+      const Branches6KM = [];
+      const dbSeller = collection(db, "sellers");
+      const activeSellersSnapshot = await getDocs(
+        query(
+          dbSeller,
+          where("companyName", "==", branchCompany),
+          where("status", "==", "Active")
+        )
+      );
+      let shouldLog = false;
+
+      for (const branchDoc of activeSellersSnapshot.docs) {
+        const branch = branchDoc.data();
+        const branchAddress = branch.formattedAddress;
+        const apiUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
+          customerAddress
+        )}&destinations=${encodeURIComponent(branchAddress)}&key=${apiKey}`;
+
+        try {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+
+          if (
+            data.rows &&
+            data.rows.length > 0 &&
+            data.rows[0].elements &&
+            data.rows[0].elements.length > 0
+          ) {
+            const distance = data.rows[0].elements[0].distance
+              ? data.rows[0].elements[0].distance.value
+              : undefined;
+            if (distance !== undefined && distance < 6000) {
+              Branches6KM.push({
+                branchesId: branch.sellerId,
+                distance: distance,
+                branch: branch.branch,
+                companyName: branch.companyName,
+                img: branch.img,
+              });
+              shouldLog = true;
+            }
+          } else {
+            console.error("Invalid distance data received:", data);
+          }
+        } catch (error) {
+          console.error("Error fetching distance:", error);
+        }
+      }
+
+      if (shouldLog) {
+        //console.log("Branches within 6km:", Branches6KM);
+        setBranches(Branches6KM);
+      }
+      setIsLoading(false);
+    };
+    fetchBranches();
+  }, [branchCompany, customerAddress]);
 
   //search
   useEffect(() => {
@@ -178,23 +150,21 @@ const BranchesScreen = ({ navigation, route }) => {
   }, [searchKeyword, branches]);
 
   const sortBranches = () => {
-    // Create a copy of the branches array to avoid modifying the original data
     const branchesCopy = [...branches];
 
     if (isLocationButtonClicked) {
-      branchesCopy.sort((branchA, branchB) => {
-        const distanceA = distances[branchA.address];
-        const distanceB = distances[branchB.address];
+      const branchesWithDistances = branchesCopy.filter(
+        (branch) => branch.distance !== undefined
+      );
+      branchesWithDistances.sort((a, b) => a.distance - b.distance);
+      const sortedBranchesWithDistances = branchesWithDistances.concat(
+        branchesCopy.filter((branch) => branch.distance === undefined)
+      );
 
-        if (distanceA && distanceB) {
-          return parseFloat(distanceA) - parseFloat(distanceB);
-        }
-
-        return 0;
-      });
+      setSortedBranches(sortedBranchesWithDistances);
+    } else {
+      setSortedBranches(branchesCopy);
     }
-
-    setSortedBranches(branchesCopy);
     setShowModal(false);
   };
 
@@ -228,9 +198,11 @@ const BranchesScreen = ({ navigation, route }) => {
             <Text style={styles.ratingText}>{item.rating}★</Text>
           </View>
           <View>
-            {isLocationFilterApplied && (
+            {isLocationButtonClicked && (
               <Text style={styles.distanceText}>
-                {distances[item.address] ? distances[item.address] : ""}
+                {item.distance
+                  ? `${(item.distance / 1000).toFixed(1)} km`
+                  : "NA"}
               </Text>
             )}
           </View>
@@ -246,7 +218,7 @@ const BranchesScreen = ({ navigation, route }) => {
             style={styles.pharmacyDetailsView}
             onPress={() =>
               navigation.navigate("BranchDetailsScreen", {
-                sellerId: item.id,
+                sellerId: item.branchesId,
               })
             }
           >
@@ -259,7 +231,7 @@ const BranchesScreen = ({ navigation, route }) => {
               navigation.navigate("ProductScreen", {
                 name: item.companyName,
                 branch: extractBranchName(item.branch),
-                sellerId: item.id,
+                sellerId: item.branchesId,
               })
             }
           >
@@ -313,32 +285,34 @@ const BranchesScreen = ({ navigation, route }) => {
           </View>
         </View>
         <Text style={styles.branchSelectionText}>Branch Selection</Text>
-        {loading ? (
+        {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        ) : branches.length != 0 ? (
-          <View>
-            <FlatList
-              data={sortedBranches.length > 0 ? sortedBranches : branches}
-              scrollEnabled={false}
-              keyExtractor={(item) => item.id}
-              numColumns={2}
-              renderItem={renderBranchItem}
-              contentContainerStyle={styles.branchesContainer}
-            />
+            <ActivityIndicator size="large" color="#EC6F56" />
           </View>
         ) : (
-          <View style={styles.noOrdersCont}>
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="ph:git-branch-light"
-                size={45}
-                color="black"
-                style={styles.noOrdersIcon}
+          <View>
+            {sortedBranches.length > 0 || branches.length > 0 ? (
+              <FlatList
+                data={sortedBranches.length > 0 ? sortedBranches : branches}
+                scrollEnabled={false}
+                keyExtractor={(item) => item.id}
+                numColumns={2}
+                renderItem={renderBranchItem}
+                contentContainerStyle={styles.branchesContainer}
               />
-              <Text style={styles.noOrdersText}>No branches yet</Text>
-            </View>
+            ) : (
+              <View style={styles.noOrdersCont}>
+                <View style={styles.noOrders}>
+                  <Iconify
+                    icon="ph:git-branch-light"
+                    size={45}
+                    color="black"
+                    style={styles.noOrdersIcon}
+                  />
+                  <Text style={styles.noOrdersText}>No branches yet</Text>
+                </View>
+              </View>
+            )}
           </View>
         )}
         <Modal

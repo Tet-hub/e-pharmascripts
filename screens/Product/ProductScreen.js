@@ -168,6 +168,29 @@ const ProductScreen = ({ navigation, route }) => {
   //fetch category
   const fetchProductCategories = async () => {
     try {
+      const categories = new Set();
+      product.forEach((prod) => {
+        if (prod.category) {
+          if (Array.isArray(prod.category)) {
+            prod.category.forEach((cat) => categories.add(cat));
+          } else {
+            categories.add(prod.category);
+          }
+        }
+      });
+      const uniqueCategories = [...categories];
+      setSelectedCategories(uniqueCategories);
+    } catch (error) {
+      console.log("Error fetching category products:", error);
+    }
+  };
+  useEffect(() => {
+    fetchProductCategories();
+  }, [product]);
+
+  /*
+  const fetchProductCategories = async () => {
+    try {
       const productsCollection = collection(db, "products");
       const productQuery = query(
         productsCollection,
@@ -203,7 +226,7 @@ const ProductScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     fetchProductCategories();
-  }, [sellerId]);
+  }, [sellerId]); */
 
   const renderProducts = ({ item }) => {
     return (
