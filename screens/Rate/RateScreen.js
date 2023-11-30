@@ -9,7 +9,15 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import styles from "../Rate/stylesheet";
 import { TextInput } from "react-native-gesture-handler";
-import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { getCurrentUserId } from "../../src/authToken";
@@ -35,6 +43,7 @@ const RateScreen = () => {
   const [characterCount, setCharacterCount] = useState(0);
   const [customerId, setCustomerId] = useState(null);
   const [email, setEmail] = useState(null);
+  const [averageRating, setAverageRating] = useState(0);
   console.log("sdf: ", customerId);
 
   const handleStarPress = (selectedRating, type) => {
@@ -155,6 +164,35 @@ const RateScreen = () => {
       console.error("Error submitting rating and review: ", error);
     }
   };
+
+  //
+  const fetchPharmacyRatings = async () => {
+    try {
+      const ratingsCollectionRef = collection(db, "rateAndReview");
+      const ratingsQuery = query(
+        ratingsCollectionRef,
+        where("sellerId", "==", seller)
+      );
+      const querySnapshot = await getDocs(ratingsQuery);
+
+      const pharmacyRatings = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        pharmacyRatings.push(data.pharmacyRating);
+      });
+      console.log("Pharmacy Ratings:", pharmacyRatings);
+      // Further operations with the fetched ratings can be performed here
+    } catch (error) {
+      console.error("Error fetching pharmacy ratings:", error);
+    }
+  };
+
+  // Call the function wherever needed, possibly inside a useEffect or a specific action
+  useEffect(() => {
+    if (seller) {
+      fetchPharmacyRatings();
+    }
+  }, [seller]);
 
   return (
     <View style={[styles.container, { height: deviceHeight - 55 }]}>

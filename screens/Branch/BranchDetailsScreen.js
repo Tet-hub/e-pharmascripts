@@ -124,7 +124,7 @@ const BranchDetailsScreen = () => {
         if (sellerSnapshot.exists()) {
           const sellerInfo = sellerSnapshot.data();
           setCompanyName(sellerInfo.companyName);
-          setAddress(sellerInfo.address);
+          setAddress(sellerInfo.formattedAddress);
           setBranch(sellerInfo.branch);
           setImage(sellerInfo.img);
           if (sellerInfo.timeClose && sellerInfo.timeOpen) {
