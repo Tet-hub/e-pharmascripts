@@ -35,10 +35,20 @@ const { darkLight } = Colors;
 const { orange } = Colors;
 
 import KeyboardAvoidingWrapper from "./../components/KeyboardAvoidingWrapper";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import emailValidator from 'email-validator';
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import emailValidator from "email-validator";
 import { authentication } from "../firebase/firebase";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../firebase/firebase";
 //firebase
 import { AuthContext } from "../src/context";
@@ -57,7 +67,7 @@ const Login = ({ navigation }) => {
   const handleForgot = async () => {
     try {
       if (!email) {
-        console.log('Type your email first');
+        console.log("Type your email first");
         Alert.alert("Blank Email", "Type your email first");
         return;
       }
@@ -65,25 +75,34 @@ const Login = ({ navigation }) => {
         Alert.alert("Invalid Email", "Please enter a valid email address.");
         return;
       }
-  
+
       // Check if the email exists in the "customers" collection
-      const customersCollectionRef = collection(db, 'customers');
-      const q = query(customersCollectionRef, where('email', '==', email));
+      const customersCollectionRef = collection(db, "customers");
+      const q = query(customersCollectionRef, where("email", "==", email));
       const querySnapshot = await getDocs(q);
-  
+
       if (querySnapshot.empty) {
         // Email does not exist in the "customers" collection
-        Alert.alert('Invalid Email', 'This email is not associated with a customers account.');
+        Alert.alert(
+          "Invalid Email",
+          "This email is not associated with a customers account."
+        );
       } else {
         // Email exists in the "customers" collection, send password reset email
         await sendPasswordResetEmail(authentication, email);
-        Alert.alert('Password Reset Email Sent', 'Check your email for further instructions.');
+        Alert.alert(
+          "Password Reset Email Sent",
+          "Check your email for further instructions."
+        );
       }
     } catch (error) {
-      console.error('Error sending password reset email:', error);
-      Alert.alert('Error', 'Failed to send password reset email. Please try again later.');
+      console.error("Error sending password reset email:", error);
+      Alert.alert(
+        "Error",
+        "Failed to send password reset email. Please try again later."
+      );
     }
-  };  
+  };
 
   const SignInUser = async () => {
     setIsLoading(true); // Start loading
@@ -200,12 +219,13 @@ const Login = ({ navigation }) => {
                   setHidePassword={setHidePassword}
                   style={{ marginTop: -15 }}
                 />
-                <TouchableOpacity style={{ marginTop: 3, marginBottom: 10 }} onPress={handleForgot}>
-                  <MsgBox>
-                    Forgot password?
-                  </MsgBox>
+                <TouchableOpacity
+                  style={{ marginTop: 3, marginBottom: 10 }}
+                  onPress={handleForgot}
+                >
+                  <MsgBox>Forgot password?</MsgBox>
                 </TouchableOpacity>
-                  
+
                 {}
                 <StyledButton onPress={SignInUser} disabled={isLoading}>
                   {isLoading ? (
@@ -214,7 +234,7 @@ const Login = ({ navigation }) => {
                     <ButtonText>Login</ButtonText>
                   )}
                 </StyledButton>
-                <Text
+                {/* <Text
                   className="text-center"
                   style={{
                     fontSize: 16,
@@ -224,15 +244,15 @@ const Login = ({ navigation }) => {
                   }}
                 >
                   or
-                </Text>
+                </Text> */}
 
-                <GoogleButton onPress={() => navigation.navigate("HomeScreen")}>
+                {/* <GoogleButton onPress={() => navigation.navigate("HomeScreen")}>
                   <GoogleImage
                     resizeMode="cover"
                     source={require("../assets/img/g-logo.png")}
                   />
                   <GoogleText>Continue with Google</GoogleText>
-                </GoogleButton>
+                </GoogleButton> */}
 
                 <ExtraView>
                   <Extratext>No account?</Extratext>

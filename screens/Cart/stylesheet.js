@@ -38,16 +38,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
     elevation: 3,
-    height: 120,
+    height: 100,
     width: "100%",
     alignSelf: "center",
-    marginTop: 15,
+    marginTop: 10,
     backgroundColor: "#FFFF",
   },
   imageContainer: {
-    marginLeft: 20,
-    height: "80%",
-    width: "30%",
+    marginLeft: 30,
+    height: "70%",
+    width: "25%",
   },
   noOrdersCont: {
     flex: 1,
@@ -238,13 +238,24 @@ const styles = StyleSheet.create({
   },
   sellerContainer: {
     backgroundColor: "#FFFFFF",
-    padding: 10,
+    padding: 15,
     marginBottom: 15,
     borderRadius: 20,
   },
+  sellerNameContainer: {
+    marginBottom: 15,
+    marginTop: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1, // Allow the seller name and checkbox to take the available space
+  },
   sellerName: {
-    fontWeight: 500,
+    fontWeight: "500",
     fontSize: 18,
+    marginLeft: 10, // Add margin for spacing
+  },
+  checkBoxIcon: {
+    alignSelf: "center", // Align the checkbox centrally within its container
   },
   loadingContainer: {
     flex: 1,
@@ -254,6 +265,13 @@ const styles = StyleSheet.create({
   },
   noOrdersText: {
     fontWeight: 300,
+  },
+  verticalSeparator: {
+    width: 3,
+    height: "100%",
+    backgroundColor: "rgba(217, 217, 217, 0.9) ",
+    alignSelf: "center",
+    marginLeft: 15,
   },
 });
 
