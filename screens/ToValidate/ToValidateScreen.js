@@ -173,6 +173,26 @@ const ToValidateScreen = ({ navigation, route }) => {
         console.error("User data, product data, or seller data is missing.");
         return;
       }
+      if (user.deliveryAddress == null) {
+        toast.show(`Please set your delivery address correctly`, {
+          type: "normal ",
+          placement: "bottom",
+          duration: 3000,
+          offset: 10,
+          animationType: "slide-in",
+        });
+        return;
+      }
+      if (user.status !== "Verified") {
+        toast.show(`Please verify your account first`, {
+          type: "normal ",
+          placement: "bottom",
+          duration: 3000,
+          offset: 10,
+          animationType: "slide-in",
+        });
+        return;
+      }
       if (Array.isArray(item)) {
         for (const product of item) {
           if (product.stock < product.quantity) {
