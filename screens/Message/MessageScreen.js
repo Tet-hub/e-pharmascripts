@@ -16,6 +16,8 @@ import {
   orderBy,
   limit,
   getDocs,
+  doc,
+  getDoc,
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
@@ -39,21 +41,19 @@ const MessageScreen = ({ navigation }) => {
     const fetchChatList = async () => {
       try {
         const messagesCollection = collection(db, "messages");
-        const userId = await getCurrentUserId(); // Get the current user's ID using await
+        const userId = await getCurrentUserId();
 
         if (userId) {
-          // Create a query to get messages where the current user is either the sender or receiver, ordered by timestamp
           const chatQuery = query(
             messagesCollection,
             orderBy("timestamp", "desc"),
             where("customerId", "==", userId)
           );
 
-          // Create a real-time listener
-          const unsubscribe = onSnapshot(chatQuery, (querySnapshot) => {
+          const unsubscribe = onSnapshot(chatQuery, async (querySnapshot) => {
             const latestMessagesMap = new Map();
 
-            querySnapshot.forEach((doc) => {
+            for (const doc of querySnapshot.docs) {
               const data = doc.data();
               const otherUserId =
                 userId === data.senderId ? data.receiverId : data.senderId;
@@ -68,7 +68,6 @@ const MessageScreen = ({ navigation }) => {
                 messageDate.getMonth() === currentDate.getMonth() &&
                 messageDate.getFullYear() === currentDate.getFullYear()
               ) {
-                // If the message is from the same day, format with hours and minutes
                 timestamp = new Date(
                   data.timestamp.seconds * 1000
                 ).toLocaleTimeString([], {
@@ -76,7 +75,6 @@ const MessageScreen = ({ navigation }) => {
                   minute: "2-digit",
                 });
               } else {
-                // If the message is from a different day, format with full date
                 timestamp = new Date(
                   data.timestamp.seconds * 1000
                 ).toLocaleDateString();
@@ -92,16 +90,46 @@ const MessageScreen = ({ navigation }) => {
                   img: data.img,
                   timestamp: timestamp,
                 });
+                setSellerId(data.sellerId);
+                console.log("seller", data.sellerId);
               }
-              setSellerId(sellerId);
-            });
+            }
 
-            // Convert the map values to an array and set it as the chatList state
-            const updatedChatList = Array.from(latestMessagesMap.values());
-            setChatList(updatedChatList);
+            for (const [otherUserId, message] of latestMessagesMap.entries()) {
+              try {
+                const sellerId = message.sellerId;
+                const sellersCollection = collection(db, "sellers");
+                const sellerDocRef = doc(sellersCollection, sellerId);
+                const sellerDocSnapshot = await getDoc(sellerDocRef);
+
+                if (sellerDocSnapshot.exists()) {
+                  const sellerData = sellerDocSnapshot.data();
+                  const sellerImage = sellerData.img;
+
+                  // Update the message object with seller image
+                  message.img = sellerImage;
+
+                  // Now set the state for chatList with updated message data
+                  const updatedChatList = Array.from(
+                    latestMessagesMap.values()
+                  );
+                  setChatList(updatedChatList);
+                  console.log(
+                    "Seller document not found for sellerId:",
+                    updatedChatList
+                  );
+                } else {
+                  console.log(
+                    "Seller document not found for sellerId:",
+                    sellerId
+                  );
+                }
+              } catch (error) {
+                console.error("Error fetching seller data:", error);
+              }
+            }
           });
 
-          // Return a cleanup function to unsubscribe from the listener when the component unmounts
           return () => {
             unsubscribe();
           };
@@ -113,6 +141,36 @@ const MessageScreen = ({ navigation }) => {
 
     fetchChatList();
   }, []);
+
+  //   const fetchSellerImage = async (sellerId) => {
+  //     try {
+  //       if (sellerId) {
+  //         const sellersCollection = collection(db, "sellers");
+  //         const sellerDocRef = doc(sellersCollection, sellerId);
+  //         const sellerDocSnapshot = await getDoc(sellerDocRef);
+
+  //         if (sellerDocSnapshot.exists()) {
+  //           const sellerData = sellerDocSnapshot.data();
+  //           const sellerImage = sellerData.img; // Assuming the field name is 'img'
+
+  //           // Store the seller image in a state variable
+  //           setSellerImage(sellerImage);
+  //         } else {
+  //           console.log("Seller document not found for sellerId:", sellerId);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching seller data:", error);
+  //     }
+  //   };
+
+  //   if (sellerId) {
+  //     fetchSellerImage(sellerId);
+  //     console.log("fetched tae");
+  //   } else {
+  //     console.log("tae");
+  //   }
+  // }, [sellerId]);
 
   // Get screen dimensions
   const { width } = Dimensions.get("window");

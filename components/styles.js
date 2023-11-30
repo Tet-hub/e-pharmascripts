@@ -116,13 +116,13 @@ export const RightIcon = styled.TouchableOpacity`
 `;
 
 export const StyledButton = styled.TouchableOpacity`
-  padding: 15px;
+  padding: 10px;
   background-color: ${orange};
   justify-content: center;
   align-items: center;
   border-radius: 26px;
   margin-vertical: 5px;
-  height: 60px;
+  height: 50px;
   width: 100%; /* Use a percentage of the screen width */
   margin-left: auto;
   margin-right: auto;
@@ -147,14 +147,14 @@ export const ExtraView = styled.View`
   flex-direction: row;
   align-items: center;
   padding: 10px;
-  margin-top: 30px;
+  margin-top: 5px;
 `;
 
 export const Extratext = styled.Text`
   justify-content: center;
   align-content: center;
   color: ${black};
-  font-size: 17px;
+  font-size: 15px;
 `;
 
 export const TextLink = styled.TouchableOpacity`

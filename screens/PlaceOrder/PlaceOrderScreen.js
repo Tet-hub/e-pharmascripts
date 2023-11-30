@@ -357,10 +357,16 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                     </View>
                     <View style={styles.pdTotalContainer}>
                       <Text style={styles.pdTotalText}>Total</Text>
-                      <Text style={styles.pdTotalAmountText}>
-                        {"\u20B1"}
-                        {item.totalPrice || ""}
-                      </Text>
+                      <View style={styles.ttCont}>
+                        <Text style={styles.pdTotalAmountText}>
+                          {"\u20B1"}
+                          {item.totalPrice || ""}
+                        </Text>
+                        <Text>
+                          or {"\u0024"}
+                          {amountInUSD.toFixed(2)}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </View>

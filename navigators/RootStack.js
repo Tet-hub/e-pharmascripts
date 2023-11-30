@@ -288,7 +288,7 @@ const RootStack = () => {
               headerTitleStyle: {
                 color: "white",
                 fontWeight: "bold",
-                fontSize: 24,
+                fontSize: 18,
               },
               headerTintColor: "white",
 

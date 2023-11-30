@@ -127,6 +127,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 5,
   },
+  ttCont: {
+    justifyContent: "flex-end",
+  },
   pdTotalText: {
     fontWeight: 600,
     fontSize: 15,
@@ -134,6 +137,7 @@ const styles = StyleSheet.create({
   pdTotalAmountText: {
     fontWeight: 600,
     fontSize: 15,
+    textAlign: "right",
   },
   psSubtotalText: {
     fontSize: 15,

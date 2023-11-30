@@ -42,6 +42,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const productId = route.params?.productId;
   const toast = useToast();
   const [sellerId, setSellerId] = useState(null); // Initialize sellerId state
+  const [ratingsAndReviews, setRatingsAndReviews] = useState([]);
+  const [aveRating, setAveRating] = useState(0);
 
   // First useEffect to fetch product data and set sellerId
   useEffect(() => {
@@ -56,13 +58,58 @@ const ProductDetailScreen = ({ navigation, route }) => {
             setProductData(productData);
 
             // Set the sellerId value obtained from productData
-            setSellerId(productData.sellerId);
+            const sellerId = productData.sellerId;
+            setSellerId(sellerId);
+
+            // Fetch seller details and ratings based on sellerId
+            if (sellerId) {
+              const sellerDocRef = doc(db, "sellers", sellerId);
+              const sellerDocSnap = await getDoc(sellerDocRef);
+
+              if (sellerDocSnap.exists()) {
+                const sellerData = sellerDocSnap.data();
+                setBranches(sellerData);
+              } else {
+                console.log(
+                  "Seller document not found for sellerId:",
+                  sellerId
+                );
+              }
+
+              const ratingsRef = collection(db, "rateAndReview");
+              const querySnapshot = await getDocs(
+                query(ratingsRef, where("sellerId", "==", sellerId))
+              );
+
+              const sellerRatings = [];
+              querySnapshot.forEach((doc) => {
+                const ratingData = doc.data();
+                sellerRatings.push(ratingData);
+              });
+
+              setRatingsAndReviews(sellerRatings);
+              // Calculate average seller rating
+              const calculateAverageRating = () => {
+                if (sellerRatings.length > 0) {
+                  const totalRatings = sellerRatings.reduce(
+                    (total, review) => total + review.pharmacyRating,
+                    0
+                  );
+                  return totalRatings / sellerRatings.length;
+                }
+                return 0; // Default to 0 if there are no ratings
+              };
+
+              const averageRating = calculateAverageRating();
+              // Set the calculated average rating to state
+              setAveRating(averageRating);
+            }
           } else {
             console.log("API request failed with status:", response.status);
           }
         }
       } catch (error) {
-        console.error("Error fetching product data:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -70,33 +117,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
     fetchData();
   }, [productId]);
-
-  //Fetch seller details based on sellerId
-  useEffect(() => {
-    if (sellerId) {
-      const fetchBranches = async () => {
-        //console.log(`sellerId before conditition: ${sellerId}`);
-        try {
-          // Construct the Firestore document reference by its ID
-          const sellerDocRef = doc(db, "sellers", sellerId);
-
-          // Fetch the seller document
-          const sellerDocSnap = await getDoc(sellerDocRef);
-
-          if (sellerDocSnap.exists()) {
-            const sellerData = sellerDocSnap.data();
-            setBranches(sellerData);
-          } else {
-            console.log("Seller document not found for sellerId:", sellerId);
-          }
-        } catch (error) {
-          console.log("Error fetching seller document:", error);
-        }
-      };
-
-      fetchBranches();
-    }
-  }, [sellerId]);
 
   const handleIncrement = () => {
     if (quantity < item.stock) {
@@ -128,12 +148,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         customerId,
         productId: productId,
         quantity,
-        // productName: item.productName,
-        // price: item.price, //should i save the current price when the user
         sellerId: item.sellerId,
-        // img: item.img,
-        // requiresPrescription: item.requiresPrescription,
-        // category: item.category,
       };
       console.log("item", itemToAddToCart);
       const response = await fetch(storeItemUrl, {
@@ -332,7 +347,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     style={styles.sellerRatingIcon}
                   />
                   <Text style={styles.sellerRatingText}>
-                    {branches.ratings || "0"} / 5
+                    {aveRating !== 0 ? aveRating.toFixed(1) : "No ratings"} /
+                    5.0
                   </Text>
                 </View>
               </View>

@@ -129,13 +129,31 @@ const ShoppingCartScreen = () => {
       setCartItems(updatedItems);
     });
   };
-
-  const handleSelectItem = (cartItemId) => {
-    setSelectedItems((prevSelectedItems) => ({
-      ...prevSelectedItems,
-      [cartItemId]: !prevSelectedItems[cartItemId],
-    }));
+  const handleSelectItem = (cartItemId, isSellerCheckbox) => {
+    if (isSellerCheckbox) {
+      const selectedSellerId = cartItems.find((item) => item.id === cartItemId)
+        .sellerInfo.sellerId;
+      const updatedSelectedItems = { ...selectedItems };
+      cartItems.forEach((item) => {
+        if (item.sellerInfo.sellerId === selectedSellerId) {
+          updatedSelectedItems[item.id] = !selectedItems[cartItemId];
+        }
+      });
+      setSelectedItems(updatedSelectedItems);
+    } else {
+      setSelectedItems((prevSelectedItems) => ({
+        ...prevSelectedItems,
+        [cartItemId]: !prevSelectedItems[cartItemId],
+      }));
+    }
   };
+
+  // const handleSelectItem = (cartItemId) => {
+  //   setSelectedItems((prevSelectedItems) => ({
+  //     ...prevSelectedItems,
+  //     [cartItemId]: !prevSelectedItems[cartItemId],
+  //   }));
+  // };
   const removeCartItem = async (cartItemId) => {
     try {
       const response = await axios.delete(
@@ -227,7 +245,16 @@ const ShoppingCartScreen = () => {
       <View style={styles.sellerContainer}>
         {item[0] && item[0].sellerInfo ? (
           <>
-            <Text style={styles.sellerName}>{item[0].sellerInfo.branch}</Text>
+            <View style={styles.sellerNameContainer}>
+              <Checkbox
+                color="#EC6F56"
+                value={selectedItems[item[0].id] || false}
+                onValueChange={() => handleSelectItem(item[0].id, true)}
+                style={styles.checkBoxIcon}
+              />
+              <View style={styles.verticalSeparator}></View>
+              <Text style={styles.sellerName}>{item[0].sellerInfo.branch}</Text>
+            </View>
             {item.map((cartItem) => (
               <View style={styles.productContainer} key={cartItem.id}>
                 <Checkbox
