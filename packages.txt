@@ -37,3 +37,8 @@ npm install email-validator
 
 nov 29
 npm install deprecated-react-native-prop-types
+
+//packge to build apk
+npm install react-native-screens or 
+npm install react-native-screens@3.20.0
+npm install @react-native-firebase/app
