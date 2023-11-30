@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Iconify } from "react-native-iconify";
 import SwiperFlatList from "react-native-swiper-flatlist";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -12,6 +12,7 @@ import {
   Dimensions,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
@@ -27,6 +28,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import buildQueryUrl from "../../src/api/components/conditionalQuery";
 
 const { width, height } = Dimensions.get("window");
 const adsImage = require("../../assets/img/ads/ads.png");
@@ -40,30 +42,63 @@ const HomeScreen = () => {
   const isFocused = useIsFocused();
   const [mainPharmacy, setPharmacy] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   // const [filteredProducts, setFilteredProducts] = useState([]);
   //const [searchKeyword, setSearchKeyword] = useState("");
 
   //
   //handleNavigateToProducts
-  useEffect(() => {
-    const fetchPharmacyData = async () => {
-      try {
-        //HTTP GET request to API endpoint without specifying conditions
-        const response = await axios.get(
-          `${BASE_URL}/api/mobile/get/fetch/docs/by/condition?collectionName=pharmacy`
-        );
+  const fetchPharmacyData = async () => {
+    try {
+      setLoading(true);
 
-        // Extracting the data from the response
-        const pharmacyData = response.data;
+      //HTTP GET request to API endpoint without specifying conditions
+      // const response = await axios.get(
+      //   `${BASE_URL}/api/mobile/get/fetch/docs/by/condition?collectionName=pharmacy`
+      // );
+
+      // // Extracting the data from the response
+      // const pharmacyData = response.data;
+      // setPharmacy(pharmacyData);
+      const pharmacyCondition = [
+        {
+          fieldName: "status",
+          operator: "!=",
+          value: "Disabled",
+        },
+      ];
+      const apiUrl = buildQueryUrl("pharmacy", pharmacyCondition);
+
+      const response = await fetch(apiUrl, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const pharmacyData = await response.json();
+        pharmacyData.forEach(() => {});
         setPharmacy(pharmacyData);
-      } catch (error) {
-        console.log("Error fetching pharmacy data:", error);
-      } finally {
-        setLoading(false);
+      } else {
+        console.log("API request failed with status:", response.status);
       }
-    };
+    } catch (error) {
+      console.log("Error fetching pharmacy data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchPharmacyData();
+    } catch (error) {
+      console.error("Error while refreshing:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
-    fetchPharmacyData();
+  useEffect(() => {
+    fetchPharmacyData(); // Initial data fetch when component mounts
   }, []);
 
   const handlePressAddress = () => {
@@ -141,7 +176,12 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Body circum:search */}
         <View className="pl-4 pr-4 pb-2">
           <StatusBar backgroundColor="white" barStyle="light-content" />
