@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   FlatList,
+  Alert,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 // import ImagePicker from "react-native-image-picker";
@@ -166,212 +167,244 @@ const ToValidateScreen = ({ navigation, route }) => {
 
   //handle place order for products checked out from productDetailsScreen
   const handlePlaceOrderScreen = async () => {
-    setBtnLoading(true);
-    try {
-      // Ensure both user data and product data are available
-      if (!user || !item || !sellerData) {
-        console.error("User data, product data, or seller data is missing.");
-        return;
-      }
-      if (user.deliveryAddress == null) {
-        toast.show(`Please set your delivery address correctly`, {
-          type: "normal ",
-          placement: "bottom",
-          duration: 3000,
-          offset: 10,
-          animationType: "slide-in",
-        });
-        return;
-      }
-      if (user.status !== "Verified") {
-        toast.show(`Please verify your account first`, {
-          type: "normal ",
-          placement: "bottom",
-          duration: 3000,
-          offset: 10,
-          animationType: "slide-in",
-        });
-        return;
-      }
-      if (Array.isArray(item)) {
-        for (const product of item) {
-          if (product.stock < product.quantity) {
-            toast.show(`Insufficient stock for ${product.productName}`, {
-              type: "normal ",
-              placement: "bottom",
-              duration: 3000,
-              offset: 10,
-              animationType: "slide-in",
-            });
-            return; // Exit the function if stock is insufficient
-          }
-        }
-      } else {
-        if (item.stock < quantity) {
-          // console.error(
-          //   `Quantity for ${item.productName} exceeds available stock.`
-          // );
-          // Display a message to the user indicating insufficient stock
-          toast.show(`Insufficient stock for ${item.productName}`, {
-            type: "normal ",
-            placement: "bottom",
-            duration: 3000,
-            offset: 10,
-            animationType: "slide-in",
-          });
-          return; // Exit the function if stock is insufficient
-        }
-      }
-      const orderCreatedTimestamp = Timestamp.now();
-      let totalQuantity = 0;
-      if (Array.isArray(item)) {
-        for (const product of item) {
-          totalQuantity += product.quantity;
-        }
-      } else if (quantity) {
-        totalQuantity = quantity;
-      }
-      //"orders" collection
-      const data = {
-        customerId: user.id,
-        customerName: `${user.firstName} ${user.lastName}`,
-        deliveryAddress: user.address,
-        customerPhoneNumber: user.phone,
-        totalPrice: totalPrice.toFixed(2),
-        sellerId: sellerData.id,
-        status: "Pending Validation",
-        createdAt: orderCreatedTimestamp,
-        sellerFcmToken: sellerData.fcmToken,
-        branchName: sellerData.branch,
-        totalQuantity: totalQuantity,
-        paymentMethod: null,
-        orderSubTotalPrice: productSubtotal.toFixed(2),
-      };
-      const orderId = await storeProductData("orders", data);
+    Alert.alert(
+      "Confirm Order",
+      "Before placing this order, ensure that your mobile phone and delivery address are correctly set.\n\nWould you like to proceed with placing this order?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Place Order",
+          onPress: async () => {
+            setBtnLoading(true);
 
-      //"attachmentList" collection
-      for (const image of itemSelectedImages) {
-        try {
-          const downloadUrl = await uploadImageAsync(image.uri);
-          console.log("Download URL:", downloadUrl);
-          // Store the image URLs in the attachmentList collection
-          const attachmentData = {
-            orderId: orderId,
-            img: downloadUrl,
-          };
-          const attachmentId = await storeProductData(
-            "attachmentList",
-            attachmentData
-          );
-          console.log("AttachmentList ID:", attachmentId);
-        } catch (error) {
-          console.error("Error uploading image:", error);
-          console.log("itemselected", itemSelectedImages);
-        }
-      }
-      //will be rendered if the item came from the "ShoppingCartScreen.js"
-      if (Array.isArray(item)) {
-        for (const product of item) {
-          // Ensure that each product has a valid productId
-          if (!product.productId) {
-            console.error("Product ID is missing or invalid.");
-            continue;
-          }
+            try {
+              // Ensure both user data and product data are available
+              if (!user || !item || !sellerData) {
+                console.error(
+                  "User data, product data, or seller data is missing."
+                );
+                return;
+              }
+              if (user.address == null) {
+                toast.show(`Please set your delivery address correctly`, {
+                  type: "normal ",
+                  placement: "bottom",
+                  duration: 3000,
+                  offset: 10,
+                  animationType: "slide-in",
+                });
+                return;
+              }
+              if (user.status !== "Verified") {
+                toast.show(`Please verify your account first`, {
+                  type: "normal ",
+                  placement: "bottom",
+                  duration: 3000,
+                  offset: 10,
+                  animationType: "slide-in",
+                });
+                return;
+              }
+              if (Array.isArray(item)) {
+                for (const product of item) {
+                  if (product.stock < product.quantity) {
+                    toast.show(
+                      `Insufficient stock for ${product.productName}`,
+                      {
+                        type: "normal ",
+                        placement: "bottom",
+                        duration: 3000,
+                        offset: 10,
+                        animationType: "slide-in",
+                      }
+                    );
+                    return;
+                  }
+                }
+              } else {
+                if (item.stock < quantity) {
+                  // console.error(
+                  //   `Quantity for ${item.productName} exceeds available stock.`
+                  // );
+                  // Display a message to the user indicating insufficient stock
+                  toast.show(`Insufficient stock for ${item.productName}`, {
+                    type: "normal ",
+                    placement: "bottom",
+                    duration: 3000,
+                    offset: 10,
+                    animationType: "slide-in",
+                  });
+                  return; // Exit the function if stock is insufficient
+                }
+              }
+              const orderCreatedTimestamp = Timestamp.now();
+              let totalQuantity = 0;
+              if (Array.isArray(item)) {
+                for (const product of item) {
+                  totalQuantity += product.quantity;
+                }
+              } else if (quantity) {
+                totalQuantity = quantity;
+              }
+              const sellerFcmToken = sellerData.fcmToken
+                ? sellerData.fcmToken
+                : "No sellerFcmToken";
+              //"orders" collection
+              const data = {
+                customerId: user.id,
+                customerName: `${user.firstName} ${user.lastName}`,
+                deliveryAddress: user.address,
+                customerPhoneNumber: user.phone,
+                totalPrice: totalPrice.toFixed(2),
+                sellerId: sellerData.id,
+                status: "Pending Validation",
+                createdAt: orderCreatedTimestamp,
+                sellerFcmToken: sellerFcmToken,
+                branchName: sellerData.branch,
+                totalQuantity: totalQuantity,
+                paymentMethod: null,
+                orderSubTotalPrice: productSubtotal.toFixed(2),
+              };
+              const orderId = await storeProductData("orders", data);
 
-          const subtotal = product.quantity * product.price;
-          // "productList" collection
-          const orderedProductDetails = {
-            orderId: orderId,
-            productId: product.productId,
-            prescription: product.requiresPrescription,
-            productName: product.productName,
-            quantity: product.quantity,
-            price: product.price,
-            productImg: product.img,
-            productSubTotalPrice: subtotal.toFixed(2),
-          };
+              //"attachmentList" collection
+              for (const image of itemSelectedImages) {
+                try {
+                  const downloadUrl = await uploadImageAsync(image.uri);
+                  console.log("Download URL:", downloadUrl);
+                  // Store the image URLs in the attachmentList collection
+                  const attachmentData = {
+                    orderId: orderId,
+                    img: downloadUrl,
+                  };
+                  const attachmentId = await storeProductData(
+                    "attachmentList",
+                    attachmentData
+                  );
+                  console.log("AttachmentList ID:", attachmentId);
+                } catch (error) {
+                  console.error("Error uploading image:", error);
+                  console.log("itemselected", itemSelectedImages);
+                }
+              }
+              //will be rendered if the item came from the "ShoppingCartScreen.js"
+              if (Array.isArray(item)) {
+                for (const product of item) {
+                  // Ensure that each product has a valid productId
+                  if (!product.productId) {
+                    console.error("Product ID is missing or invalid.");
+                    continue;
+                  }
 
-          const productListId = await storeProductData(
-            "productList",
-            orderedProductDetails
-          );
+                  const subtotal = product.quantity * product.price;
+                  const pImage = product.img ? product.img : "No product Image";
+                  // "productList" collection
+                  const orderedProductDetails = {
+                    orderId: orderId,
+                    productId: product.productId,
+                    prescription: product.requiresPrescription,
+                    productName: product.productName,
+                    quantity: product.quantity,
+                    price: product.price,
+                    productImg: pImage,
+                    productSubTotalPrice: subtotal.toFixed(2),
+                  };
 
-          console.log("Order placed with ID:", orderId);
-          console.log("ProductList ID", productListId);
-          //updating the stock on the "products" collection
-          for (const product of item) {
-            // Ensure that each product has a valid productId
-            if (!product.productId) {
-              console.error("Product ID is missing or invalid.");
-              continue;
+                  const productListId = await storeProductData(
+                    "productList",
+                    orderedProductDetails
+                  );
+
+                  console.log("Order placed with ID:", orderId);
+                  console.log("ProductList ID", productListId);
+                  //updating the stock on the "products" collection
+                  for (const product of item) {
+                    // Ensure that each product has a valid productId
+                    if (!product.productId) {
+                      console.error("Product ID is missing or invalid.");
+                      continue;
+                    }
+
+                    const updatedStock = product.stock - product.quantity;
+                    // Update the stock on the "products" collection
+                    await updateById(
+                      product.productId,
+                      "products",
+                      "stock",
+                      updatedStock
+                    );
+
+                    // Check if the updated stock is 0 and update the product status
+                    if (updatedStock === 0) {
+                      await updateById(
+                        product.productId,
+                        "products",
+                        "productStatus",
+                        "Hidden"
+                      );
+                      console.log(
+                        `Product ${product.productName} status updated to hidden.`
+                      );
+                    }
+                  }
+                }
+              }
+              //will be rendered if the item came from the "ProductDetailsScreen.js"
+              else {
+                // "productList" collection
+                const pImage = item.img ? item.img : "No product Image";
+                const subtotal = item.quantity * item.price;
+                const orderDetails = {
+                  orderId: orderId,
+                  productId: item.productId,
+                  prescription: item.requiresPrescription,
+                  productName: item.productName,
+                  quantity: quantity,
+                  price: item.price,
+                  productImg: pImage,
+                  productSubTotalPrice: subtotal.toFixed(2),
+                };
+
+                const productListId = await storeProductData(
+                  "productList",
+                  orderDetails
+                );
+
+                //updating the stock on the "products" collection
+                const updatedStock = item.stock - quantity;
+                await updateById(
+                  productId,
+                  "products",
+                  "stock",
+                  item.stock - quantity
+                );
+                if (updatedStock === 0) {
+                  await updateById(
+                    item.productId,
+                    "products",
+                    "productStatus",
+                    "Hidden"
+                  );
+                }
+
+                console.log("Order placed with ID:", orderId);
+                console.log("ProductList ID", productListId);
+              }
+
+              navigation.navigate("OrderScreen");
+            } catch (error) {
+              console.error("Error placing the order:", error);
+            } finally {
+              setBtnLoading(false);
             }
-
-            const updatedStock = product.stock - product.quantity;
-            // Update the stock on the "products" collection
-            await updateById(
-              product.productId,
-              "products",
-              "stock",
-              updatedStock
-            );
-
-            // Check if the updated stock is 0 and update the product status
-            if (updatedStock === 0) {
-              await updateById(
-                product.productId,
-                "products",
-                "productStatus",
-                "Hidden"
-              );
-              console.log(
-                `Product ${product.productName} status updated to hidden.`
-              );
-            }
-          }
-        }
-      }
-      //will be rendered if the item came from the "ProductDetailsScreen.js"
-      else {
-        // "productList" collection
-        const subtotal = item.quantity * item.price;
-        const orderDetails = {
-          orderId: orderId,
-          productId: item.productId,
-          prescription: item.requiresPrescription,
-          productName: item.productName,
-          quantity: quantity,
-          price: item.price,
-          productImg: item.img,
-          productSubTotalPrice: subtotal.toFixed(2),
-        };
-
-        const productListId = await storeProductData(
-          "productList",
-          orderDetails
-        );
-
-        //updating the stock on the "products" collection
-        const updatedStock = item.stock - quantity;
-        await updateById(productId, "products", "stock", item.stock - quantity);
-        if (updatedStock === 0) {
-          await updateById(
-            item.productId,
-            "products",
-            "productStatus",
-            "Hidden"
-          );
-        }
-
-        console.log("Order placed with ID:", orderId);
-        console.log("ProductList ID", productListId);
-      }
-
-      navigation.navigate("OrderScreen");
-    } catch (error) {
-      console.error("Error placing the order:", error);
-    } finally {
-      setBtnLoading(false);
-    }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const uploadImageAsync = async (uri) => {
@@ -676,7 +709,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.pdTotalAmountText}>
                     {"\u20B1"}
-                    {totalPrice.toFixed(2)} {/* Display the total price */}
+                    {totalPrice.toFixed(2)}
                   </Text>
                 </View>
                 <TouchableOpacity

@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    padding: 15,
   },
   productContainer: {
     paddingHorizontal: 8,
@@ -92,15 +92,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   xButton: {
-    backgroundColor: "#8E8E8E",
+    backgroundColor: "black",
     borderRadius: 50,
-    padding: 3,
   },
   xButtonContainer: {
     flexDirection: "row",
     marginLeft: 5,
     marginTop: 5,
     marginBottom: -10,
+    justifyContent: "flex-end",
   },
   noFavoritesText: {
     fontSize: 18,

@@ -5,19 +5,22 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { Iconify } from "react-native-iconify";
 import { StatusBar } from "expo-status-bar";
 import { getAuthToken } from "../../src/authToken";
 import styles from "./stylesheet";
+import { AuthContext } from "../../src/context";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const isStatusBarWhite = true;
+  const { signOut } = useContext(AuthContext);
   const [isLoading, setLoading] = useState(true);
   const [CurrentUserId, setCurrentUserId] = useState(null);
   const [user, setUser] = useState(null);
@@ -78,6 +81,26 @@ const ProfileScreen = () => {
 
   const handlePressDeleteAccount = () => {
     navigation.navigate("TestScreen");
+  };
+  const handleLogout = () => {
+    Alert.alert(
+      "Confirm Logout",
+      "Are your sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          onPress: async () => {
+            // Call the signOut function to clear the token
+            signOut();
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
   // useEffect(() => {
   //   if (isDataLoaded && fetchedStatus !== "Verified") {
@@ -215,19 +238,15 @@ const ProfileScreen = () => {
             </TouchableOpacity>
 
             <View style={styles.line2} />
-            <TouchableOpacity>
-              <View style={styles.viewCont} className="mt-2">
-                <View style={styles.iconsBG}>
-                  <Iconify icon="ic:outline-delete" size={22} color="black" />
-                </View>
-                <Text style={styles.viewContText}>Delete Account</Text>
-                <View style={styles.arrowIcon}>
-                  <Iconify
-                    icon="iconoir:nav-arrow-right"
-                    size={22}
-                    color="black"
-                  />
-                </View>
+            <TouchableOpacity onPress={handleLogout}>
+              <View style={styles.logoutCont}>
+                <Iconify
+                  icon="tabler:logout"
+                  size={25}
+                  color="white"
+                  style={{ marginRight: 15 }}
+                />
+                <Text style={styles.logoutButton}>Logout</Text>
               </View>
             </TouchableOpacity>
           </View>

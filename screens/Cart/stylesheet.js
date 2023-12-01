@@ -30,19 +30,21 @@ const styles = StyleSheet.create({
 
   selectedProductContainer: {
     height: "100%",
-    paddingTop: "21%",
+    paddingTop: "20%",
   },
   productContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    borderRadius: 10,
-    elevation: 3,
     height: 100,
     width: "100%",
     alignSelf: "center",
-    marginTop: 10,
-    backgroundColor: "#FFFF",
+    marginTop: 9,
+    marginBottom: 15,
+    borderEndWidth: 2,
+    borderStartWidth: 2,
+    borderRadius: 13,
+    borderColor: "#E0E0E0",
   },
   imageContainer: {
     marginLeft: 30,
@@ -122,11 +124,21 @@ const styles = StyleSheet.create({
     fontWeight: 300,
   },
   separator: {
-    marginTop: 20,
-    height: 1,
-    width: "85%",
-    backgroundColor: "#D9D9D9",
+    marginTop: 15,
+    marginBottom: 25,
+    height: 0.85,
+    width: "100%",
+    backgroundColor: "#E0E0E0",
     alignSelf: "center",
+  },
+  productSeparator: {
+    marginTop: 15,
+    height: 1,
+    width: "95%",
+    backgroundColor: "#CCCCCC",
+    alignSelf: "center",
+    elevation: 0.5,
+    borderWidth: 1,
   },
   footer: {
     position: "absolute",
@@ -239,15 +251,14 @@ const styles = StyleSheet.create({
   sellerContainer: {
     backgroundColor: "#FFFFFF",
     padding: 15,
-    marginBottom: 15,
-    borderRadius: 20,
+    marginBottom: 25,
+    borderRadius: 15,
   },
   sellerNameContainer: {
-    marginBottom: 15,
-    marginTop: 5,
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    flex: 1, // Allow the seller name and checkbox to take the available space
+    marginTop: 15,
   },
   sellerName: {
     fontWeight: "500",

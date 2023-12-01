@@ -166,13 +166,14 @@ const ShoppingCartScreen = () => {
         (item) => item.id !== cartItemId
       );
       setCartItems(updatedCartItems);
-      toast.show("Item removed successfully!", {
-        type: "normal ",
-        placement: "bottom",
-        duration: 3000,
-        offset: 10,
-        animationType: "slide-in",
-      });
+      ToastAndroid.show("Item removed successfully!", ToastAndroid.SHORT);
+      // toast.show("Item removed successfully!", {
+      //   type: "normal ",
+      //   placement: "bottom",
+      //   duration: 3000,
+      //   offset: 10,
+      //   animationType: "slide-in",
+      // });
     } catch (error) {
       console.error("Error removing item from the database:", error);
     }
@@ -194,13 +195,17 @@ const ShoppingCartScreen = () => {
       // Proceed to the checkout screen
       navigation.navigate("ToValidateScreen", { cartId: selectedCartIds });
     } else {
-      toast.show("Please select items from the same seller to proceed!", {
-        type: "normal",
-        placement: "bottom",
-        duration: 3000,
-        offset: 10,
-        animationType: "slide-in",
-      });
+      ToastAndroid.show(
+        "Please select items from the same seller to proceed!",
+        ToastAndroid.SHORT
+      );
+      // toast.show("Please select items from the same seller to proceed!", {
+      //   type: "normal",
+      //   placement: "bottom",
+      //   duration: 3000,
+      //   offset: 10,
+      //   animationType: "slide-in",
+      // });
     }
   };
 
@@ -252,9 +257,11 @@ const ShoppingCartScreen = () => {
                 onValueChange={() => handleSelectItem(item[0].id, true)}
                 style={styles.checkBoxIcon}
               />
-              <View style={styles.verticalSeparator}></View>
+              <View style={styles.verticalSeparator} />
               <Text style={styles.sellerName}>{item[0].sellerInfo.branch}</Text>
             </View>
+            <View style={styles.separator} />
+
             {item.map((cartItem) => (
               <View style={styles.productContainer} key={cartItem.id}>
                 <Checkbox
@@ -271,7 +278,7 @@ const ShoppingCartScreen = () => {
                     />
                   ) : (
                     <Image
-                      source={require("../../assets/img/default-image.jpg")}
+                      source={require("../../assets/img/def-image.jpg")}
                       style={styles.productImage}
                     />
                   )}
@@ -327,7 +334,7 @@ const ShoppingCartScreen = () => {
                   <TouchableOpacity onPress={() => removeCartItem(cartItem.id)}>
                     <Iconify
                       icon="carbon:close-filled"
-                      size={22}
+                      size={23}
                       color="black"
                     />
                   </TouchableOpacity>

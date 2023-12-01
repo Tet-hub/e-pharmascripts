@@ -136,6 +136,22 @@ const styles = StyleSheet.create({
     alignItems: "center", // Align items vertically
     justifyContent: "center", // Center items horizontally
   },
+  logoutButton: {
+    fontWeight: 600,
+    fontSize: 17,
+    color: "white",
+    alignItems: "center", // Center children vertically
+  },
+  logoutCont: {
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row", // Align children horizontally
+    marginTop: 20,
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderRadius: 20,
+  },
 });
 
 export default styles;
