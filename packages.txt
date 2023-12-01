@@ -42,3 +42,4 @@ npm install deprecated-react-native-prop-types
 npm install react-native-screens or 
 npm install react-native-screens@3.20.0
 npm install @react-native-firebase/app
+ npm install @react-native-firebase/storage

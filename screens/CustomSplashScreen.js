@@ -7,7 +7,7 @@ const CustomSplashScreen = () => {
       <View style={styles.content}>
         <Image
           style={styles.logo}
-          source={require("../assets/img/ads/logo-e.jpg")}
+          source={require("../assets/e-pharmascripts-logo-without-bg.png")}
         />
         <Text style={styles.title}>
           E-<Text style={styles.highlightedText}>PHARMASCRIPTS</Text>

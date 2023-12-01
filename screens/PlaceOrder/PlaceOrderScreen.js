@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   FlatList,
+  Alert,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Iconify } from "react-native-iconify";
@@ -91,90 +92,109 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   useEffect(() => {
     setIsPaymentMethodSelected(!!selectedPaymentMethod);
   }, [selectedPaymentMethod]);
-
   const handlePlaceOrder = async () => {
-    try {
-      if (!isPaymentMethodSelected) {
-        return;
-      }
+    Alert.alert(
+      "Confirm Order",
+      "Would you like to proceed with placing this order?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Place Order",
+          onPress: async () => {
+            try {
+              if (!isPaymentMethodSelected) {
+                return;
+              }
 
-      if (orderId && selectedPaymentMethod === "Card") {
-        if (!card || !card.id) {
-          // console.log("Error card");
-          toast.show(`Error card`, {
-            type: "normal ",
-            placement: "bottom",
-            duration: 3000,
-            offset: 10,
-            animationType: "slide-in",
-          });
-          return;
-        }
+              if (orderId && selectedPaymentMethod === "Card") {
+                if (!card || !card.id) {
+                  // console.log("Error card");
+                  toast.show(`Error card`, {
+                    type: "normal ",
+                    placement: "bottom",
+                    duration: 3000,
+                    offset: 10,
+                    animationType: "slide-in",
+                  });
+                  return;
+                }
 
-        try {
-          const response = await payRequest(card.id, totalPrice, customerName);
-          const paymentIntentId = response.paymentIntentId;
+                try {
+                  const response = await payRequest(
+                    card.id,
+                    totalPrice,
+                    customerName
+                  );
+                  const paymentIntentId = response.paymentIntentId;
 
-          console.log("Payment Intent ID:", paymentIntentId);
+                  console.log("Payment Intent ID:", paymentIntentId);
 
-          // Update the order status only when payment is successful
-          await updateById(
-            orderId,
-            "orders",
-            "paymentMethod",
-            selectedPaymentMethod
-          );
+                  // Update the order status only when payment is successful
+                  await updateById(
+                    orderId,
+                    "orders",
+                    "paymentMethod",
+                    selectedPaymentMethod
+                  );
 
-          const orderCreatedTimestamp = Timestamp.now();
-          const orderDocRef = doc(db, "orders", orderId);
-          await updateDoc(
-            orderDocRef,
-            {
-              paymentId: paymentIntentId,
-              orderedAt: orderCreatedTimestamp,
-              status: "Ordered", // Update the status here
-            },
-            { merge: true }
-          );
+                  const orderCreatedTimestamp = Timestamp.now();
+                  const orderDocRef = doc(db, "orders", orderId);
+                  await updateDoc(
+                    orderDocRef,
+                    {
+                      paymentId: paymentIntentId,
+                      orderedAt: orderCreatedTimestamp,
+                      status: "Ordered", // Update the status here
+                    },
+                    { merge: true }
+                  );
 
-          console.log("Order placed successfully!");
-          navigation.navigate("OrderScreen");
-        } catch (error) {
-          // console.error("Error processing payment:", error);
-          toast.show(`Error processing payment`, {
-            type: "normal ",
-            placement: "bottom",
-            duration: 3000,
-            offset: 10,
-            animationType: "slide-in",
-          });
-        }
-      } else if (orderId && selectedPaymentMethod) {
-        // Update the order status for other payment methods
-        await updateById(orderId, "orders", "status", "Ordered");
-        await updateById(
-          orderId,
-          "orders",
-          "paymentMethod",
-          selectedPaymentMethod
-        );
+                  console.log("Order placed successfully!");
+                  navigation.navigate("OrderScreen");
+                } catch (error) {
+                  // console.error("Error processing payment:", error);
+                  toast.show(`Error processing payment`, {
+                    type: "normal ",
+                    placement: "bottom",
+                    duration: 3000,
+                    offset: 10,
+                    animationType: "slide-in",
+                  });
+                }
+              } else if (orderId && selectedPaymentMethod) {
+                // Update the order status for other payment methods
+                await updateById(orderId, "orders", "status", "Ordered");
+                await updateById(
+                  orderId,
+                  "orders",
+                  "paymentMethod",
+                  selectedPaymentMethod
+                );
 
-        const orderCreatedTimestamp = Timestamp.now();
-        const orderDocRef = doc(db, "orders", orderId);
-        await updateDoc(
-          orderDocRef,
-          {
-            orderedAt: orderCreatedTimestamp,
+                const orderCreatedTimestamp = Timestamp.now();
+                const orderDocRef = doc(db, "orders", orderId);
+                await updateDoc(
+                  orderDocRef,
+                  {
+                    orderedAt: orderCreatedTimestamp,
+                  },
+                  { merge: true }
+                );
+
+                console.log("Order placed successfully!");
+                navigation.navigate("OrderScreen");
+              }
+            } catch (error) {
+              console.error("Error placing the order:", error);
+            }
           },
-          { merge: true }
-        );
-
-        console.log("Order placed successfully!");
-        navigation.navigate("OrderScreen");
-      }
-    } catch (error) {
-      console.error("Error placing the order:", error);
-    }
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const renderItem = ({ item }) => (

@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 10,
     justifyContent: "space-between",
+    padding: 15,
   },
   productCard: {
     borderRadius: 15,
@@ -106,8 +107,10 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   image: {
-    width: "100%",
+    width: "95%",
     height: 90,
+    alignSelf: "center",
+    marginTop: 5,
   },
   imageContainer: {
     width: "100%",

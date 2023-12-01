@@ -220,11 +220,11 @@ const MenuScreen = () => {
         </View>
         <View style={styles.line} />
 
-        <TouchableOpacity onPress={handleLogout}>
+        {/* <TouchableOpacity onPress={handleLogout}>
           <View style={styles.logoutCont}>
             <Text style={styles.logoutButton}>Logout</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

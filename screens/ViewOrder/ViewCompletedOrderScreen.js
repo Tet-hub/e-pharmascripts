@@ -160,7 +160,9 @@ const ViewCompletedOrderScreen = () => {
                 <Text style={styles.methodText}>Payment Method :</Text>
                 <View style={styles.choseMethodTextContainer}>
                   <Text style={styles.choseMethodText}>
-                    {item.paymentMethod || ""}
+                    {item.paymentMethod == "Card"
+                      ? "Credit Card"
+                      : "Cash-on-Delivery" || ""}
                   </Text>
                 </View>
               </View>

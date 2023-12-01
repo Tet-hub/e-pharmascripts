@@ -3,11 +3,10 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   titleContainer: {
     paddingHorizontal: 16,
-    paddingTop: 50, // Increased top padding
+    paddingTop: 50,
   },
   title: {
     fontSize: 28,
@@ -57,6 +56,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 10,
+    marginBottom: 10,
   },
   chatImage: {
     width: 48, // Set image width

@@ -161,18 +161,18 @@ const ProductDetailScreen = ({ navigation, route }) => {
       if (response.ok) {
         console.log("Item added to cart successfully!");
         //Adding toastAndriod success message
-        // ToastAndroid.show(
-        //   "Item added to cart successfully!",
-        //   ToastAndroid.SHORT
-        // );
+        ToastAndroid.show(
+          "Item added to cart successfully!",
+          ToastAndroid.SHORT
+        );
         // toast.show("Item added to cart successfully!");
-        toast.show("Item added to cart successfully!", {
-          type: "normal ",
-          placement: "bottom",
-          duration: 3000,
-          offset: 10,
-          animationType: "slide-in",
-        });
+        // toast.show("Item added to cart successfully!", {
+        //   type: "normal ",
+        //   placement: "bottom",
+        //   duration: 3000,
+        //   offset: 10,
+        //   animationType: "slide-in",
+        // });
       } else {
         console.log("Error adding item to cart:", response.status);
       }

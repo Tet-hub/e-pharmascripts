@@ -143,7 +143,7 @@ const FavoritesScreen = ({ navigation, route }) => {
               style={styles.xButton}
               onPress={() => removeProductFromFavorites(item.productId)}
             >
-              <Iconify icon="bi:x" size={13} color="white" />
+              <Iconify icon="bi:x" size={20} color="white" />
             </TouchableOpacity>
           </View>
           <View style={styles.imageContainer}>
@@ -151,8 +151,8 @@ const FavoritesScreen = ({ navigation, route }) => {
               <Image source={{ uri: item.img }} style={styles.image} />
             ) : (
               <Image
-                source={require("../../assets/img/default-image.jpg")}
-                style={{ width: 100, height: 100, borderRadius: 50 }}
+                source={require("../../assets/img/def-image.jpg")}
+                style={styles.image}
               />
             )}
           </View>

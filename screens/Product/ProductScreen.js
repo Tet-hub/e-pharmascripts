@@ -232,7 +232,14 @@ const ProductScreen = ({ navigation, route }) => {
       <View style={[styles.productContainer, { width: cardWidth }]}>
         <View style={styles.productCard}>
           <View style={styles.imageContainer}>
-            <Image source={{ uri: item.img }} style={styles.image} />
+            {item.img ? (
+              <Image source={{ uri: item.img }} style={styles.image} />
+            ) : (
+              <Image
+                source={require("../../assets/img/def-image.jpg")}
+                style={styles.image}
+              />
+            )}
           </View>
           <Text style={styles.productName}>
             {item.productName.length > 20
