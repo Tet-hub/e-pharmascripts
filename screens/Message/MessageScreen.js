@@ -142,36 +142,6 @@ const MessageScreen = ({ navigation }) => {
     fetchChatList();
   }, []);
 
-  //   const fetchSellerImage = async (sellerId) => {
-  //     try {
-  //       if (sellerId) {
-  //         const sellersCollection = collection(db, "sellers");
-  //         const sellerDocRef = doc(sellersCollection, sellerId);
-  //         const sellerDocSnapshot = await getDoc(sellerDocRef);
-
-  //         if (sellerDocSnapshot.exists()) {
-  //           const sellerData = sellerDocSnapshot.data();
-  //           const sellerImage = sellerData.img; // Assuming the field name is 'img'
-
-  //           // Store the seller image in a state variable
-  //           setSellerImage(sellerImage);
-  //         } else {
-  //           console.log("Seller document not found for sellerId:", sellerId);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching seller data:", error);
-  //     }
-  //   };
-
-  //   if (sellerId) {
-  //     fetchSellerImage(sellerId);
-  //     console.log("fetched tae");
-  //   } else {
-  //     console.log("tae");
-  //   }
-  // }, [sellerId]);
-
   // Get screen dimensions
   const { width } = Dimensions.get("window");
 

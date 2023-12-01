@@ -40,7 +40,6 @@ const ChatScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [user, setUser] = useState(null);
-  const [scrollToEnd, setScrollToEnd] = useState(true);
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState(null);
   const [customerName, setCustomerName] = useState(null);
@@ -75,7 +74,7 @@ const ChatScreen = ({ route, navigation }) => {
 
           const messagesQuery = query(
             messagesCollection,
-            orderBy("timestamp", "asc"),
+            orderBy("timestamp", "desc"),
             where("senderId", "in", [currentUserId, sellerId]),
             where("receiverId", "in", [currentUserId, sellerId])
           );
@@ -87,10 +86,6 @@ const ChatScreen = ({ route, navigation }) => {
             });
 
             setMessages(messageData);
-
-            if (scrollToEnd && flatListRef.current) {
-              flatListRef.current.scrollToEnd({ animated: true });
-            }
           });
 
           return () => unsubscribe();
@@ -104,7 +99,7 @@ const ChatScreen = ({ route, navigation }) => {
       })();
 
       // Ensure that you don't return anything from the callback.
-    }, [sellerId, scrollToEnd])
+    }, [sellerId])
   );
 
   const handleSendMessage = async () => {
@@ -116,9 +111,6 @@ const ChatScreen = ({ route, navigation }) => {
 
       await sendMessage(newMessage, sellerId);
       setNewMessage("");
-
-      // Set scrollToEnd to true to scroll to the end when a new message is sent
-      setScrollToEnd(true);
     } catch (error) {
       console.log("Error sending message:", error);
     }
@@ -285,7 +277,7 @@ const ChatScreen = ({ route, navigation }) => {
                 >
                   <Image
                     source={{ uri: item.messageImg }}
-                    style={styles.imageStyle} // Add a style for the image if needed
+                    style={styles.imageStyle}
                   />
                 </TouchableOpacity>
               ) : (
@@ -305,11 +297,7 @@ const ChatScreen = ({ route, navigation }) => {
             </View>
           </View>
         )}
-        onLayout={() => {
-          if (scrollToEnd && flatListRef.current) {
-            flatListRef.current.scrollToEnd({ animated: true });
-          }
-        }}
+        inverted={true}
       />
       <Modal
         animationType="slide"
