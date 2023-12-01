@@ -7,6 +7,8 @@ import RootStack from "./navigators/RootStack"; // Your main app stack
 import AuthStack from "./navigators/AuthStack"; // Your authentication stack (Login and Signup)
 import { AuthContext } from "./src/context";
 import { getAuthToken } from "./src/authToken";
+import { db } from "./firebase/firebase";
+import { doc, getDoc } from 'firebase/firestore'
 import CustomSplashScreen from "./screens/CustomSplashScreen";
 import { ToastProvider } from "react-native-toast-notifications";
 import "./console-log";
@@ -16,6 +18,41 @@ const App = () => {
   const [userToken, setUserToken] = useState(null);
   const [userId, setUserId] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove(["token", "email", "userId"]);
+      setUserToken(null);
+      setUserId(null);
+      setUserEmail(null);
+      console.log("Token, Email, and UserId removed successfully");
+    } catch (error) {
+      console.log("Error removing data from AsyncStorage:", error);
+    }
+    
+  };
+  useEffect(() => {
+    const checkCustomerStatus = async () => {
+      try {
+        if (userToken) {
+          const userDocRef = doc(db, 'customers', userToken);
+          const userDocSnapshot = await getDoc(userDocRef);
+          if (userDocSnapshot.exists()) {
+            const userData = userDocSnapshot.data();
+            // Check if the customer's status is "disabled" and perform automatic logout
+            if (userData.status === 'Disabled') {
+              handleLogout();
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking customer status:', error);
+      }
+    };
+    checkCustomerStatus();
+    const intervalId = setInterval(checkCustomerStatus, 1000);
+    return () => clearInterval(intervalId);
+  }, [handleLogout]);
 
   useEffect(() => {
     // Check if a token is stored in AsyncStorage
