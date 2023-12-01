@@ -219,13 +219,11 @@ const Login = ({ navigation }) => {
                   setHidePassword={setHidePassword}
                   style={{ marginTop: -15 }}
                 />
-                <TouchableOpacity
-                  style={{ marginTop: 3, marginBottom: 10 }}
-                  onPress={handleForgot}
-                >
-                  <MsgBox>Forgot password?</MsgBox>
-                </TouchableOpacity>
-
+                <View style={{ width: '100%', alignItems: 'center', marginTop: 10, marginBottom: 15}}>
+                  <TouchableOpacity onPress={handleForgot}>
+                    <Text style={{ fontSize: 14, color: '#EB3F3F' }}>Forgot password?</Text>
+                  </TouchableOpacity>
+                </View>
                 {}
                 <StyledButton onPress={SignInUser} disabled={isLoading}>
                   {isLoading ? (
