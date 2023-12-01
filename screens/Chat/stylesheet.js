@@ -74,11 +74,11 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     backgroundColor: "#EC6F56",
-    borderRadius: 50, // Make it a circle
-    width: 50,
-    height: 50,
-    alignItems: "center", // Center horizontally
-    justifyContent: "center", // Center vertically
+    borderRadius: 50,
+    width: 55,
+    height: 55,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   dateDivider: {
