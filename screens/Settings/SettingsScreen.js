@@ -17,6 +17,10 @@ const SettingsScreen = () => {
   // const toggleNotifications = () => {
   //setIsNotificationsEnabled((prevState) => !prevState);
   // };
+  const navigation = useNavigation();
+  const handleReport = () => {
+    navigation.navigate("ReportIssueScreen");
+  };
 
   return (
     <View style={styles.container}>
@@ -30,7 +34,7 @@ const SettingsScreen = () => {
 
         <View style={styles.line} />
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleReport}>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>Help Center</Text>
             <View style={styles.arrowIcon}>
