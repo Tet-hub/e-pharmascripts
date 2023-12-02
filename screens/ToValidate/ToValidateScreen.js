@@ -188,6 +188,21 @@ const ToValidateScreen = ({ navigation, route }) => {
                 );
                 return;
               }
+              const requiresPrescription = Array.isArray(item)
+                ? item.some((product) => product.requiresPrescription === "Yes")
+                : item.requiresPrescription === "Yes";
+
+              // Check if prescription is required but no image is selected
+              if (requiresPrescription && itemSelectedImages.length === 0) {
+                toast.show(`Please add your prescription image first`, {
+                  type: "normal",
+                  placement: "bottom",
+                  duration: 3000,
+                  offset: 10,
+                  animationType: "slide-in",
+                });
+                return;
+              }
               if (user.address == null) {
                 toast.show(`Please set your delivery address correctly`, {
                   type: "normal ",
