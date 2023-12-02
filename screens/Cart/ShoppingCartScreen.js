@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   ToastAndroid,
+  RefreshControl,
 } from "react-native";
 import { useToast } from "react-native-toast-notifications";
 import { Iconify } from "react-native-iconify";
@@ -36,54 +37,65 @@ const ShoppingCartScreen = () => {
   const toast = useToast();
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        const authToken = await getAuthToken();
-        const customerId = authToken.userId;
-        if (!customerId) {
-          console.log("User ID is undefined or null.");
-          return;
-        }
-
-        const cartConditions = [
-          { fieldName: "customerId", operator: "==", value: customerId },
-        ];
-        listenForItem("cart", cartConditions, (updatedCartItems) => {
-          const promises = updatedCartItems.map(async (cartItem) => {
-            const productDocumentId = cartItem.productId;
-            const productDocumentRef = doc(db, "products", productDocumentId);
-            const productSnapshot = await getDoc(productDocumentRef);
-            if (productSnapshot.exists()) {
-              const productData = productSnapshot.data();
-              const sellerId = productData.sellerId;
-              const sellerDocumentRef = doc(db, "sellers", sellerId);
-              const sellerSnapshot = await getDoc(sellerDocumentRef);
-              if (sellerSnapshot.exists()) {
-                const sellerInfo = sellerSnapshot.data();
-                return { ...cartItem, productData, sellerInfo };
-              }
-            }
-            return null;
-          });
-
-          Promise.all(promises).then((cartItemsWithProductDetails) => {
-            const filteredCartItems = cartItemsWithProductDetails.filter(
-              (item) => item !== null
-            );
-            setCartItems(filteredCartItems);
-          });
-        });
-      } catch (error) {
-        console.log("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCartItems();
+    fetchCartItems(); // Fetch cart items when the component mounts
   }, []);
+  const fetchCartItems = async () => {
+    try {
+      setLoading(true);
+      const authToken = await getAuthToken();
+      const customerId = authToken.userId;
+      if (!customerId) {
+        console.log("User ID is undefined or null.");
+        return;
+      }
 
+      const cartConditions = [
+        { fieldName: "customerId", operator: "==", value: customerId },
+      ];
+      listenForItem("cart", cartConditions, (updatedCartItems) => {
+        const promises = updatedCartItems.map(async (cartItem) => {
+          const productDocumentId = cartItem.productId;
+          const productDocumentRef = doc(db, "products", productDocumentId);
+          const productSnapshot = await getDoc(productDocumentRef);
+          if (productSnapshot.exists()) {
+            const productData = productSnapshot.data();
+            const sellerId = productData.sellerId;
+            const sellerDocumentRef = doc(db, "sellers", sellerId);
+            const sellerSnapshot = await getDoc(sellerDocumentRef);
+            if (sellerSnapshot.exists()) {
+              const sellerInfo = sellerSnapshot.data();
+              return { ...cartItem, productData, sellerInfo };
+            }
+          }
+          return null;
+        });
+
+        Promise.all(promises).then((cartItemsWithProductDetails) => {
+          const filteredCartItems = cartItemsWithProductDetails.filter(
+            (item) => item !== null
+          );
+          setCartItems(filteredCartItems);
+          setLoading(false);
+        });
+      });
+    } catch (error) {
+      console.log("Error fetching products:", error);
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchCartItems();
+    } catch (error) {
+      console.log("Error while refreshing:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
   const handleIncrement = async (cartItemId) => {
     const updatedCartItems = cartItems.map(async (cartItem) => {
       if (cartItem.id === cartItemId) {
@@ -175,7 +187,7 @@ const ShoppingCartScreen = () => {
       //   animationType: "slide-in",
       // });
     } catch (error) {
-      console.error("Error removing item from the database:", error);
+      console.log("Error removing item from the database:", error);
     }
   };
   const handleToValidateScreen = () => {
@@ -354,13 +366,18 @@ const ShoppingCartScreen = () => {
       <View style={styles.titleWrapper}>
         <Text style={styles.screenTitle}>MY CART</Text>
       </View>
-      <View style={styles.bodyWrapper}>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        ) : cartItems.length !== 0 ? (
-          <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.bodyWrapper}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : cartItems.length !== 0 ? (
             <View style={styles.selectedProductContainer}>
               <View style={styles.cartContainer}>
                 <FlatList
@@ -373,21 +390,21 @@ const ShoppingCartScreen = () => {
                 />
               </View>
             </View>
-          </ScrollView>
-        ) : (
-          <View style={styles.noOrdersCont}>
-            <View style={styles.noOrders}>
-              <Iconify
-                icon="tabler:shopping-cart-x"
-                size={45}
-                color="black"
-                style={styles.noOrdersIcon}
-              />
-              <Text style={styles.noOrdersText}>No cart items yet</Text>
+          ) : (
+            <View style={styles.noOrdersCont}>
+              <View style={styles.noOrders}>
+                <Iconify
+                  icon="tabler:shopping-cart-x"
+                  size={45}
+                  color="black"
+                  style={styles.noOrdersIcon}
+                />
+                <Text style={styles.noOrdersText}>No cart items yet</Text>
+              </View>
             </View>
-          </View>
-        )}
-      </View>
+          )}
+        </View>
+      </ScrollView>
       <View>
         <View style={styles.footer}>
           <View style={styles.checkoutContainer}>

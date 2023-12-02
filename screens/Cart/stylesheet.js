@@ -17,6 +17,8 @@ const styles = StyleSheet.create({
   },
   bodyWrapper: {
     flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
   },
   itemsContainer: {
     width: "100%",
@@ -56,6 +58,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     marginBottom: 50,
+    marginVertical: "50%",
   },
   noOrders: {
     fontSize: 20,
@@ -272,6 +275,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginVertical: "50%",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
   noOrdersText: {
