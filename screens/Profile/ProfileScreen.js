@@ -109,6 +109,7 @@ const ProfileScreen = () => {
   // }, [isDataLoaded, fetchedStatus]);
   return (
     <ScrollView style={styles.container}>
+      <StatusBar backgroundColor="white" barStyle="light-content" />
       {isLoading ? (
         <View style={styles.loadCont}>
           <View style={styles.loadingContainer}>
@@ -122,7 +123,7 @@ const ProfileScreen = () => {
         </View>
       ) : (
         <View style={styles.insideContainer}>
-          <StatusBar backgroundColor="white" />
+          
           {/* <StatusBar
             style={isStatusBarWhite ? "light" : "dark"}
             backgroundColor={isStatusBarWhite ? "black" : "white"}

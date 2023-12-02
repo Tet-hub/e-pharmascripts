@@ -8,7 +8,7 @@ import {
   Keyboard,
   TouchableOpacity,
 } from 'react-native';
-import { updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { updateEmail, reauthenticateWithCredential, EmailAuthProvider, sendEmailVerification} from 'firebase/auth';
 import { db } from '../../firebase/firebase';
 import { updateDoc, doc } from 'firebase/firestore';
 import { authentication } from '../../firebase/firebase';
@@ -19,7 +19,7 @@ import { getCurrentUserId } from "../../src/authToken";
 const ChangeEmailScreen = () => {
   const [newEmail, setNewEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  
   const showToast = (message) => {
     Toast.show(message, {
       duration: Toast.durations.SHORT,
@@ -58,18 +58,23 @@ const ChangeEmailScreen = () => {
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
 
-      // Update the email
-      await updateEmail(user, newEmail);
-      
-      const docRef = doc(db, 'customers', userToken);
-      await updateDoc(docRef, {
-        email: newEmail,
-      });
-      console.log('Email changed successfully!');
-      showToast('Email changed successfully!');
-      setNewEmail(''); // Clear the fields
-      setPassword(''); // Clear the fields
-      
+      if (!user.emailVerified) { // Check the email verification status of the current user
+        await sendEmailVerification(user);
+        showToast("Verify Your Current Email first. Verification email sent.");
+      }
+      else {
+        // Update the email
+        await updateEmail(user, newEmail);
+        
+        const docRef = doc(db, 'customers', userToken);
+        await updateDoc(docRef, {
+          email: newEmail,
+        });
+        console.log('Email changed successfully!');
+        showToast('Email changed successfully!');
+        setNewEmail(''); // Clear the fields
+        setPassword(''); // Clear the fields
+      }
     } catch (error) {
       if (error.code === 'auth/wrong-password') {
         console.log('Incorrect current password. Please try again.');

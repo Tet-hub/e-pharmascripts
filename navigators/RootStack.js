@@ -42,6 +42,7 @@ import SecurityScreen from "../screens/Account/SecurityScreen";
 import ChangePasswordScreen from "../screens/Account/ChangePasswordScreen";
 import ChangeEmailScreen from "../screens/Account/ChangeEmailScreen";
 import VerifyEmailScreen from "../screens/Account/VerifyEmailScreen";
+import ReportIssueScreen from "../screens/Settings/ReportIssueScreen";
 
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
@@ -367,6 +368,14 @@ const RootStack = () => {
           <Stack.Screen
             name="VerifyEmailScreen"
             component={VerifyEmailScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="ReportIssueScreen"
+            component={ReportIssueScreen}
             options={{
               headerTitle: () => <View></View>,
               headerTintColor: "black",

@@ -174,7 +174,7 @@ const Login = ({ navigation }) => {
   return (
     <KeyboardAvoidingWrapper>
       <StyledContainer>
-        <StatusBar style="dark" />
+        <StatusBar backgroundColor="white" barStyle="light-content" />
         <InnerContainer>
           <PageLogo
             resizeMode="cover"

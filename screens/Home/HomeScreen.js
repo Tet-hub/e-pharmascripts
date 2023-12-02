@@ -176,6 +176,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="white" barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -184,7 +185,7 @@ const HomeScreen = () => {
       >
         {/* Body circum:search */}
         <View className="pl-4 pr-4 pb-2">
-          <StatusBar backgroundColor="white" barStyle="light-content" />
+          
           <View style={{ marginTop: 13, marginBottom: 5 }}>
             <Text
               style={{
