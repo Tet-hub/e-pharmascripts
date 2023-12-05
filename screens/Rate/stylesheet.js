@@ -7,11 +7,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     alignItems: "center",
   },
-  productName: {
-    fontWeight: "600",
-    fontSize: 20,
-    marginTop: 5,
-  },
   rateInstruction: {
     fontWeight: "400",
     fontSize: 14,

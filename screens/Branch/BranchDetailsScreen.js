@@ -90,23 +90,28 @@ const BranchDetailsScreen = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        const ratingsAndReviews = [];
+        const fetchedRatingsAndReviews = [];
         for (const doc of querySnapshot.docs) {
           const data = doc.data();
-          const { pharmacyRating, reviewDescription, customerId } = data;
+          const { pharmacyRating, reviewDescription, reviewedAt, customerId } =
+            data;
 
           // Fetch user data for this customerId
           await fetchUserData(customerId);
 
           // Add the review data to the array
-          ratingsAndReviews.push({
+          fetchedRatingsAndReviews.push({
             pharmacyRating,
             reviewDescription,
+            reviewedAt,
           });
         }
 
+        fetchedRatingsAndReviews.sort(
+          (a, b) => b.reviewedAt.toDate() - a.reviewedAt.toDate()
+        );
         // Set the array once after collecting all data
-        setRatingsAndReviews(ratingsAndReviews);
+        setRatingsAndReviews(fetchedRatingsAndReviews);
       } else {
         console.log("No ratings and reviews found for this seller.");
       }
@@ -198,6 +203,25 @@ const BranchDetailsScreen = () => {
       updateSellerRating();
     }
   }, [averageRating, sellerId]);*/
+
+  const formatDate = (timestamp) => {
+    const date = timestamp.toDate();
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    const formattedDate = date.toLocaleDateString(undefined, options);
+    const lastCommaIndex = formattedDate.lastIndexOf(",");
+    const formattedDateTime =
+      formattedDate.slice(0, lastCommaIndex) +
+      " at" +
+      formattedDate.slice(lastCommaIndex + 1);
+
+    return formattedDateTime;
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -332,26 +356,37 @@ const BranchDetailsScreen = () => {
                   </View>
 
                   <View style={styles.ratingsReviewsView}>
-                    <Text style={styles.raterNameText}>
-                      {raterInfo[index].firstName}
-                    </Text>
-                    <View style={styles.starRatingReviews}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Text key={star} style={styles.star}>
-                          <Icon
-                            name="star"
-                            size={8}
-                            color={
-                              star <= review.pharmacyRating ? "#FAC63E" : "grey"
-                            }
-                          />
+                    <View style={styles.flexDiv}>
+                      <View>
+                        <Text style={styles.raterNameText}>
+                          {raterInfo[index].firstName}
                         </Text>
-                      ))}
-                    </View>
-                    <View style={styles.reviewTextView}>
-                      <Text style={styles.reviewText}>
-                        {review.reviewDescription}
-                      </Text>
+                        <View style={styles.starRatingReviews}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Text key={star} style={styles.star}>
+                              <Icon
+                                name="star"
+                                size={8}
+                                color={
+                                  star <= review.pharmacyRating
+                                    ? "#FAC63E"
+                                    : "grey"
+                                }
+                              />
+                            </Text>
+                          ))}
+                        </View>
+                        <View style={styles.reviewTextView}>
+                          <Text style={styles.reviewText}>
+                            {review.reviewDescription}
+                          </Text>
+                        </View>
+                      </View>
+                      <View>
+                        <Text style={styles.dateReviewed}>
+                          {formatDate(review.reviewedAt)}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </View>
