@@ -86,9 +86,14 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     textAlign: "left",
+    marginLeft: 5,
     color: "#333",
-    fontWeight: "bold",
-    fontSize: 14,
+    fontWeight: "500",
+    fontSize: 10,
+  },
+  ratingsRowDiv: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   pharmacyName: {
     textAlign: "center",

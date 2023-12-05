@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 25,
+    marginBottom: 5,
   },
   ratingsText: {
     fontSize: 14,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
   ratingReviewBackground: {
     backgroundColor: "#F5F5F5",
     borderRadius: 5,
-    marginTop: 10,
+    marginTop: 5,
     height: 150,
   },
   reviewText: {
@@ -195,6 +196,14 @@ const styles = StyleSheet.create({
     fontWeight: 400,
     fontSize: 12,
     marginLeft: 20,
+  },
+  flexDiv: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dateReviewed: {
+    color: "#4E4E4E",
+    fontSize: 10,
   },
 });
 

@@ -99,7 +99,7 @@ const AddressScreen = () => {
         )}
       </View>
       <GooglePlacesAutocomplete
-        placeholder="Add new address"
+        placeholder="Modify address"
         onPress={(data, details = null) => {
           setSelectedAddress(data);
         }}

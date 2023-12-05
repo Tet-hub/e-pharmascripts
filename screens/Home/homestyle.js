@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
   },
   searchTextInput: {
     marginLeft: 5,
+    color: "gray",
   },
   inputSearch: {
     flex: 1,

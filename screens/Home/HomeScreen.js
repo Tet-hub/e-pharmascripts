@@ -147,7 +147,7 @@ const HomeScreen = () => {
           }
         }}
       >
-        <Iconify icon="iconoir:search" size={22} color="black" />
+        <Iconify icon="iconoir:search" size={22} color="gray" />
       </TouchableOpacity>
     );
   };
@@ -157,7 +157,14 @@ const HomeScreen = () => {
     return (
       <View style={[styles.pharmacyContainer, { width: cardWidth }]}>
         <View style={styles.pharmacyCard}>
-          <Image style={styles.image} source={{ uri: item.img }} />
+          {item.img ? (
+            <Image style={styles.image} source={{ uri: item.img }} />
+          ) : (
+            <Image
+              source={require("../../assets/img/def-image.jpg")}
+              style={styles.image}
+            />
+          )}
           <Text style={styles.pharmacyName}>{item.companyName}</Text>
           <TouchableOpacity
             onPress={() =>
@@ -185,7 +192,6 @@ const HomeScreen = () => {
       >
         {/* Body circum:search */}
         <View className="pl-4 pr-4 pb-2">
-          
           <View style={{ marginTop: 13, marginBottom: 5 }}>
             <Text
               style={{

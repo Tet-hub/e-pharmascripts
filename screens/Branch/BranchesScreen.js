@@ -16,6 +16,7 @@ import { Iconify } from "react-native-iconify";
 import styles from "./bs";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
 import { getAuthToken } from "../../src/authToken";
+import Icon from "react-native-vector-icons/FontAwesome";
 import {
   getDoc,
   doc,
@@ -42,6 +43,8 @@ const BranchesScreen = ({ navigation, route }) => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const apiKey = GOOGLE_MAPS_API_KEY;
+  const [ratingsAndReviews, setRatingsAndReviews] = useState([]);
+  const [aveRating, setAveRating] = useState(0);
   //
   const handleFilterClick = () => {
     setShowModal(true);
@@ -75,6 +78,8 @@ const BranchesScreen = ({ navigation, route }) => {
       setIsLoading(true);
       const Branches6KM = [];
       const dbSeller = collection(db, "sellers");
+      const ratingsRef = collection(db, "rateAndReview"); // Reference to ratings collection
+
       const activeSellersSnapshot = await getDocs(
         query(
           dbSeller,
@@ -82,6 +87,7 @@ const BranchesScreen = ({ navigation, route }) => {
           where("status", "==", "Active")
         )
       );
+
       let shouldLog = false;
 
       for (const branchDoc of activeSellersSnapshot.docs) {
@@ -104,15 +110,48 @@ const BranchesScreen = ({ navigation, route }) => {
             const distance = data.rows[0].elements[0].distance
               ? data.rows[0].elements[0].distance.value
               : undefined;
+
             if (distance !== undefined && distance < 6000) {
-              Branches6KM.push({
-                branchesId: branch.sellerId,
-                distance: distance,
-                branch: branch.branch,
-                companyName: branch.companyName,
-                img: branch.img,
+              // Fetch ratings for the current sellerId
+              const sellerId = branch.sellerId;
+              const querySnapshot = await getDocs(
+                query(ratingsRef, where("sellerId", "==", sellerId))
+              );
+
+              const sellerRatings = [];
+              querySnapshot.forEach((doc) => {
+                const ratingData = doc.data();
+                sellerRatings.push(ratingData);
               });
-              shouldLog = true;
+
+              // Calculate average rating based on pharmacyRating field
+              let totalRating = 0;
+              if (sellerRatings.length > 0) {
+                sellerRatings.forEach((rating) => {
+                  totalRating += rating.pharmacyRating; // Using pharmacyRating field
+                });
+                const averageRating = totalRating / sellerRatings.length;
+                Branches6KM.push({
+                  branchesId: branch.sellerId,
+                  distance: distance,
+                  branch: branch.branch,
+                  companyName: branch.companyName,
+                  img: branch.img,
+                  averageRating: averageRating.toFixed(1), // Keeping the average to 2 decimal places
+                });
+                shouldLog = true;
+              } else {
+                // If no ratings found
+                Branches6KM.push({
+                  branchesId: branch.sellerId,
+                  distance: distance,
+                  branch: branch.branch,
+                  companyName: branch.companyName,
+                  img: branch.img,
+                  averageRating: "0",
+                });
+                shouldLog = true;
+              }
             }
           } else {
             console.error("Invalid distance data received:", data);
@@ -123,7 +162,7 @@ const BranchesScreen = ({ navigation, route }) => {
       }
 
       if (shouldLog) {
-        //console.log("Branches within 6km:", Branches6KM);
+        // console.log("Branches within 6km:", Branches6KM);
         setBranches(Branches6KM);
       }
       setIsLoading(false);
@@ -163,6 +202,17 @@ const BranchesScreen = ({ navigation, route }) => {
 
       setSortedBranches(sortedBranchesWithDistances);
     } else {
+      // Sort branches by average rating
+      branchesCopy.sort((a, b) => {
+        // Consider "No ratings" as 0 for sorting purposes
+        const ratingA =
+          a.averageRating === "No ratings" ? 0 : parseFloat(a.averageRating);
+        const ratingB =
+          b.averageRating === "No ratings" ? 0 : parseFloat(b.averageRating);
+
+        return ratingB - ratingA; // Sort in descending order
+      });
+
       setSortedBranches(branchesCopy);
     }
     setShowModal(false);
@@ -194,9 +244,25 @@ const BranchesScreen = ({ navigation, route }) => {
             justifyContent: "space-between",
           }}
         >
-          <View>
-            <Text style={styles.ratingText}>{item.rating}★</Text>
+          <View style={styles.ratingsRowDiv}>
+            <Icon name="star" size={13} color="#FAC63E" />
+            <Text
+              style={[
+                styles.ratingText,
+                {
+                  fontStyle: item.averageRating === "0" ? "normal" : "normal",
+                  fontWeight: item.averageRating === "0" ? "600" : "normal",
+                },
+              ]}
+            >
+              {item.averageRating !== "0" ? (
+                `${item.averageRating}`
+              ) : (
+                <Text style={{ fontStyle: "normal" }}>No ratings</Text>
+              )}
+            </Text>
           </View>
+
           <View>
             {isLocationButtonClicked && (
               <Text style={styles.distanceText}>
@@ -207,7 +273,14 @@ const BranchesScreen = ({ navigation, route }) => {
             )}
           </View>
         </View>
-        <Image source={{ uri: item.img }} style={styles.image} />
+        {item.img ? (
+          <Image source={{ uri: item.img }} style={styles.image} />
+        ) : (
+          <Image
+            source={require("../../assets/img/def-image.jpg")}
+            style={styles.image}
+          />
+        )}
         <Text style={styles.pharmacyName}>{item.companyName}</Text>
         <Text style={styles.branchName}>{`(${extractBranchName(
           item.branch

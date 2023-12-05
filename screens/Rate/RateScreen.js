@@ -17,6 +17,7 @@ import {
   query,
   where,
   getDocs,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -155,6 +156,7 @@ const RateScreen = () => {
         sellerId: seller,
         customerId: customerId,
         orderId: orderId,
+        reviewedAt: serverTimestamp(),
       };
 
       await setDoc(rateAndReviewRef, data);
@@ -180,24 +182,21 @@ const RateScreen = () => {
         const data = doc.data();
         pharmacyRatings.push(data.pharmacyRating);
       });
-      console.log("Pharmacy Ratings:", pharmacyRatings);
-      // Further operations with the fetched ratings can be performed here
+      //console.log("Pharmacy Ratings:", pharmacyRatings);
     } catch (error) {
       console.error("Error fetching pharmacy ratings:", error);
     }
   };
 
-  // Call the function wherever needed, possibly inside a useEffect or a specific action
   useEffect(() => {
     if (seller) {
       fetchPharmacyRatings();
     }
   }, [seller]);
-
+  console.log("ProductName:", productName);
   return (
     <View style={[styles.container, { height: deviceHeight - 55 }]}>
       <View style={styles.containerRate}>
-        <Text style={styles.productName}>{productName}</Text>
         <Text style={styles.pharmacyBranch}>{pharmacyBranch}</Text>
         <Text style={styles.rateInstruction}>
           Give an overall rating of your experience
