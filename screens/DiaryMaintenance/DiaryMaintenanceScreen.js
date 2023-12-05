@@ -10,7 +10,7 @@ import {
   Alert,
   Button,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Iconify } from "react-native-iconify";
 import DiarySwitchTabs from "../../components/DiarySwitchTabs";
 import {
@@ -30,10 +30,15 @@ import {
   updateDoc,
   getDoc,
 } from "firebase/firestore";
-import { getAuthToken } from "../../src/authToken";
+import { getAuthToken, getCurrentUserId } from "../../src/authToken";
 import Modal from "react-native-modal";
 import styles from "./dms";
 import { DateTime } from "luxon";
+import * as Notifications from "expo-notifications";
+import { setNotificationHandler } from "../../components/NotificationHandler";
+import { registerForPushNotificationsAsync } from "../Notification/NotificationScreen";
+
+setNotificationHandler();
 
 const DiaryMaintenanceScreen = () => {
   const navigation = useNavigation();
@@ -46,6 +51,56 @@ const DiaryMaintenanceScreen = () => {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isXButtonVisible, setIsXButtonVisible] = useState(true);
   const { isDeleting, startDeleting, stopDeleting } = useIsDeleting();
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const [notificationId, setNotificationId] = useState(null);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+        console.log(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener(
+        async (response) => {
+          console.log(response);
+          if (response.actionIdentifier === "snooze") {
+            // Snooze the reminder
+            Notifications.cancelAllScheduledNotificationsAsync();
+            const snoozeTime = new Date();
+            snoozeTime.setMinutes(snoozeTime.getMinutes() + 5); // Snooze for 5 minutes
+            const notificationId = await schedulePushNotification();
+            setNotificationId(notificationId);
+          } else if (response.actionIdentifier === "stop") {
+            Notifications.cancelAllScheduledNotificationsAsync();
+            Notifications.dismissAllNotificationsAsync();
+          } else {
+            const snoozeTime = new Date();
+            snoozeTime.setMinutes(snoozeTime.getMinutes() + 5);
+            if (snoozeTime > new Date()) {
+              // Check if the notification was snoozed
+              const notificationId = await schedulePushNotification();
+              setNotificationId(notificationId);
+            }
+          }
+        }
+      );
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   const handleCreateDiaryMaintenance = () => {
     navigation.navigate("CreateDiaryMaintenance");
@@ -293,93 +348,134 @@ const DiaryMaintenanceScreen = () => {
         });
         console.log("set new switchState", newSwitchState);
         // Check the reminder immediately after toggling the switch
-        checkReminder(reminderId, newSwitchState);
+        //checkReminder(reminderId, newSwitchState);
       } catch (error) {
         console.error("Error updating reminder switch state:", error);
       }
     }
   };
 
-  const checkReminder = async (reminderId, initialSwitchState) => {
-    let switchState = initialSwitchState;
+  async function schedulePushNotification(maintenanceItem, remindersData) {
+    const currentTimeInPH = DateTime.now().setZone("Asia/Manila");
+    const matchingReminders = remindersData.filter(
+      (item) => item.diaryMaintenanceId === maintenanceItem.id
+    );
 
-    while (switchState) {
-      const currentTimeInPH = DateTime.now().setZone("Asia/Manila");
-      const reminder = diaryRemindersData.find(
-        (item) => item.id === reminderId
+    const notificationIds = [];
+
+    for (const item of matchingReminders) {
+      const { reminderSched, currentDay } = await getReminderSchedAndCurrentDay(
+        item.diaryMaintenanceId,
+        currentTimeInPH
       );
 
-      if (!reminder) {
-        // Reminder no longer exists, stop checking
-        break;
-      }
+      const reminderTime = item.reminderTime?.seconds
+        ? new Date(item.reminderTime.seconds * 1000)
+        : null;
 
-      if (reminder && switchState === true && reminder.reminderTime?.seconds) {
-        const reminderTime = DateTime.fromSeconds(
-          reminder.reminderTime.seconds
-        ).setZone("Asia/Manila");
-        const reminderHoursMinutes = reminderTime.toFormat("h:mm a");
-        const currentTimeHoursMinutes = currentTimeInPH.toFormat("h:mm a");
+      let adjustedDay = currentDay % 7;
+      const isCurrentDayInReminderchedule = reminderSched.includes(adjustedDay);
+      const switchState = item.switchState;
 
-        // Fetch the latest switchState from Firestore
-        const reminderDocRef = doc(db, "diaryReminders", reminderId);
-        const reminderDocSnap = await getDoc(reminderDocRef);
-        if (!reminderDocSnap.exists()) {
-          // Reminder document no longer exists, stop checking
-          break;
+      if (switchState === true && isCurrentDayInReminderchedule) {
+        try {
+          const { hours, minutes, period } = getTimeDetails(reminderTime);
+
+          let date = new Date();
+          date.setHours(hours);
+          date.setMinutes(minutes);
+
+          await Notifications.setNotificationCategoryAsync(
+            "alarm",
+            [
+              {
+                identifier: "stop",
+                buttonTitle: "Stop",
+                isAuthenticationRequired: false,
+              },
+              {
+                identifier: "snooze",
+                buttonTitle: "Snooze",
+                isAuthenticationRequired: false,
+              },
+            ],
+            {
+              name: "alarm",
+              sound: true,
+              importance: Notifications.AndroidImportance.MAX,
+              bypassDnd: true,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: "#FF231F7C",
+              priority: Notifications.AndroidNotificationPriority.MAX,
+              lockscreenVisibility:
+                Notifications.AndroidNotificationVisibility.PUBLIC,
+              enableLights: true,
+            }
+          );
+
+          const notificationId = await Notifications.scheduleNotificationAsync({
+            content: {
+              title: "Reminder",
+              body: `Time to take Medicine at `,
+              sound: true,
+              categoryIdentifier: "alarm",
+              vibrate: [0, 1000, 500, 1000],
+              priority: Notifications.AndroidNotificationPriority.MAX,
+              name: "alarm",
+              importance: Notifications.AndroidImportance.MAX,
+              bypassDnd: true,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: "#FF231F7C",
+              lockscreenVisibility:
+                Notifications.AndroidNotificationVisibility.PUBLIC,
+              enableLights: true,
+            },
+            trigger: { date: date },
+          });
+
+          setTimeout(() => {
+            Notifications.dismissNotificationAsync(notificationId);
+          }, 180000);
+
+          notificationIds.push(notificationId);
+        } catch (error) {
+          console.error("Failed to schedule notification. Error:", error);
         }
-        const updatedSwitchState = reminderDocSnap.data().switchState;
-        switchState = updatedSwitchState;
-
-        // Fetch the reminderSched value associated with this reminder's diaryMaintenanceId
-        const diaryMaintenanceId = reminder.diaryMaintenanceId;
-        const diaryMaintenanceDocRef = doc(
-          db,
-          "diaryMaintenance",
-          diaryMaintenanceId
-        );
-        const diaryMaintenanceDocSnap = await getDoc(diaryMaintenanceDocRef);
-        if (!diaryMaintenanceDocSnap.exists()) {
-          // DiaryMaintenance document no longer exists, stop checking
-          break;
-        }
-
-        const reminderSched = diaryMaintenanceDocSnap.data().reminderSched;
-        const currentDay = currentTimeInPH.weekday;
-
-        //console.log("Reminder Day:", reminderSched);
-        //console.log("Current D:", currentDay);
-
-        // Check if the numeric value of the current day is in the reminderSched array
-        const isCurrentDayInReminderchedule =
-          reminderSched.includes(currentDay);
-
-        if (
-          reminderHoursMinutes === currentTimeHoursMinutes &&
-          isCurrentDayInReminderchedule
-        ) {
-          alert("ORAS NA!");
-        } else {
-          // console.log("No reminders yet");
-        }
-
-        // Wait for a while before checking again (adjust the interval as needed)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
       } else {
-        // Stop further execution when switchState is false or reminder data is missing
-        break;
+        console.log("No Reminders");
       }
     }
+    return notificationIds;
+  }
+
+  const getReminderSchedAndCurrentDay = async (
+    diaryMaintenanceId,
+    currentTimeInPH
+  ) => {
+    const diaryMaintenanceDocRef = doc(
+      db,
+      "diaryMaintenance",
+      diaryMaintenanceId
+    );
+    const diaryMaintenanceDocSnap = await getDoc(diaryMaintenanceDocRef);
+
+    if (!diaryMaintenanceDocSnap.exists()) {
+      return { reminderSched: null, currentDay: null };
+    }
+
+    const reminderSched = diaryMaintenanceDocSnap.data().reminderSched;
+    const currentDay = currentTimeInPH.weekday;
+
+    return { reminderSched, currentDay };
   };
 
-  // Call the function to start checking for each reminder when the component mounts
-  useEffect(() => {
-    diaryRemindersData.forEach((reminder) => {
-      if (reminder.switchState) {
-        checkReminder(reminder.id);
-      }
-    });
-  }, [diaryRemindersData]);
+  const getTimeDetails = (reminderTime) => {
+    const hours = reminderTime.getHours();
+    const minutes = String(reminderTime.getMinutes()).padStart(2, "0");
+    const period = hours >= 12 ? "PM" : "AM";
+
+    return { hours, minutes, period };
+  };
 
   //---------------------------FOR DISPLAYg
   const renderReminderTimes = (maintenanceItem, remindersData) => {
@@ -387,6 +483,8 @@ const DiaryMaintenanceScreen = () => {
     const matchingReminders = remindersData.filter(
       (item) => item.diaryMaintenanceId === maintenanceItem.id
     );
+    //console.log("remderReminderTimes", maintenanceItem);
+    schedulePushNotification(maintenanceItem, remindersData);
 
     return (
       <View style={styles.columnContainer}>
@@ -395,9 +493,7 @@ const DiaryMaintenanceScreen = () => {
             ? new Date(item.reminderTime.seconds * 1000)
             : null;
 
-          const hours = reminderTime.getHours();
-          const minutes = String(reminderTime.getMinutes()).padStart(2, "0");
-          const period = hours >= 12 ? "PM" : "AM";
+          const { hours, minutes, period } = getTimeDetails(reminderTime);
 
           // Log the switch state for the current reminder
           if (index === 0) {

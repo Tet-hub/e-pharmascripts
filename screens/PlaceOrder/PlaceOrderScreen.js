@@ -18,12 +18,21 @@ import { BASE_URL } from "../../src/api/apiURL";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
 import { useRoute } from "@react-navigation/native";
 import { updateById } from "../../database/update/updateDataById";
-import { updateDoc, doc, Timestamp } from "firebase/firestore";
+import {
+  updateDoc,
+  doc,
+  Timestamp,
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useToast } from "react-native-toast-notifications";
 import { CreditCardInput } from "../../components/credit-card.component";
 import { getCurrentCustomerName } from "../../src/authToken";
 import { payRequest } from "../../service/checkout.service";
+import { BASE_URL2 } from "../../utilities/backendURL";
+import axios from "axios";
 
 const PlaceOrderScreen = ({ navigation, route }) => {
   const toast = useToast();
@@ -40,9 +49,13 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   console.log(`TotalPrice: ${totalPrice}`);
 
   const exchangeRate = 53;
-
   const amountInUSD = totalPrice / exchangeRate;
   console.log(`Amount in Dollars : ${amountInUSD.toFixed(2)}`);
+
+  const customerId = item.customerId;
+  const customerExpoToken = item.customerExpoToken;
+  const sellerFcmToken = item.sellerFcmToken;
+  const sellerId = item.sellerId;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -152,6 +165,42 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                     { merge: true }
                   );
 
+                  if (!sellerFcmToken || sellerFcmToken === "null") {
+                    // Save the notification to the 'notifications' collection in Firestore
+                    await addDoc(collection(db, "notifications"), {
+                      title: "New Order Arrived",
+                      body: `New Order has arrived, please work on order ${orderId}.`,
+                      receiverId: sellerId,
+                      senderId: customerId,
+                      read: false,
+                      createdAt: serverTimestamp(),
+                    });
+                  } else if (sellerFcmToken) {
+                    try {
+                      const response = await axios.post(
+                        `${BASE_URL2}/post/sendToFCM`,
+                        {
+                          title: "New Order Arrived",
+                          body: `New Order has arrived, please work on order ${orderId}.`,
+                          fcmToken: sellerFcmToken,
+                        }
+                      );
+                      console.log("Notification sent to FCM:", response.data);
+                    } catch (error) {
+                      console.error("Error sending notification:", error);
+                    }
+
+                    // Save the notification to the 'notifications' collection in Firestore
+                    await addDoc(collection(db, "notifications"), {
+                      title: "New Order Arrived",
+                      body: `New Order has arrived, please work on order ${orderId}.`,
+                      receiverId: sellerId,
+                      senderId: customerId,
+                      read: false,
+                      createdAt: serverTimestamp(),
+                    });
+                  }
+
                   console.log("Order placed successfully!");
                   navigation.navigate("OrderScreen");
                 } catch (error) {
@@ -183,6 +232,42 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                   },
                   { merge: true }
                 );
+
+                if (!sellerFcmToken || sellerFcmToken === "null") {
+                  // Save the notification to the 'notifications' collection in Firestore
+                  await addDoc(collection(db, "notifications"), {
+                    title: "New Order Arrived",
+                    body: `New Order has arrived, please work on order ${orderId}.`,
+                    receiverId: sellerId,
+                    senderId: customerId,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                  });
+                } else if (sellerFcmToken) {
+                  try {
+                    const response = await axios.post(
+                      `${BASE_URL2}/post/sendToFCM`,
+                      {
+                        title: "New Order Arrived",
+                        body: `New Order has arrived, please work on order ${orderId}.`,
+                        fcmToken: sellerFcmToken,
+                      }
+                    );
+                    console.log("Notification sent to FCM:", response.data);
+                  } catch (error) {
+                    console.error("Error sending notification:", error);
+                  }
+
+                  // Save the notification to the 'notifications' collection in Firestore
+                  await addDoc(collection(db, "notifications"), {
+                    title: "New Order Arrived",
+                    body: `New Order has arrived, please work on order ${orderId}.`,
+                    receiverId: sellerId,
+                    senderId: customerId,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                  });
+                }
 
                 console.log("Order placed successfully!");
                 navigation.navigate("OrderScreen");

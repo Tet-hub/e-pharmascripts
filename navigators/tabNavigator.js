@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import React, { useState, useEffect } from "react";
-import { getAuthToken } from "../src/authToken";
-import { onSnapshot, doc } from "firebase/firestore";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useState, useEffect, useCallback } from "react";
+import { getAuthToken, getCurrentUserId } from "../src/authToken";
+import { onSnapshot, doc, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
 //screns
@@ -42,11 +42,37 @@ const CustomHeaderTitle = () => {
   const [CurrentUserId, setCurrentUserId] = useState(null);
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleNotificationPress = () => {
     // Navigate to notification screen when TouchableOpacity of notification icon is pressed
     navigation.navigate("NotificationScreen");
   };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUnreadCount = async () => {
+        try {
+          const currentUser = await getCurrentUserId();
+          const q = query(
+            collection(db, "notifications"),
+            where("receiverId", "==", currentUser),
+            where("read", "==", false)
+          );
+          const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const count = querySnapshot.size;
+            setUnreadCount(count);
+          });
+
+          // Clean up the listener when the component unmounts
+          return () => unsubscribe();
+        } catch (error) {
+          console.error("Error fetching unread count:", error);
+        }
+      };
+
+      fetchUnreadCount();
+    }, [])
+  );
   const handleProfilePress = () => {
     // Navigate to profile screen when TouchableOpacity of profile icon is pressed
     navigation.navigate("ProfileScreen");
@@ -107,7 +133,31 @@ const CustomHeaderTitle = () => {
 
       <View className="w-1/2 mt-2 flex-row flex-wrap justify-end">
         <TouchableOpacity onPress={handleNotificationPress}>
-          <Iconify icon="ion:notifications" size={24} color="#EC6F56" />
+          <Iconify icon="ion:notifications-outline" size={30} color="#EC6F56" />
+          {unreadCount > 0 && (
+            <View
+              style={{
+                position: "absolute",
+                top: -5,
+                right: -5,
+                backgroundColor: "red",
+                borderRadius: 10,
+                width: 20,
+                height: 20,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 10,
+                }}
+              >
+                {unreadCount}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleProfilePress}>

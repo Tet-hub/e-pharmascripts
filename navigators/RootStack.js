@@ -5,12 +5,15 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../console-log";
 import TabNavigator from "./tabNavigator";
-import NotificationScreen from "../screens/Notification/NotificationScreen";
+import NotificationScreen, {
+  registerForPushNotificationsAsync,
+} from "../screens/Notification/NotificationScreen";
 import OrderScreen from "../screens/Order/OrderScreen";
 // import OrderSwitchTab1 from "../screens/Order/PendingOrders";
 import InstallmentScreen from "../screens/InstallmentScreen/InstallmentScreen";
 import FavoritesScreen from "../screens/Favorite/FavoritesScreen";
 import StoreLocatorScreen from "../screens/StoreLocator/StoreLocatorScreen";
+import ChooseLocation from "../screens/StoreLocator/ChooseLocation";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import BranchesScreen from "../screens/Branch/BranchesScreen";
 import ProductScreen from "../screens/Product/ProductScreen";
@@ -70,6 +73,10 @@ const styles = StyleSheet.create({
 const Stack = createStackNavigator();
 
 const RootStack = () => {
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
+
   return (
     <TailwindProvider>
       <MessageProvider>
@@ -139,6 +146,11 @@ const RootStack = () => {
           <Stack.Screen
             name="StoreLocatorScreen"
             component={StoreLocatorScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ChooseLocation"
+            component={ChooseLocation}
             options={{
               headerTitle: () => <View></View>,
               headerTintColor: "black",
