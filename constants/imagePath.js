@@ -1,0 +1,16 @@
+export default {
+  icCurLoc: require("../assets/img/marker/Oval.png"),
+  icRedMarker: require("../assets/img/marker/redMarker.png"),
+  redIndicator: require("../assets/img/marker/redIndicator.png"),
+  icBike: require("../assets/img/marker/bike.png"),
+  pharmacy: require("../assets/img/marker/pharmacy.png"),
+  newOrder: require("../assets/img/notification/neworder.png"),
+  defaultImg: require("../assets/img/notification/default.png"),
+  validated: require("../assets/img/notification/validated.png"),
+  processing: require("../assets/img/notification/processing.png"),
+  delivering: require("../assets/img/notification/delivering.png"),
+  cancelled: require("../assets/img/notification/cancel.png"),
+  delivered: require("../assets/img/notification/delivered.png"),
+  verified: require("../assets/img/notification/alter-verified.png"),
+  rejected: require("../assets/img/notification/rejected.png"),
+};

@@ -12,9 +12,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import IconSimple from "react-native-vector-icons/SimpleLineIcons";
 import { Iconify } from "react-native-iconify";
 import styles from "./stylesheet";
-import { saveAuthToken } from "../../src/authToken";
+import { getCurrentUserId, saveAuthToken } from "../../src/authToken";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { getDoc, doc, updateDoc, Timestamp } from "firebase/firestore";
+import {
+  getDoc,
+  doc,
+  updateDoc,
+  Timestamp,
+  addDoc,
+  serverTimestamp,
+  collection,
+} from "firebase/firestore";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
@@ -26,6 +34,8 @@ import {
   deleteObject,
 } from "@firebase/storage";
 import { ScrollView } from "react-native-gesture-handler";
+import axios from "axios";
+import { BASE_URL2 } from "../../utilities/backendURL";
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
@@ -289,6 +299,28 @@ const EditProfileScreen = () => {
     try {
       const storageRef = ref(storage, `Image/image-${Date.now()}`);
       const result = await uploadBytes(storageRef, blob);
+
+      const userToken = await getCurrentUserId();
+
+      try {
+        const response = await axios.post(`${BASE_URL2}/post/admin/sendToFCM`, {
+          title: "New Account Verification",
+          body: `Please review and verify this account ${userToken}.`,
+        });
+
+        console.log("Notification sent to Admin FCM:", response.data);
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+
+      await addDoc(collection(db, "notifications"), {
+        title: "New Account Verification",
+        body: `Please review and verify this account ${userToken}.`,
+        receiverId: "adminId",
+        senderId: userToken,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
 
       blob.close();
       return await getDownloadURL(storageRef);

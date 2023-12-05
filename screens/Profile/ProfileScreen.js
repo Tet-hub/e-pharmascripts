@@ -16,6 +16,8 @@ import { StatusBar } from "expo-status-bar";
 import { getAuthToken } from "../../src/authToken";
 import styles from "./stylesheet";
 import { AuthContext } from "../../src/context";
+import { BASE_URL2 } from "../../utilities/backendURL";
+import axios from "axios";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -94,6 +96,12 @@ const ProfileScreen = () => {
         {
           text: "Logout",
           onPress: async () => {
+            const authToken = await getAuthToken();
+            const userId = authToken.userId;
+
+            await axios.patch(`${BASE_URL2}/patch/logout/${userId}`, {
+              expoPushToken: "null",
+            });
             // Call the signOut function to clear the token
             signOut();
           },
@@ -123,7 +131,6 @@ const ProfileScreen = () => {
         </View>
       ) : (
         <View style={styles.insideContainer}>
-          
           {/* <StatusBar
             style={isStatusBarWhite ? "light" : "dark"}
             backgroundColor={isStatusBarWhite ? "black" : "white"}

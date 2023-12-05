@@ -18,6 +18,11 @@ import styles from "./viewOrderStyles";
 import { BASE_URL } from "../../src/api/apiURL";
 import buildQueryUrl from "../../src/api/components/conditionalQuery";
 import { updateById } from "../../database/update/updateDataById";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { BASE_URL2 } from "../../utilities/backendURL";
+import axios from "axios";
+import { getAuthToken, getCurrentUserId } from "../../src/authToken";
 
 const ViewCancelledOrderScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
@@ -79,6 +84,7 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
 
     fetchData();
   }, [orderId]);
+
   const handleRemoveOrder = () => {
     Alert.alert(
       "Confirm Removal",
@@ -92,6 +98,46 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
           text: "Remove",
           onPress: async () => {
             try {
+              const userToken = item.customerId;
+              const sellerId = item.sellerId;
+              const sellerFcmToken = item.sellerFcmToken;
+
+              if (!sellerFcmToken || sellerFcmToken === "null") {
+                // Save the notification to the 'notifications' collection in Firestore
+                await addDoc(collection(db, "notifications"), {
+                  title: "Order Cancelled",
+                  body: `Order has been cancelled by the customer ${orderId}.`,
+                  receiverId: sellerId,
+                  senderId: userToken,
+                  read: false,
+                  createdAt: serverTimestamp(),
+                });
+              } else if (sellerFcmToken) {
+                try {
+                  const response = await axios.post(
+                    `${BASE_URL2}/post/sendToFCM`,
+                    {
+                      title: "Order Cancelled",
+                      body: `Order has been cancelled by the customer ${orderId}.`,
+                      fcmToken: sellerFcmToken,
+                    }
+                  );
+                  console.log("Notification sent to FCM:", response.data);
+                } catch (error) {
+                  console.error("Error sending notification:", error);
+                }
+
+                // Save the notification to the 'notifications' collection in Firestore
+                await addDoc(collection(db, "notifications"), {
+                  title: "Order Cancelled",
+                  body: `Order has been cancelled by the customer ${orderId}.`,
+                  receiverId: sellerId,
+                  senderId: userToken,
+                  read: false,
+                  createdAt: serverTimestamp(),
+                });
+              }
+
               await updateById(orderId, "orders", "status", "Cancelled");
               console.log("Order removed and status updated.");
               navigation.navigate("OrderScreen");

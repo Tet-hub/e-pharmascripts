@@ -24,7 +24,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useToast } from "react-native-toast-notifications";
 import { ScrollView } from "react-native-gesture-handler";
-import { Timestamp } from "firebase/firestore";
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
 import { storeProductData } from "../../database/storing/storeData";
 import { getAuthToken } from "../../src/authToken";
 import { updateById } from "../../database/update/updateDataById";
@@ -34,6 +39,8 @@ import styles from "./stylesheet";
 import * as ImagePicker from "expo-image-picker";
 import AddressScreen from "../Address/AddressScreen";
 import { db } from "../../firebase/firebase";
+import axios from "axios";
+import { BASE_URL2 } from "../../utilities/backendURL";
 
 const ToValidateScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
@@ -266,7 +273,11 @@ const ToValidateScreen = ({ navigation, route }) => {
               }
               const sellerFcmToken = sellerData.fcmToken
                 ? sellerData.fcmToken
-                : "No sellerFcmToken";
+                : "null";
+
+              const customerExpoToken = user.expoPushToken
+                ? user.expoPushToken
+                : "null";
               //"orders" collection
               const data = {
                 customerId: user.id,
@@ -278,12 +289,53 @@ const ToValidateScreen = ({ navigation, route }) => {
                 status: "Pending Validation",
                 createdAt: orderCreatedTimestamp,
                 sellerFcmToken: sellerFcmToken,
+                customerExpoToken: customerExpoToken,
                 branchName: sellerData.branch,
                 totalQuantity: totalQuantity,
                 paymentMethod: null,
                 orderSubTotalPrice: productSubtotal.toFixed(2),
               };
               const orderId = await storeProductData("orders", data);
+
+              const sellerId = data.sellerId;
+              const userToken = data.customerId;
+
+              // Send notification to seller
+              if (!sellerFcmToken || sellerFcmToken === "null") {
+                // Save the notification to the 'notifications' collection in Firestore
+                await addDoc(collection(db, "notifications"), {
+                  title: "New Order Validation",
+                  body: `Please validate the newly arrived Order ${orderId}.`,
+                  receiverId: sellerId,
+                  senderId: userToken,
+                  read: false,
+                  createdAt: serverTimestamp(),
+                });
+              } else if (sellerFcmToken) {
+                try {
+                  const response = await axios.post(
+                    `${BASE_URL2}/post/sendToFCM`,
+                    {
+                      title: "New Order Validation",
+                      body: `Please validate the newly arrived Order ${orderId}.`,
+                      fcmToken: sellerFcmToken,
+                    }
+                  );
+                  console.log("Notification sent to FCM:", response.data);
+                } catch (error) {
+                  console.error("Error sending notification:", error);
+                }
+
+                // Save the notification to the 'notifications' collection in Firestore
+                await addDoc(collection(db, "notifications"), {
+                  title: "New Order Validation",
+                  body: `Please validate the newly arrived Order ${orderId}.`,
+                  receiverId: sellerId,
+                  senderId: userToken,
+                  read: false,
+                  createdAt: serverTimestamp(),
+                });
+              }
 
               //"attachmentList" collection
               for (const image of itemSelectedImages) {

@@ -6,12 +6,20 @@
     "orientation": "portrait",
     "icon": "./assets/e-pharmascripts-logo.png",
     "userInterfaceStyle": "light",
-
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAPPybZW_L6JP2zzz2t3DMbPPSbs9rSxpc"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/e-pharmascripts-logo.png",
         "backgroundColor": "#ffffff"
@@ -21,9 +29,21 @@
     "web": {
       "favicon": "./assets/e-pharmascripts-logo.png"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/notify.wav"
+          ]
+        }
+      ]
+    ],
     "extra": {
       "eas": {
-        "projectId": "9c7726c5-0fef-4fe1-842b-b491eab51ce5"
+        "projectId": "4908418d-b286-4faa-935d-4f712f2f41a9"
       }
     }
   }

@@ -6,12 +6,15 @@ import { TailwindProvider } from "tailwindcss-react-native";
 import RootStack from "./navigators/RootStack"; // Your main app stack
 import AuthStack from "./navigators/AuthStack"; // Your authentication stack (Login and Signup)
 import { AuthContext } from "./src/context";
-import { getAuthToken } from "./src/authToken";
+import { getAuthToken, getCurrentUserId } from "./src/authToken";
 import { db } from "./firebase/firebase";
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import CustomSplashScreen from "./screens/CustomSplashScreen";
 import { ToastProvider } from "react-native-toast-notifications";
 import "./console-log";
+import axios from "axios";
+import { BASE_URL2 } from "./utilities/backendURL";
+import FlashMessage from "react-native-flash-message";
 const Stack = createStackNavigator();
 const App = () => {
   const [appReady, setAppReady] = useState(false);
@@ -29,24 +32,23 @@ const App = () => {
     } catch (error) {
       console.log("Error removing data from AsyncStorage:", error);
     }
-    
   };
   useEffect(() => {
     const checkCustomerStatus = async () => {
       try {
         if (userToken) {
-          const userDocRef = doc(db, 'customers', userToken);
+          const userDocRef = doc(db, "customers", userToken);
           const userDocSnapshot = await getDoc(userDocRef);
           if (userDocSnapshot.exists()) {
             const userData = userDocSnapshot.data();
             // Check if the customer's status is "disabled" and perform automatic logout
-            if (userData.status === 'Disabled') {
+            if (userData.status === "Disabled") {
               handleLogout();
             }
           }
         }
       } catch (error) {
-        console.error('Error checking customer status:', error);
+        console.error("Error checking customer status:", error);
       }
     };
     checkCustomerStatus();
@@ -123,6 +125,7 @@ const App = () => {
             ) : (
               <CustomSplashScreen />
             )}
+            <FlashMessage position="bottom" />
           </NavigationContainer>
         </ToastProvider>
       </TailwindProvider>

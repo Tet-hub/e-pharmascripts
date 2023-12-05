@@ -38,7 +38,7 @@ import CompletedOrderList from "./CompletedOrder";
 import CancelledOrderList from "./CancelledOrder";
 import { useIsFocused } from "@react-navigation/native";
 
-const OrderScreen = () => {
+const OrderScreen = ({ route }) => {
   const navigation = useNavigation();
   const [orderId, setOrderId] = useState("");
   const [isRated, setIsRated] = useState(false);
@@ -48,7 +48,7 @@ const OrderScreen = () => {
   const [filteredProductData, setfilteredProductData] = useState([]);
   const [approvedOrders, setApprovedOrders] = useState([]);
   const [productData, setproductData] = useState([]);
-  const [trackerTab, setTrackerTab] = useState(1);
+  const [trackerTab, setTrackerTab] = useState(route.params?.tabIndex || 1);
   const [loading, setLoading] = useState(true);
   const [orderData, setOrderData] = useState([]);
   const [ordersData, setOrdersData] = useState([]);
@@ -293,7 +293,7 @@ const OrderScreen = () => {
 
       <View>
         <OrderSwitchTabs
-          selectionMode={1}
+          selectionMode={trackerTab}
           option1="PENDING"
           option2="VALIDATED"
           option3="TO RECEIVE"

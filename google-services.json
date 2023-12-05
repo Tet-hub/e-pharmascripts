@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1015681631923",
+    "project_id": "e-pharmascripts",
+    "storage_bucket": "e-pharmascripts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1015681631923:android:596364f5fa6f0f51d812c6",
+        "android_client_info": {
+          "package_name": "com.epharmascripts.EpharmaScripts"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1015681631923-dqv6euauqhl4ph419a8irm4t1ipp0ong.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAErVuJDetH9oqE36Gx_sBDBv2JIUbXcJ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1015681631923-dqv6euauqhl4ph419a8irm4t1ipp0ong.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
