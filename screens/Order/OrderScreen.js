@@ -179,14 +179,27 @@ const OrderScreen = ({ route }) => {
             ...order,
             isRated: filteredResults[index]?.isOrderRated || false,
           }));
+          const orderFieldPriority = ["completedAt", "orderedAt", "createdAt"];
 
+          const orderByField = orderFieldPriority.find((field) =>
+            orderData.some((order) => order[field])
+          );
+
+          const orderBy = orderByField || "createdAt"; // If none of the fields exist, default to "createdAt"
+
+          const orderDataSorted = orderData.sort((a, b) => {
+            const dateA = a[orderBy] || 0; // Using 0 if the field doesn't exist for comparison
+            const dateB = b[orderBy] || 0;
+
+            return dateB - dateA; // Descending order
+          });
           console.log("Final order data processed...");
-          setOrderData(orderData);
+          setOrderData(orderDataSorted);
           setfilteredProductData(
             filteredResults.map((result) => result.products)
           );
         } catch (error) {
-          console.error("Error processing fetched data: ", error);
+          console.log("Error processing fetched data: ", error);
           setLoading(false);
         } finally {
           setLoading(false);
@@ -200,7 +213,7 @@ const OrderScreen = ({ route }) => {
         console.log("Unsubscribed from snapshot updates...");
       };
     } catch (error) {
-      console.error("Error fetching orders: ", error);
+      console.log("Error fetching orders: ", error);
       setLoading(false);
     }
   };

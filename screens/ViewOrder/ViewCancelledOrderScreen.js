@@ -9,6 +9,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Iconify } from "react-native-iconify";
@@ -22,6 +23,10 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [item, setOrderData] = useState([]);
   const [productData, setProductData] = useState([]);
+  const [attachmentData, setAttachmentData] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
   const { orderId } = route.params;
   console.log("order id", orderId);
 
@@ -59,6 +64,30 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
               });
               setProductData(products);
               console.log("productData", products);
+              const attachmentCondition = [
+                {
+                  fieldName: "orderId",
+                  operator: "==",
+                  value: orderId,
+                },
+              ];
+              console.log("orders.id: ", orderId);
+              const attachmentUrl = buildQueryUrl(
+                "attachmentList",
+                attachmentCondition
+              );
+
+              const attachmentResponse = await fetch(attachmentUrl, {
+                method: "GET",
+              });
+
+              if (attachmentResponse.ok) {
+                const attachments = await attachmentResponse.json();
+                attachments.forEach((attachment) => {
+                  console.log("Attachment ID: ", attachment.id);
+                });
+                setAttachmentData(attachments);
+              }
             } else {
               console.log(
                 "API request failed with status:",
@@ -157,15 +186,66 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
                 keyExtractor={(item) => item.id.toString()}
                 scrollEnabled={false}
               />
-              {/* <View style={styles.separator2} />
-
               <View style={styles.pmentContainer}>
-                <Text style={styles.methodText}>Order has been cancelled:</Text>
-                <Text style={styles.reminderText}>
-                  Your order has been cancelled. We apologize for any
-                  inconvenience caused during your experience with our service.
-                </Text>
-              </View> */}
+                {attachmentData.length > 0 ? (
+                  <>
+                    <Text style={styles.reminderText}>
+                      Prescription image/s uploaded
+                    </Text>
+                    <FlatList
+                      data={attachmentData}
+                      horizontal
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedImage(item.img);
+                            setModalVisible(true);
+                          }}
+                        >
+                          <View style={styles.selectedImageCont}>
+                            <Image
+                              source={{ uri: item.img }}
+                              style={styles.selectedImage}
+                              onError={() => console.log("Error loading image")}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                      keyExtractor={(item, index) => index.toString()}
+                    />
+                  </>
+                ) : null}
+              </View>
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <TouchableOpacity
+                    style={{
+                      position: "absolute",
+                      top: 30,
+                      padding: 15,
+                      zIndex: 1,
+                      color: "white",
+                      borderRadius: 20,
+                    }}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Iconify
+                      icon="ion:arrow-back-sharp"
+                      size={35}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={styles.fullscreenImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </Modal>
               <View style={styles.separator2} />
               <View style={styles.pmentDetailsContainer}>
                 <Text style={styles.pmentDetailsText}>Payment Details :</Text>

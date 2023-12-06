@@ -582,8 +582,16 @@ const EditProfileScreen = () => {
           {fetchedStatus === "Verified" ||
           fetchedStatus === "Unverified" ||
           fetchedStatus === "Rejected" ? (
-            <TouchableOpacity style={styles.addButton} onPress={updateProfile}>
-              <Text style={styles.addText}>SAVE</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={updateProfile}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Text style={styles.addText}>SAVE</Text>
+              )}
             </TouchableOpacity>
           ) : (
             <View>
@@ -591,11 +599,6 @@ const EditProfileScreen = () => {
             </View>
           )}
         </View>
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#EC6F56" />
-          </View>
-        )}
       </ScrollView>
     </View>
   );

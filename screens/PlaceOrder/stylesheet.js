@@ -255,6 +255,50 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
   },
+  selectedImageName: {
+    fontSize: 15,
+    alignSelf: "center",
+    overflow: "hidden",
+    maxWidth: "65%",
+    marginLeft: 10,
+  },
+  selectedImageCont: {
+    height: 100,
+    width: 100,
+    margin: 5,
+  },
+  selectedImage: {
+    resizeMode: "cover",
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "black",
+  },
+
+  fullscreenImage: {
+    width: "100%",
+    height: "80%",
+  },
+  reminderText: {
+    fontSize: 12,
+    fontWeight: 500,
+    fontStyle: "italic",
+    marginBottom: 5,
+  },
+  closeButton: {
+    color: "white",
+    fontSize: 18,
+    margin: 20,
+  },
+  pmentContainer: {
+    marginTop: 20,
+    width: "80%",
+    alignSelf: "center",
+  },
 });
 
 export default styles;

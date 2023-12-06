@@ -267,18 +267,16 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
                 keyExtractor={(item) => item.id.toString()}
                 scrollEnabled={false}
               />
-              <View style={styles.separator2} />
 
               <View style={styles.pmentContainer}>
                 {attachmentData.length > 0 ? (
                   <>
-                    <Text style={styles.pImgTxt}>
+                    <Text style={styles.reminderText}>
                       Prescription image/s uploaded
                     </Text>
                     <FlatList
                       data={attachmentData}
-                      scrollEnabled={false}
-                      vertical
+                      horizontal
                       renderItem={({ item }) => (
                         <TouchableOpacity
                           onPress={() => {
@@ -330,8 +328,8 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
                   />
                 </View>
               </Modal>
-
               <View style={styles.separator2} />
+
               <View style={styles.pmentDetailsContainer}>
                 <Text style={styles.pmentDetailsText}>Payment Details :</Text>
                 <View style={styles.subtotalContainer}>
