@@ -549,7 +549,7 @@ const ToValidateScreen = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#EC6F56" />
       </View>
     );
   }

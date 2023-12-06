@@ -133,17 +133,22 @@ const CustomHeaderTitle = () => {
 
       <View className="w-1/2 mt-2 flex-row flex-wrap justify-end">
         <TouchableOpacity onPress={handleNotificationPress}>
-          <Iconify icon="ion:notifications-outline" size={30} color="#EC6F56" />
+          <Iconify
+            icon="ion:notifications-outline"
+            size={30}
+            color="#EC6F56"
+            style={{ top: -4 }}
+          />
           {unreadCount > 0 && (
             <View
               style={{
                 position: "absolute",
                 top: -5,
-                right: -5,
-                backgroundColor: "red",
+                right: -1,
+                backgroundColor: "#EC6F56",
                 borderRadius: 10,
-                width: 20,
-                height: 20,
+                width: 15,
+                height: 15,
                 justifyContent: "center",
                 alignItems: "center",
               }}

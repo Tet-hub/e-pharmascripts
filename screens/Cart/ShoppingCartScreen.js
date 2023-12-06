@@ -385,7 +385,7 @@ const ShoppingCartScreen = () => {
         <View style={styles.bodyWrapper}>
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
+              <ActivityIndicator size="large" color="#EC6F56" />
             </View>
           ) : cartItems.length !== 0 ? (
             <View style={styles.selectedProductContainer}>

@@ -125,7 +125,7 @@ const ProfileScreen = () => {
             <ActivityIndicator
               style={styles.loadingIndicator}
               size="large"
-              color="#0000ff"
+              color="#EC6F56"
             />
           </View>
         </View>
