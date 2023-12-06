@@ -116,6 +116,13 @@ const styles = StyleSheet.create({
     width: "80%",
     alignSelf: "center",
   },
+  pImgTxt: {
+    fontSize: 15,
+    fontWeight: 600,
+    color: "gray",
+    fontStyle: "italic",
+    marginBottom: 5,
+  },
   methodText: {
     fontWeight: 500,
     fontSize: 14,
@@ -209,6 +216,40 @@ const styles = StyleSheet.create({
   destructiveButton: {
     backgroundColor: "red", // Change the background color to red (or any color indicating danger)
     // Add more styles as needed (e.g., padding, border-radius, etc.)
+  },
+  selectedImageName: {
+    fontSize: 15,
+    alignSelf: "center",
+    overflow: "hidden",
+    maxWidth: "65%",
+    marginLeft: 10,
+  },
+  selectedImageCont: {
+    height: 100,
+    width: 100,
+    margin: 5,
+  },
+  selectedImage: {
+    resizeMode: "cover",
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "black",
+  },
+
+  fullscreenImage: {
+    width: "100%",
+    height: "80%",
+  },
+
+  closeButton: {
+    color: "white",
+    fontSize: 18,
+    margin: 20,
   },
 });
 

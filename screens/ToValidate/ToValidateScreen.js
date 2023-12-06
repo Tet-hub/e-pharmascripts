@@ -162,7 +162,7 @@ const ToValidateScreen = ({ navigation, route }) => {
         }
       } else if (item.price && quantity !== undefined) {
         const currentQuantity = item.quantity ? item.quantity : quantity;
-        subtotal += item.price * currentQuantity;
+        subtotal = item.price * currentQuantity;
       }
 
       setProductSubtotal(subtotal);
@@ -423,7 +423,7 @@ const ToValidateScreen = ({ navigation, route }) => {
               else {
                 // "productList" collection
                 const pImage = item.img ? item.img : "No product Image";
-                const subtotal = item.quantity * item.price;
+                // const subtotal = item.quantity * item.price;
                 const orderDetails = {
                   orderId: orderId,
                   productId: item.productId,
@@ -432,7 +432,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                   quantity: quantity,
                   price: item.price,
                   productImg: pImage,
-                  productSubTotalPrice: subtotal.toFixed(2),
+                  productSubTotalPrice: productSubtotal.toFixed(2),
                 };
 
                 const productListId = await storeProductData(
@@ -569,7 +569,13 @@ const ToValidateScreen = ({ navigation, route }) => {
           </View>
           <View style={styles.productInfoContainer}>
             <View>
-              <Text style={styles.productName}>{item.productName}</Text>
+              <Text
+                style={styles.productName}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {item.productName}
+              </Text>
               {item.requiresPrescription === "Yes" ? (
                 <Text style={styles.productReq}>[ Requires Prescription ]</Text>
               ) : (

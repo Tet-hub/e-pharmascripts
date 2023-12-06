@@ -284,14 +284,14 @@ const ProductDetailScreen = ({ navigation, route }) => {
         </View>
         <View style={styles.productContentContainer}>
           <View style={styles.insideContentContainer}>
-            <View style={styles.productNameView}>
+            <View style={[styles.productNameView, styles.row]}>
               <Text style={styles.productNameText}>{item.productName}</Text>
-              <Text style={styles.productNameText}>{item.id}</Text>
               <Iconify
                 icon="mdi:heart"
                 size={35}
                 color={isFavorite ? "#EC6F56" : "#8E8E8E"}
                 onPress={handleFavorites}
+                style={styles.heartIcon}
               />
             </View>
             {item.requiresPrescription == "Yes" ? (

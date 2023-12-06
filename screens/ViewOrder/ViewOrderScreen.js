@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/native";
@@ -30,6 +31,10 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [item, setOrderData] = useState([]);
   const [productData, setProductData] = useState([]);
+  const [attachmentData, setAttachmentData] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
   const { orderId } = route.params;
   console.log("order id", orderId);
 
@@ -71,6 +76,36 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
               console.log(
                 "API request failed with status:",
                 productResponse.status
+              );
+            }
+            const attachmentCondition = [
+              {
+                fieldName: "orderId",
+                operator: "==",
+                value: orderId,
+              },
+            ];
+            console.log("orders.id: ", orderId);
+            const attachmentUrl = buildQueryUrl(
+              "attachmentList",
+              attachmentCondition
+            );
+
+            const attachmentResponse = await fetch(attachmentUrl, {
+              method: "GET",
+            });
+
+            if (attachmentResponse.ok) {
+              const attachments = await attachmentResponse.json();
+              attachments.forEach((attachment) => {
+                console.log("Attachment ID: ", attachment.id);
+              });
+              setAttachmentData(attachments);
+              console.log("Attachment Data", attachments);
+            } else {
+              console.log(
+                "API request failed with status:",
+                attachmentResponse.status
               );
             }
           }
@@ -166,7 +201,13 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
       </View>
       <View style={styles.productInfoContainer}>
         <View>
-          <Text style={styles.productName}>{item.productName || ""}</Text>
+          <Text
+            style={styles.productName}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {item.productName || ""}
+          </Text>
           {item.prescription === "Yes" ? (
             <Text style={styles.productReq}>[ Requires Prescription ]</Text>
           ) : (
@@ -229,10 +270,67 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
               <View style={styles.separator2} />
 
               <View style={styles.pmentContainer}>
-                <Text style={styles.reminderText}>
-                  Order/s currently being verified.
-                </Text>
+                {attachmentData.length > 0 ? (
+                  <>
+                    <Text style={styles.pImgTxt}>
+                      Prescription image/s uploaded
+                    </Text>
+                    <FlatList
+                      data={attachmentData}
+                      scrollEnabled={false}
+                      vertical
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedImage(item.img);
+                            setModalVisible(true);
+                          }}
+                        >
+                          <View style={styles.selectedImageCont}>
+                            <Image
+                              source={{ uri: item.img }}
+                              style={styles.selectedImage}
+                              onError={() => console.log("Error loading image")}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                      keyExtractor={(item, index) => index.toString()}
+                    />
+                  </>
+                ) : null}
               </View>
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <TouchableOpacity
+                    style={{
+                      position: "absolute",
+                      top: 30,
+                      padding: 15,
+                      zIndex: 1,
+                      color: "white",
+                      borderRadius: 20,
+                    }}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Iconify
+                      icon="ion:arrow-back-sharp"
+                      size={35}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={styles.fullscreenImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </Modal>
+
               <View style={styles.separator2} />
               <View style={styles.pmentDetailsContainer}>
                 <Text style={styles.pmentDetailsText}>Payment Details :</Text>
