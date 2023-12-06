@@ -315,7 +315,7 @@ const ProductScreen = ({ navigation, route }) => {
       <Text style={styles.productSelectionText}>Product Selection</Text>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#EC6F56" />
         </View>
       ) : filteredProduct.length !== 0 ? (
         <View style={{ justifyContent: "center" }}>

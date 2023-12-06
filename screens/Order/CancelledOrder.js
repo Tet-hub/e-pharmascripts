@@ -36,7 +36,7 @@ const CancelledOrderList = ({
       <View style={styles.container}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" color="#EC6F56" />
           </View>
         ) : orderData.length === 0 ? (
           <View style={styles.noOrdersCont}>

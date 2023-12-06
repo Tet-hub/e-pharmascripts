@@ -130,7 +130,7 @@ export default function NotificationScreen() {
   // Display notifications
   const renderNotifications = () => {
     if (loading) {
-      return <ActivityIndicator size="large" color="#0000ff" />;
+      return <ActivityIndicator size="large" color="#EC6F56" />;
     }
     if (notifications.length > 0) {
       return notifications.map((notification, index) => (
@@ -331,7 +331,7 @@ export default function NotificationScreen() {
               }}
             >
               {deleting ? (
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color="#EC6F56" />
               ) : (
                 <Iconify
                   icon="material-symbols:delete"

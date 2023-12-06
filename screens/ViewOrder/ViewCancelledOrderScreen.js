@@ -124,7 +124,7 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
         <View style={[styles.container]}>
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
+              <ActivityIndicator size="large" color="#EC6F56" />
             </View>
           ) : (
             <React.Fragment>
