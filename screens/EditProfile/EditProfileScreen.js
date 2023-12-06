@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -43,6 +44,7 @@ const EditProfileScreen = () => {
   const [selectedFileImage, setSelectedFileImage] = useState(null);
   const [fetchedStatus, setFetchedStatus] = useState("Unverified");
   const [rejectedReason, setRejectedReason] = useState("");
+  const [loading, setLoading] = useState(false);
   const isEditingEnabled =
     fetchedStatus === "Verified" ||
     fetchedStatus === "Unverified" ||
@@ -174,6 +176,7 @@ const EditProfileScreen = () => {
     }
 
     try {
+      setLoading(true);
       const userRef = doc(db, "customers", userID);
       let imageUrl = null;
       let fileImageUrl = null;
@@ -221,6 +224,8 @@ const EditProfileScreen = () => {
     } catch (error) {
       // Handle any errors that occur during the update.
       console.error("Error updating user data in Firestore: ", error);
+    } finally {
+      setLoading(false); // Step 3: Hide activity indicator after submission
     }
   };
 
@@ -363,227 +368,236 @@ const EditProfileScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.wholeContainer}>
-      <View style={styles.upperContainer}>
-        <Text style={styles.title}>Edit Profile</Text>
-        <View style={styles.pic_cont}>
-          {selectedImage ? (
-            <Image
-              source={{ uri: selectedImage }}
-              style={styles.pic_cont}
-              className="w-full h-full rounded-full"
-            />
-          ) : (
-            <Image
-              source={DefaultImage}
-              style={styles.pic_cont}
-              className="w-full h-full rounded-full"
-            />
-          )}
-        </View>
-
-        <TouchableOpacity onPress={isEditingEnabled ? pickImageAsync : null}>
-          {isEditingEnabled && (
-            <IconSimple
-              style={styles.camera}
-              name="camera"
-              size={16}
-              color="white"
-            />
-          )}
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.lowerContainer}>
-        <View style={styles.labelInfoCont}>
-          <Text style={styles.label}>First name</Text>
-          <View style={styles.infoContView}>
-            <TextInput
-              style={[
-                styles.info,
-                (!isEditingEnabled || fetchedStatus === "Verified") &&
-                  styles.disabledInput,
-              ]}
-              placeholder="First name"
-              value={updateUserData.firstName}
-              onChangeText={handleFirstNameChange}
-              editable={isEditingEnabled && fetchedStatus !== "Verified"}
-            />
-          </View>
-        </View>
-
-        <View style={styles.labelInfoCont}>
-          <Text style={styles.label}>Last name</Text>
-          <View style={styles.infoContView}>
-            <TextInput
-              style={[
-                styles.info,
-                (!isEditingEnabled || fetchedStatus === "Verified") &&
-                  styles.disabledInput,
-              ]}
-              value={updateUserData.lastName}
-              onChangeText={handleLastNameChange}
-              editable={isEditingEnabled && fetchedStatus !== "Verified"}
-            />
-          </View>
-        </View>
-
-        <View style={styles.labelInfoCont}>
-          <Text style={styles.label}>Phone</Text>
-          <View style={styles.infoContView}>
-            <TextInput
-              style={[styles.info, !isEditingEnabled && styles.disabledInput]}
-              value={updateUserData.phone}
-              onChangeText={handlePhone}
-              keyboardType="numeric"
-              editable={isEditingEnabled}
-            />
-          </View>
-        </View>
-
-        <View style={styles.labelInfoCont}>
-          <Text style={styles.label}>Gender</Text>
-          <View style={styles.infoContView}>
-            <Picker
-              selectedValue={updateUserData.gender}
-              style={styles.infoGender}
-              onValueChange={(itemValue) =>
-                setUpdateUserData({ ...updateUserData, gender: itemValue })
-              }
-              enabled={isEditingEnabled && fetchedStatus !== "Verified"}
-            >
-              <Picker.Item label="Select Gender" value="" />
-              <Picker.Item label="Male" value="Male" />
-              <Picker.Item label="Female" value="Female" />
-            </Picker>
-          </View>
-        </View>
-
-        <View style={styles.labelInfoCont}>
-          <Text style={styles.label}>Birthdate</Text>
-          <View style={styles.infoContViewBirthdate}>
-            <Text style={styles.info}>
-              {selectedDate
-                ? formatDate(selectedDate)
-                : updateUserData.dateOfBirth
-                ? formatFetchDate(updateUserData.dateOfBirth)
-                : "Select birthdate"}
-            </Text>
-
-            {isEditingEnabled && fetchedStatus !== "Verified" && (
-              <Iconify
-                size={22}
-                icon="mi:calendar"
-                color="#4E4E4E"
-                style={{ marginRight: 15 }}
-                onPress={() => setShowDatePicker(true)}
+    <View style={styles.container}>
+      <ScrollView style={styles.wholeContainer}>
+        <View style={styles.upperContainer}>
+          <Text style={styles.title}>Edit Profile</Text>
+          <View style={styles.pic_cont}>
+            {selectedImage ? (
+              <Image
+                source={{ uri: selectedImage }}
+                style={styles.pic_cont}
+                className="w-full h-full rounded-full"
+              />
+            ) : (
+              <Image
+                source={DefaultImage}
+                style={styles.pic_cont}
+                className="w-full h-full rounded-full"
               />
             )}
           </View>
+
+          <TouchableOpacity onPress={isEditingEnabled ? pickImageAsync : null}>
+            {isEditingEnabled && (
+              <IconSimple
+                style={styles.camera}
+                name="camera"
+                size={16}
+                color="white"
+              />
+            )}
+          </TouchableOpacity>
         </View>
 
-        {showDatePicker && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={new Date()}
-            mode="date"
-            display="default"
-            onChange={handleDateChange}
-          />
-        )}
-
-        <View style={styles.labelInfoContValidId}>
-          <View style={styles.statusView}>
-            <Text style={styles.label}>Valid ID</Text>
-            <Text
-              style={[
-                styles.statusText,
-                { color: fetchedStatus === "Verified" ? "#0CB669" : "#DC3642" },
-              ]}
-            >
-              [ {fetchedStatus ? fetchedStatus : "Unverified"} ]
-            </Text>
-          </View>
-          {fetchedStatus === "Rejected" && rejectedReason !== null ? (
-            <View style={styles.reasonContainer}>
-              <Text style={styles.reasonLabel}>Reason:</Text>
-              <Text style={styles.rejectedReasonText}>{rejectedReason}</Text>
+        <View style={styles.lowerContainer}>
+          <View style={styles.labelInfoCont}>
+            <Text style={styles.label}>First name</Text>
+            <View style={styles.infoContView}>
+              <TextInput
+                style={[
+                  styles.info,
+                  (!isEditingEnabled || fetchedStatus === "Verified") &&
+                    styles.disabledInput,
+                ]}
+                placeholder="First name"
+                value={updateUserData.firstName}
+                onChangeText={handleFirstNameChange}
+                editable={isEditingEnabled && fetchedStatus !== "Verified"}
+              />
             </View>
-          ) : null}
-          <View style={styles.chooseFileTouchable}>
-            {isEditingEnabled && fetchedStatus !== "Verified" ? (
-              <TouchableOpacity onPress={handleChooseID}>
-                <View style={styles.chooseFileTextView}>
-                  <Text style={styles.chooseFileText}>Choose File</Text>
+          </View>
+
+          <View style={styles.labelInfoCont}>
+            <Text style={styles.label}>Last name</Text>
+            <View style={styles.infoContView}>
+              <TextInput
+                style={[
+                  styles.info,
+                  (!isEditingEnabled || fetchedStatus === "Verified") &&
+                    styles.disabledInput,
+                ]}
+                value={updateUserData.lastName}
+                onChangeText={handleLastNameChange}
+                editable={isEditingEnabled && fetchedStatus !== "Verified"}
+              />
+            </View>
+          </View>
+
+          <View style={styles.labelInfoCont}>
+            <Text style={styles.label}>Phone</Text>
+            <View style={styles.infoContView}>
+              <TextInput
+                style={[styles.info, !isEditingEnabled && styles.disabledInput]}
+                value={updateUserData.phone}
+                onChangeText={handlePhone}
+                keyboardType="numeric"
+                editable={isEditingEnabled}
+              />
+            </View>
+          </View>
+
+          <View style={styles.labelInfoCont}>
+            <Text style={styles.label}>Gender</Text>
+            <View style={styles.infoContView}>
+              <Picker
+                selectedValue={updateUserData.gender}
+                style={styles.infoGender}
+                onValueChange={(itemValue) =>
+                  setUpdateUserData({ ...updateUserData, gender: itemValue })
+                }
+                enabled={isEditingEnabled && fetchedStatus !== "Verified"}
+              >
+                <Picker.Item label="Select Gender" value="" />
+                <Picker.Item label="Male" value="Male" />
+                <Picker.Item label="Female" value="Female" />
+              </Picker>
+            </View>
+          </View>
+
+          <View style={styles.labelInfoCont}>
+            <Text style={styles.label}>Birthdate</Text>
+            <View style={styles.infoContViewBirthdate}>
+              <Text style={styles.info}>
+                {selectedDate
+                  ? formatDate(selectedDate)
+                  : updateUserData.dateOfBirth
+                  ? formatFetchDate(updateUserData.dateOfBirth)
+                  : "Select birthdate"}
+              </Text>
+
+              {isEditingEnabled && fetchedStatus !== "Verified" && (
+                <Iconify
+                  size={22}
+                  icon="mi:calendar"
+                  color="#4E4E4E"
+                  style={{ marginRight: 15 }}
+                  onPress={() => setShowDatePicker(true)}
+                />
+              )}
+            </View>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={new Date()}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+
+          <View style={styles.labelInfoContValidId}>
+            <View style={styles.statusView}>
+              <Text style={styles.label}>Valid ID</Text>
+              <Text
+                style={[
+                  styles.statusText,
+                  {
+                    color: fetchedStatus === "Verified" ? "#0CB669" : "#DC3642",
+                  },
+                ]}
+              >
+                [ {fetchedStatus ? fetchedStatus : "Unverified"} ]
+              </Text>
+            </View>
+            {fetchedStatus === "Rejected" && rejectedReason !== null ? (
+              <View style={styles.reasonContainer}>
+                <Text style={styles.reasonLabel}>Reason:</Text>
+                <Text style={styles.rejectedReasonText}>{rejectedReason}</Text>
+              </View>
+            ) : null}
+            <View style={styles.chooseFileTouchable}>
+              {isEditingEnabled && fetchedStatus !== "Verified" ? (
+                <TouchableOpacity onPress={handleChooseID}>
+                  <View style={styles.chooseFileTextView}>
+                    <Text style={styles.chooseFileText}>Choose File</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.accountVerificationText}>
+                  {fetchedStatus === "Pending" ? (
+                    <View style={styles.verifyStatusCont}>
+                      <Iconify
+                        size={22}
+                        icon="ic:round-pending-actions"
+                        color="#ec6f56"
+                        style={{ marginLeft: 10 }}
+                      />
+                    </View>
+                  ) : fetchedStatus === "Verified" ? (
+                    <View style={styles.verifyStatusCont}>
+                      <Iconify
+                        size={22}
+                        icon="material-symbols:verified"
+                        color="#0CB669"
+                        style={{ marginLeft: 10 }}
+                      />
+                    </View>
+                  ) : null}
                 </View>
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.accountVerificationText}>
-                {fetchedStatus === "Pending" ? (
+              )}
+
+              <Text style={styles.fileDisplayText} numberOfLines={1}>
+                {fetchedStatus === "Rejected" ? (
+                  getFileNameFromURL(selectedFileImage) ? (
+                    getFileNameFromURL(selectedFileImage)
+                  ) : (
+                    "Select a Valid ID"
+                  )
+                ) : fetchedStatus === "Pending" ? (
                   <View style={styles.verifyStatusCont}>
-                    <Iconify
-                      size={22}
-                      icon="ic:round-pending-actions"
-                      color="#ec6f56"
-                      style={{ marginLeft: 10 }}
-                    />
+                    <Text style={styles.accountVerificationText}>
+                      Verifying ID
+                    </Text>
                   </View>
                 ) : fetchedStatus === "Verified" ? (
                   <View style={styles.verifyStatusCont}>
-                    <Iconify
-                      size={22}
-                      icon="material-symbols:verified"
-                      color="#0CB669"
-                      style={{ marginLeft: 10 }}
-                    />
+                    <Text style={styles.accountVerificationText}>
+                      Account Verified
+                    </Text>
                   </View>
-                ) : null}
-              </View>
-            )}
-
-            <Text style={styles.fileDisplayText} numberOfLines={1}>
-              {fetchedStatus === "Rejected" ? (
-                getFileNameFromURL(selectedFileImage) ? (
+                ) : getFileNameFromURL(selectedFileImage) ? (
                   getFileNameFromURL(selectedFileImage)
                 ) : (
-                  "Select a Valid ID"
-                )
-              ) : fetchedStatus === "Pending" ? (
-                <View style={styles.verifyStatusCont}>
-                  <Text style={styles.accountVerificationText}>
-                    Verifying ID
-                  </Text>
-                </View>
-              ) : fetchedStatus === "Verified" ? (
-                <View style={styles.verifyStatusCont}>
-                  <Text style={styles.accountVerificationText}>
-                    Account Verified
-                  </Text>
-                </View>
-              ) : getFileNameFromURL(selectedFileImage) ? (
-                getFileNameFromURL(selectedFileImage)
-              ) : (
-                "No file Chosen"
-              )}
-            </Text>
+                  "No file Chosen"
+                )}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View style={styles.addButtonView}>
-        {fetchedStatus === "Verified" ||
-        fetchedStatus === "Unverified" ||
-        fetchedStatus === "Rejected" ? (
-          <TouchableOpacity style={styles.addButton} onPress={updateProfile}>
-            <Text style={styles.addText}>SAVE</Text>
-          </TouchableOpacity>
-        ) : (
-          <View>
-            <Text style={styles.disabledEditButton}>SAVE</Text>
+        <View style={styles.addButtonView}>
+          {fetchedStatus === "Verified" ||
+          fetchedStatus === "Unverified" ||
+          fetchedStatus === "Rejected" ? (
+            <TouchableOpacity style={styles.addButton} onPress={updateProfile}>
+              <Text style={styles.addText}>SAVE</Text>
+            </TouchableOpacity>
+          ) : (
+            <View>
+              <Text style={styles.disabledEditButton}>SAVE</Text>
+            </View>
+          )}
+        </View>
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#EC6F56" />
           </View>
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

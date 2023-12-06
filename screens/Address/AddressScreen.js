@@ -1,32 +1,32 @@
 import {
   View,
-  Image,
   TouchableOpacity,
   Text,
-  TextInput,
-  FlatList,
   ToastAndroid,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Iconify } from "react-native-iconify";
 import styles from "./addressStyle";
 import {
-  addDoc,
+  collection,
   setDoc,
   doc,
-  getDoc,
+  getDocs,
   onSnapshot,
   where,
+  deleteDoc,
+  query,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { getAuthToken } from "../../src/authToken";
-import { ScrollView } from "react-native-gesture-handler";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-
+import { useNavigation, useRoute } from "@react-navigation/native";
 const AddressScreen = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [currentCustomerId, setCustomerId] = useState(null);
   const [currentCustomerAddress, setCustomerAddress] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchCustomerId = async () => {
@@ -56,20 +56,73 @@ const AddressScreen = () => {
 
   const saveAddress = async () => {
     if (currentCustomerId && selectedAddress) {
-      try {
-        const customerRef = doc(db, "customers", currentCustomerId);
-        await setDoc(
-          customerRef,
-          { address: selectedAddress.description },
-          { merge: true }
+      if (currentCustomerAddress) {
+        // Alert the user before changing the address
+        Alert.alert(
+          "Warning",
+          "Modifying your address will result in removing all of your items from your cart.",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Continue",
+              onPress: async () => {
+                try {
+                  const customerRef = doc(db, "customers", currentCustomerId);
+                  await setDoc(
+                    customerRef,
+                    { address: selectedAddress.description },
+                    { merge: true }
+                  );
+
+                  // Logic to delete docs in the cart collection
+                  const cartRef = collection(db, "cart");
+                  const querySnapshot = await getDocs(
+                    query(cartRef, where("customerId", "==", currentCustomerId))
+                  );
+
+                  const deletePromises = querySnapshot.docs.map((doc) =>
+                    deleteDoc(doc.ref)
+                  );
+
+                  await Promise.all(deletePromises);
+
+                  setSelectedAddress(null);
+                  navigation.goBack();
+                  ToastAndroid.show(
+                    "Address saved successfully",
+                    ToastAndroid.SHORT
+                  );
+                } catch (error) {
+                  console.error("Error saving address:", error);
+                  ToastAndroid.show(
+                    "Failed to save address",
+                    ToastAndroid.LONG
+                  );
+                }
+              },
+            },
+          ]
         );
+      } else {
+        // If no existing address, proceed with saving the new address
+        try {
+          const customerRef = doc(db, "customers", currentCustomerId);
+          await setDoc(
+            customerRef,
+            { address: selectedAddress.description },
+            { merge: true }
+          );
 
-        setSelectedAddress(null);
+          setSelectedAddress(null);
 
-        ToastAndroid.show("Address saved successfully", ToastAndroid.SHORT);
-      } catch (error) {
-        console.error("Error saving address:", error);
-        ToastAndroid.show("Failed to save address", ToastAndroid.LONG);
+          ToastAndroid.show("Address saved successfully", ToastAndroid.SHORT);
+        } catch (error) {
+          console.error("Error saving address:", error);
+          ToastAndroid.show("Failed to save address", ToastAndroid.LONG);
+        }
       }
     } else {
       ToastAndroid.show("Please select an address first", ToastAndroid.LONG);
@@ -98,8 +151,17 @@ const AddressScreen = () => {
           <Text style={styles.displayAddressView}>No address set</Text>
         )}
       </View>
+      <View style={styles.currentTitleView}>
+        <Iconify
+          size={20}
+          icon="mdi:address-marker"
+          color="#4E4E4E"
+          style={{ marginRight: 5 }}
+        />
+        <Text style={styles.currentText}>Modify address</Text>
+      </View>
       <GooglePlacesAutocomplete
-        placeholder="Modify address"
+        placeholder="Type here..."
         onPress={(data, details = null) => {
           setSelectedAddress(data);
         }}
@@ -110,7 +172,7 @@ const AddressScreen = () => {
         }}
         styles={{
           textInputContainer: {
-            width: "90%", // Adjust the width as needed
+            width: "90%",
             alignSelf: "center",
             marginTop: 10,
           },

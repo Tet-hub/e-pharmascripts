@@ -85,14 +85,26 @@ const SearchProductsScreen = ({ navigation }) => {
     filteredProducts = filteredProducts.filter((product) => {
       return product.productName.toLowerCase().includes(trimmedSearchKeyword);
     });
+
+    // Apply distance sorting if location button is clicked
     if (isLocationButtonClicked) {
-      // Sort by distance if location button is clicked
       filteredProducts = filteredProducts.sort((a, b) => {
-        // Assuming distance is in meters for comparison
         return a.distance - b.distance;
       });
+
+      // Update filtered products to display distance only when location button is clicked
+      filteredProducts = filteredProducts.map((product) => ({
+        ...product,
+        shouldDisplayDistance: true,
+      }));
+    } else {
+      // Update filtered products to not display distance when location button is not clicked
+      filteredProducts = filteredProducts.map((product) => ({
+        ...product,
+        shouldDisplayDistance: false,
+      }));
     }
-    // Update the state with the sorted and filtered products
+
     setFilteredProducts(filteredProducts);
     setShowModal(false);
   };
@@ -348,11 +360,9 @@ const SearchProductsScreen = ({ navigation }) => {
                         {product.branch ? ` (${product.branch} Branch)` : ""}
                       </Text>
 
-                      {isLocationButtonClicked && (
+                      {product.shouldDisplayDistance && product.distance && (
                         <Text style={styles.distanceDisplayText}>
-                          {product.distance
-                            ? `${(product.distance / 1000).toFixed(2)} km`
-                            : "NA"}
+                          {`${(product.distance / 1000).toFixed(2)} km`}
                         </Text>
                       )}
                     </View>

@@ -52,10 +52,7 @@ const MenuScreen = () => {
     // Navigate to my order screen
     navigation.navigate("OrderScreen");
   };
-  const handleInstallmentScreen = () => {
-    // Navigate to installment screen
-    navigation.navigate("InstallmentScreen");
-  };
+
   const handleFavoritesScreen = () => {
     // Navigate to favorites screen
     navigation.navigate("FavoritesScreen");
@@ -138,22 +135,6 @@ const MenuScreen = () => {
               <View style={styles.arrowIcon}>
                 <Iconify
                   style={{ marginLeft: 155 }}
-                  icon="iconoir:nav-arrow-right"
-                  size={22}
-                  color="black"
-                />
-              </View>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleInstallmentScreen}>
-            <View style={styles.viewCont}>
-              <View style={styles.iconsBG}>
-                <Iconify icon="quill:creditcard" size={22} color="#EC6F56" />
-              </View>
-              <Text style={styles.viewContText}>Installment</Text>
-              <View style={styles.arrowIcon}>
-                <Iconify
                   icon="iconoir:nav-arrow-right"
                   size={22}
                   color="black"

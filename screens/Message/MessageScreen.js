@@ -30,12 +30,23 @@ const MessageScreen = ({ navigation }) => {
   const [userId, setUserId] = useState(null);
   const [sellerImage, setSellerImage] = useState(null);
   const [sellerId, setSellerId] = useState(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const DefaultImage = require("../../assets/img/default-image.jpg");
   //get userID
   useEffect(() => {
     getCurrentUserId().then((id) => setUserId(id));
   }, []);
   //console.log(`UserId: ${userId}`);
+
+  // Filtered chat list based on searchKeyword
+  const filteredChatList = chatList.filter((item) =>
+    item.sellerBranch.toLowerCase().includes(searchKeyword.toLowerCase())
+  );
+
+  // Function to handle search input change
+  const handleSearch = (text) => {
+    setSearchKeyword(text);
+  };
 
   useEffect(() => {
     const fetchChatList = async () => {
@@ -148,6 +159,15 @@ const MessageScreen = ({ navigation }) => {
   // Calculate dynamic padding based on screen width
   const dynamicPadding = Math.min(16, width * 0.05);
 
+  //show search icon
+  const renderSearchIcon = () => {
+    return (
+      <Text style={styles.searchButtonIcon}>
+        <Iconify icon="iconoir:search" size={22} color="gray" />
+      </Text>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -155,66 +175,77 @@ const MessageScreen = ({ navigation }) => {
         <View style={styles.horizontalLine} />
       </View>
       <View className="items-center flex-row mt-5 ml-3 mr-3 ">
-        <View style={styles.searchFilterCont}>
-          <View style={styles.searchCont}>
-            <Iconify icon="circum:search" size={22} style={styles.iconSearch} />
-            <TextInput placeholder="Search branch" />
+        <View style={styles.searchCont}>
+          <View style={styles.searchTexInputView}>
+            <TextInput
+              placeholder="Search branch"
+              value={searchKeyword}
+              onChangeText={handleSearch}
+              style={styles.searchBranchInput}
+            />
           </View>
+          {renderSearchIcon()}
         </View>
       </View>
-      <FlatList
-        data={chatList}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.chatItem, { paddingHorizontal: dynamicPadding }]}
-            onPress={() =>
-              navigation.navigate("ChatScreen", {
-                sellerId: item.sellerId,
-                sellerBranch: item.sellerBranch,
-                img: item.img,
-                name: item.sellerName,
-              })
-            }
-          >
-            <View style={styles.chatContent}>
-              <View className="w-12 h-12 ml-3 mr-5">
-                {item.img ? (
-                  <Image
-                    source={{ uri: item.img }}
-                    className="w-full h-full rounded-full"
-                  />
-                ) : (
-                  <Image
-                    source={DefaultImage}
-                    style={styles.pic_cont}
-                    className="w-full h-full rounded-full"
-                  />
-                )}
-              </View>
-              <View style={styles.chatText}>
-                <Text
-                  style={styles.chatName}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {item.sellerBranch}
-                </Text>
-
-                {/* Display "Sent an image" if there is no messageText */}
-                <Text style={styles.lastMessage}>
-                  {item.lastMessage ? (
-                    item.lastMessage
+      {filteredChatList.length === 0 ? (
+        <View style={styles.noMatchContainer}>
+          <Text style={styles.noMatchText}>No matched results</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredChatList}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.chatItem, { paddingHorizontal: dynamicPadding }]}
+              onPress={() =>
+                navigation.navigate("ChatScreen", {
+                  sellerId: item.sellerId,
+                  sellerBranch: item.sellerBranch,
+                  img: item.img,
+                  name: item.sellerName,
+                })
+              }
+            >
+              <View style={styles.chatContent}>
+                <View className="w-12 h-12 ml-2 mr-5">
+                  {item.img ? (
+                    <Image
+                      source={{ uri: item.img }}
+                      className="w-full h-full rounded-full"
+                    />
                   ) : (
-                    <Text style={{ fontStyle: "italic" }}>Sent an image</Text>
+                    <Image
+                      source={DefaultImage}
+                      style={styles.pic_cont}
+                      className="w-full h-full rounded-full"
+                    />
                   )}
-                </Text>
+                </View>
+                <View style={styles.chatText}>
+                  <Text
+                    style={styles.chatName}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.sellerBranch}
+                  </Text>
+
+                  {/* Display "Sent an image" if there is no messageText */}
+                  <Text style={styles.lastMessage}>
+                    {item.lastMessage ? (
+                      item.lastMessage
+                    ) : (
+                      <Text style={{ fontStyle: "italic" }}>Sent an image</Text>
+                    )}
+                  </Text>
+                </View>
+                <Text style={styles.timestamp}>{item.timestamp}</Text>
               </View>
-              <Text style={styles.timestamp}>{item.timestamp}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 };

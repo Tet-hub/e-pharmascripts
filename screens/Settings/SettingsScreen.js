@@ -21,6 +21,15 @@ const SettingsScreen = () => {
   const handleReport = () => {
     navigation.navigate("ReportIssueScreen");
   };
+  const handleCommunityRules = () => {
+    navigation.navigate("CommunityRulesScreen");
+  };
+  const handleAbout = () => {
+    navigation.navigate("AboutScreen");
+  };
+  const handleTerms = () => {
+    navigation.navigate("TermsAndConditionsScreen");
+  };
 
   return (
     <View style={styles.container}>
@@ -47,7 +56,7 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleCommunityRules}>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>Community Rules</Text>
             <View style={styles.arrowIcon}>
@@ -60,9 +69,9 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleTerms}>
           <View style={styles.touchableCont}>
-            <Text style={styles.touchableText}>E-Pharmascripts Policies</Text>
+            <Text style={styles.touchableText}>Terms & Conditions</Text>
             <View style={styles.arrowIcon}>
               <Iconify
                 icon="iconoir:nav-arrow-right"
@@ -73,7 +82,7 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleAbout}>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>About</Text>
             <View style={styles.arrowIcon}>
@@ -86,20 +95,6 @@ const SettingsScreen = () => {
           </View>
         </TouchableOpacity>
       </View>
-
-      {/*
-            <Text className="text-base font-semibold border-b border-gray-200 pb-4 pt-6">  
-            <Ionicons name="notifications-outline" size={23} color="black"/> Notifications</Text>
-            <View className="flex flex-row items-center justify-between mr-3 mt-3 ml-3">
-                <Text className="mr-2 text-base">Notifications</Text>
-                <Switch
-                    value={isNotificationsEnabled}
-                    onValueChange={toggleNotifications}
-                    trackColor={{ true: 'red', false: 'gray' }}
-                    thumbColor={isNotificationsEnabled ? 'red' : 'white'}
-                />
-            </View>
-            */}
     </View>
   );
 };

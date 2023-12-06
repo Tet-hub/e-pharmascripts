@@ -3,11 +3,19 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Login from "../screens/login";
 import Signup from "../screens/Signup";
 import TermsConditions from "../screens/TermsCondition/TermsConditions";
+import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 
 const Stack = createStackNavigator();
 
 const AuthStack = () => (
-  <Stack.Navigator initialRouteName="Login">
+  <Stack.Navigator
+    initialRouteName="Login"
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: "#F5F5F5",
+      },
+    }}
+  >
     <Stack.Screen
       name="Login"
       component={Login}
@@ -21,7 +29,10 @@ const AuthStack = () => (
     <Stack.Screen
       name="TermsConditions"
       component={TermsConditions}
-      options={{ headerShown: true }}
+      options={{
+        headerTitle: () => <View></View>,
+        headerTintColor: "black",
+      }}
     />
   </Stack.Navigator>
 );

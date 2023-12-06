@@ -126,9 +126,10 @@ const BranchesScreen = ({ navigation, route }) => {
 
               // Calculate average rating based on pharmacyRating field
               let totalRating = 0;
+              const DEFAULT_RATING = 0.0;
               if (sellerRatings.length > 0) {
                 sellerRatings.forEach((rating) => {
-                  totalRating += rating.pharmacyRating; // Using pharmacyRating field
+                  totalRating += rating.pharmacyRating;
                 });
                 const averageRating = totalRating / sellerRatings.length;
                 Branches6KM.push({
@@ -137,7 +138,7 @@ const BranchesScreen = ({ navigation, route }) => {
                   branch: branch.branch,
                   companyName: branch.companyName,
                   img: branch.img,
-                  averageRating: averageRating.toFixed(1), // Keeping the average to 2 decimal places
+                  averageRating: averageRating.toFixed(1),
                 });
                 shouldLog = true;
               } else {
@@ -148,7 +149,7 @@ const BranchesScreen = ({ navigation, route }) => {
                   branch: branch.branch,
                   companyName: branch.companyName,
                   img: branch.img,
-                  averageRating: "0",
+                  averageRating: DEFAULT_RATING,
                 });
                 shouldLog = true;
               }
@@ -202,15 +203,17 @@ const BranchesScreen = ({ navigation, route }) => {
 
       setSortedBranches(sortedBranchesWithDistances);
     } else {
-      // Sort branches by average rating
       branchesCopy.sort((a, b) => {
-        // Consider "No ratings" as 0 for sorting purposes
-        const ratingA =
-          a.averageRating === "No ratings" ? 0 : parseFloat(a.averageRating);
-        const ratingB =
-          b.averageRating === "No ratings" ? 0 : parseFloat(b.averageRating);
+        const ratingA = parseFloat(a.averageRating);
+        const ratingB = parseFloat(b.averageRating);
 
-        return ratingB - ratingA; // Sort in descending order
+        if (ratingA > ratingB) {
+          return -1;
+        } else if (ratingA < ratingB) {
+          return 1;
+        } else {
+          return 0;
+        }
       });
 
       setSortedBranches(branchesCopy);
@@ -246,21 +249,7 @@ const BranchesScreen = ({ navigation, route }) => {
         >
           <View style={styles.ratingsRowDiv}>
             <Icon name="star" size={13} color="#FAC63E" />
-            <Text
-              style={[
-                styles.ratingText,
-                {
-                  fontStyle: item.averageRating === "0" ? "normal" : "normal",
-                  fontWeight: item.averageRating === "0" ? "600" : "normal",
-                },
-              ]}
-            >
-              {item.averageRating !== "0" ? (
-                `${item.averageRating}`
-              ) : (
-                <Text style={{ fontStyle: "normal" }}>No ratings</Text>
-              )}
-            </Text>
+            <Text style={styles.ratingText}>{item.averageRating}</Text>
           </View>
 
           <View>

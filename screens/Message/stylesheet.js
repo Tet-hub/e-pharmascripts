@@ -24,8 +24,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   searchCont: {
-    flexDirection: "row",
-    alignItems: "center",
     padding: 10,
     borderRadius: 15,
     width: "100%",
@@ -36,6 +34,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1.5,
     marginVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchTexInputView: {
+    width: "90%",
+  },
+  searchBranchInput: {
+    paddingLeft: 10,
   },
   iconSearch: {
     marginRight: 10,
@@ -85,6 +91,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     flex: 1,
+  },
+  noMatchText: {
+    textAlign: "center",
+    marginVertical: "30%",
+    fontSize: 15,
   },
 });
 

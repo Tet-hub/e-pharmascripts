@@ -189,6 +189,21 @@ const styles = StyleSheet.create({
     paddingLeft: 60,
     borderRadius: 30,
   },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  container: {
+    flex: 1,
+    position: "relative",
+  },
 });
 
 export default styles;
