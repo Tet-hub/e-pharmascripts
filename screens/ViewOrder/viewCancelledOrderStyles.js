@@ -212,6 +212,45 @@ const styles = StyleSheet.create({
     backgroundColor: "red", // Change the background color to red (or any color indicating danger)
     // Add more styles as needed (e.g., padding, border-radius, etc.)
   },
+  selectedImageName: {
+    fontSize: 15,
+    alignSelf: "center",
+    overflow: "hidden",
+    maxWidth: "65%",
+    marginLeft: 10,
+  },
+  selectedImageCont: {
+    height: 100,
+    width: 100,
+    margin: 5,
+  },
+  selectedImage: {
+    resizeMode: "cover",
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "black",
+  },
+
+  fullscreenImage: {
+    width: "100%",
+    height: "80%",
+  },
+  reminderText: {
+    fontSize: 12,
+    fontWeight: 500,
+    fontStyle: "italic",
+    marginBottom: 5,
+  },
+  closeButton: {
+    color: "white",
+    fontSize: 18,
+    margin: 20,
+  },
 });
 
 export default styles;

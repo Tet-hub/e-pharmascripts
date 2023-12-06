@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   separator2: {
-    marginTop: 60,
+    marginTop: 20,
     height: 1,
     width: "85%",
     backgroundColor: "#D9D9D9",
@@ -201,11 +201,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginLeft: 5,
   },
-  reminderText: {
-    fontSize: 12,
-    fontWeight: 200,
-    fontStyle: "italic",
-  },
   loadingContainer: {
     flex: 1,
     flexDirection: "row",
@@ -245,7 +240,12 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "80%",
   },
-
+  reminderText: {
+    fontSize: 12,
+    fontWeight: 500,
+    fontStyle: "italic",
+    marginBottom: 5,
+  },
   closeButton: {
     color: "white",
     fontSize: 18,

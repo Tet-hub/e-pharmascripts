@@ -10,6 +10,7 @@ import {
   FlatList,
   Alert,
   ToastAndroid,
+  Modal,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Iconify } from "react-native-iconify";
@@ -47,6 +48,10 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   const { orderId, totalPrice, customerName } = route.params;
   const [card, setCard] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
+  const [attachmentData, setAttachmentData] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
   console.log(`CustomerName: ${customerName}`);
   console.log(`TotalPrice: ${totalPrice}`);
 
@@ -87,6 +92,30 @@ const PlaceOrderScreen = ({ navigation, route }) => {
               const products = await productResponse.json();
               products.forEach((product) => {});
               setProductData(products);
+              const attachmentCondition = [
+                {
+                  fieldName: "orderId",
+                  operator: "==",
+                  value: orderId,
+                },
+              ];
+              console.log("orders.id: ", orderId);
+              const attachmentUrl = buildQueryUrl(
+                "attachmentList",
+                attachmentCondition
+              );
+
+              const attachmentResponse = await fetch(attachmentUrl, {
+                method: "GET",
+              });
+
+              if (attachmentResponse.ok) {
+                const attachments = await attachmentResponse.json();
+                attachments.forEach((attachment) => {
+                  console.log("Attachment ID: ", attachment.id);
+                });
+                setAttachmentData(attachments);
+              }
             } else {
               console.log(
                 "API request failed with status:",
@@ -385,6 +414,66 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                   />
                 </View>
               </View>
+              <View style={styles.pmentContainer}>
+                {attachmentData.length > 0 ? (
+                  <>
+                    <Text style={styles.reminderText}>
+                      Prescription image/s uploaded
+                    </Text>
+                    <FlatList
+                      data={attachmentData}
+                      horizontal
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedImage(item.img);
+                            setModalVisible(true);
+                          }}
+                        >
+                          <View style={styles.selectedImageCont}>
+                            <Image
+                              source={{ uri: item.img }}
+                              style={styles.selectedImage}
+                              onError={() => console.log("Error loading image")}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                      keyExtractor={(item, index) => index.toString()}
+                    />
+                  </>
+                ) : null}
+              </View>
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <TouchableOpacity
+                    style={{
+                      position: "absolute",
+                      top: 30,
+                      padding: 15,
+                      zIndex: 1,
+                      color: "white",
+                      borderRadius: 20,
+                    }}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Iconify
+                      icon="ion:arrow-back-sharp"
+                      size={35}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={styles.fullscreenImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </Modal>
               <View style={styles.separator} />
               <View style={styles.paymentMethodContainer}>
                 <Text style={styles.pmText}>Payment Method :</Text>

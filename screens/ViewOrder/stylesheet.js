@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   separator2: {
-    marginTop: 60,
+    marginTop: 20,
     height: 1,
     width: "85%",
     backgroundColor: "#D9D9D9",
@@ -196,6 +196,45 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
+  selectedImageName: {
+    fontSize: 15,
+    alignSelf: "center",
+    overflow: "hidden",
+    maxWidth: "65%",
+    marginLeft: 10,
+  },
+  selectedImageCont: {
+    height: 100,
+    width: 100,
+    margin: 5,
+  },
+  selectedImage: {
+    resizeMode: "cover",
+    width: "100%",
+    height: "100%",
+    borderRadius: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "black",
+  },
+
+  fullscreenImage: {
+    width: "100%",
+    height: "80%",
+  },
+  reminderText: {
+    fontSize: 12,
+    fontWeight: 500,
+    fontStyle: "italic",
+    marginBottom: 5,
+  },
+  closeButton: {
+    color: "white",
+    fontSize: 18,
+    margin: 20,
   },
 });
 
