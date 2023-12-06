@@ -203,14 +203,20 @@ const ShoppingCartScreen = () => {
       }
     }
     console.log("cart id:", selectedCartIds);
+    if (selectedCartIds.length == 0) {
+      ToastAndroid.show(
+        "Item/s to be checked out is empty!",
+        ToastAndroid.SHORT
+      );
+    }
     if (selectedSellerId.size === 1 && selectedCartIds.length > 0) {
       // Proceed to the checkout screen
       navigation.navigate("ToValidateScreen", { cartId: selectedCartIds });
-    } else {
+    } else if (selectedSellerId.size > 1 && selectedCartIds.length > 0) {
       ToastAndroid.show(
         "Please select items from the same seller to proceed!",
         ToastAndroid.SHORT
-      );
+      );  
       // toast.show("Please select items from the same seller to proceed!", {
       //   type: "normal",
       //   placement: "bottom",
@@ -297,7 +303,11 @@ const ShoppingCartScreen = () => {
                 </View>
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.productName}>
+                    <Text
+                      style={styles.productName}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
                       {cartItem.productData.productName}
                     </Text>
                     {cartItem.productData.requiresPrescription === "Yes" ? (

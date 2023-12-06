@@ -94,7 +94,13 @@ const ViewCompletedOrderScreen = () => {
       </View>
       <View style={styles.productInfoContainer}>
         <View>
-          <Text style={styles.productName}>{item.productName || ""}</Text>
+          <Text
+            style={styles.productName}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {item.productName || ""}
+          </Text>
           {item.prescription === "Yes" ? (
             <Text style={styles.productReq}>[ Requires Prescription ]</Text>
           ) : (

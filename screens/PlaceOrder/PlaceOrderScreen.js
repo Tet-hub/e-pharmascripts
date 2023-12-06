@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   FlatList,
   Alert,
+  ToastAndroid,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Iconify } from "react-native-iconify";
@@ -45,6 +46,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   const [isPaymentMethodSelected, setIsPaymentMethodSelected] = useState(false);
   const { orderId, totalPrice, customerName } = route.params;
   const [card, setCard] = useState(null);
+  const [btnLoading, setBtnLoading] = useState(false);
   console.log(`CustomerName: ${customerName}`);
   console.log(`TotalPrice: ${totalPrice}`);
 
@@ -106,6 +108,16 @@ const PlaceOrderScreen = ({ navigation, route }) => {
     setIsPaymentMethodSelected(!!selectedPaymentMethod);
   }, [selectedPaymentMethod]);
   const handlePlaceOrder = async () => {
+    if (!isPaymentMethodSelected) {
+      toast.show(`Please select a payment method first`, {
+        type: "normal ",
+        placement: "bottom",
+        duration: 3000,
+        offset: 10,
+        animationType: "slide-in",
+      });
+      return;
+    }
     Alert.alert(
       "Confirm Order",
       "Would you like to proceed with placing this order?",
@@ -117,11 +129,8 @@ const PlaceOrderScreen = ({ navigation, route }) => {
         {
           text: "Place Order",
           onPress: async () => {
+            setBtnLoading(true);
             try {
-              if (!isPaymentMethodSelected) {
-                return;
-              }
-
               if (orderId && selectedPaymentMethod === "Card") {
                 if (!card || !card.id) {
                   // console.log("Error card");
@@ -200,7 +209,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                       createdAt: serverTimestamp(),
                     });
                   }
-
+                  setBtnLoading(false);
                   console.log("Order placed successfully!");
                   navigation.navigate("OrderScreen");
                 } catch (error) {
@@ -212,6 +221,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                     offset: 10,
                     animationType: "slide-in",
                   });
+                  setBtnLoading(false);
                 }
               } else if (orderId && selectedPaymentMethod) {
                 // Update the order status for other payment methods
@@ -268,12 +278,13 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                     createdAt: serverTimestamp(),
                   });
                 }
-
+                setBtnLoading(false);
                 console.log("Order placed successfully!");
                 navigation.navigate("OrderScreen");
               }
             } catch (error) {
               console.error("Error placing the order:", error);
+              setBtnLoading(false);
             }
           },
         },
@@ -296,7 +307,13 @@ const PlaceOrderScreen = ({ navigation, route }) => {
       </View>
       <View style={styles.productInfoContainer}>
         <View>
-          <Text style={styles.productName}>{item.productName || ""}</Text>
+          <Text
+            style={styles.productName}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {item.productName || ""}
+          </Text>
           {item.requiresPrescription === "Yes" ? (
             <Text style={styles.productReq}>[ Requires Prescription ]</Text>
           ) : (
@@ -486,8 +503,13 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                     <TouchableOpacity
                       style={styles.ordernowButton}
                       onPress={handlePlaceOrder}
+                      disabled={btnLoading}
                     >
-                      <Text style={styles.ordernowText}>PLACE ORDER</Text>
+                      {btnLoading ? (
+                        <ActivityIndicator size="small" color="#ffffff" />
+                      ) : (
+                        <Text style={styles.ordernowText}>PLACE ORDER</Text>
+                      )}
                     </TouchableOpacity>
                   </View>
                 </View>

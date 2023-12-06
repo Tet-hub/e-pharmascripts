@@ -45,7 +45,7 @@ const Signup = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [errorText, setErrorText] = useState("");
-
+  const [btnLoading, setBtnLoading] = useState(false);
   //HANDLE INPUTS
   const showToast = (message) => {
     ToastAndroid.show(message, ToastAndroid.SHORT);
@@ -85,11 +85,13 @@ const Signup = ({ navigation }) => {
     setConfirmPassword(text);
   };
   const handleRegister = async () => {
+    setBtnLoading(true);
     if (firstName.trim() === "") {
       setErrorText("Please fill in first name");
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     if (lastName.trim() === "") {
@@ -97,6 +99,7 @@ const Signup = ({ navigation }) => {
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     if (!isValidEmail(email)) {
@@ -104,6 +107,7 @@ const Signup = ({ navigation }) => {
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     if (email.trim() === "") {
@@ -111,6 +115,7 @@ const Signup = ({ navigation }) => {
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     if (phone.trim() === "") {
@@ -119,12 +124,14 @@ const Signup = ({ navigation }) => {
         setErrorText("");
       }, 5000);
       return;
+      setBtnLoading(false);
     }
     if (password.trim() === "") {
       setErrorText("Please fill in password");
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     if (!selectedAddress || selectedAddress.description.trim() === "") {
@@ -146,6 +153,7 @@ const Signup = ({ navigation }) => {
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     if (!isChecked) {
@@ -153,6 +161,7 @@ const Signup = ({ navigation }) => {
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
     const querySnapshot = await getDocs(
@@ -164,6 +173,7 @@ const Signup = ({ navigation }) => {
       setTimeout(() => {
         setErrorText("");
       }, 5000);
+      setBtnLoading(false);
       return;
     }
 
@@ -193,17 +203,21 @@ const Signup = ({ navigation }) => {
 
       // Attempt to set the document
       await setDoc(userDocRef, userData);
-
+      setBtnLoading(false);
       showToast("Registration successful");
+      navigation.navigate("Login");
     } catch (error) {
       //console.error("Error creating user:", error);
-
+      setBtnLoading(false);
       if (error.code === "auth/weak-password") {
         setErrorText("Password should be at least 6 characters");
+        setBtnLoading(false);
       } else if (error.code === "auth/email-already-in-use") {
         setErrorText("Email already exists");
+        setBtnLoading(false);
       } else {
         setErrorText("Registration failed. Please try again later.");
+        setBtnLoading(false);
       }
 
       setTimeout(() => {
@@ -353,8 +367,13 @@ const Signup = ({ navigation }) => {
           activeOpacity={0.6}
           style={styles.registerTO}
           onPress={handleRegister}
+          disabled={btnLoading}
         >
-          <Text style={styles.registerText}>Register</Text>
+          {btnLoading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.registerText}>Register</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.loginView}>

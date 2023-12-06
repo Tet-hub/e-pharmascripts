@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import styles from "../Rate/stylesheet";
@@ -45,6 +46,8 @@ const RateScreen = () => {
   const [customerId, setCustomerId] = useState(null);
   const [email, setEmail] = useState(null);
   const [averageRating, setAverageRating] = useState(0);
+  const [btnLoading, setBtnLoading] = useState(false);
+
   console.log("sdf: ", customerId);
 
   const handleStarPress = (selectedRating, type) => {
@@ -147,6 +150,7 @@ const RateScreen = () => {
 
   //
   const submitRatingReview = async () => {
+    setBtnLoading(true);
     try {
       const rateAndReviewRef = doc(db, "rateAndReview", orderId);
 
@@ -161,9 +165,11 @@ const RateScreen = () => {
 
       await setDoc(rateAndReviewRef, data);
       ToastAndroid.show("Successfully rated", ToastAndroid.SHORT);
+      setBtnLoading(false);
       navigation.goBack();
     } catch (error) {
       console.error("Error submitting rating and review: ", error);
+      setBtnLoading(false);
     }
   };
 
@@ -250,8 +256,13 @@ const RateScreen = () => {
           <TouchableOpacity
             style={styles.submitContainer}
             onPress={submitRatingReview}
+            disabled={btnLoading}
           >
-            <Text style={styles.submitText}>SUBMIT</Text>
+            {btnLoading ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text style={styles.submitText}>SUBMIT</Text>
+            )}
           </TouchableOpacity>
         )}
       </View>

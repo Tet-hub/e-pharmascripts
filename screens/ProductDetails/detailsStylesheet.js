@@ -35,10 +35,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "92%",
+  },
+  heartIcon: {
+    justifyContent: "flex-end",
+    marginRight: -20,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   productNameText: {
     fontWeight: 600,
     fontSize: 20,
+    marginRight: 20,
   },
   productReq: {
     fontWeight: 400,
