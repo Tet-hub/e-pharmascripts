@@ -37,6 +37,8 @@ const BranchDetailsScreen = () => {
   const [timeClose, setTimeClose] = useState("");
   const [timeOpen, setTimeOpen] = useState("");
   const [pharmacyRating, setPharmacyRating] = useState(0);
+  const [currentSellerId, setSellerId] = useState(null);
+  const [currentSellerDisplayName, setSellerDisplayName] = useState("");
   //rater
   const [raterFirstName, setRaterFirstName] = useState("");
   const [raterImg, setRaterImage] = useState(null);
@@ -128,6 +130,8 @@ const BranchDetailsScreen = () => {
 
         if (sellerSnapshot.exists()) {
           const sellerInfo = sellerSnapshot.data();
+          setSellerId(sellerInfo.sellerId);
+          setSellerDisplayName(sellerInfo.displayName);
           setCompanyName(sellerInfo.companyName);
           setAddress(sellerInfo.formattedAddress);
           setBranch(sellerInfo.branch);
@@ -225,13 +229,28 @@ const BranchDetailsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.screenTitle}>Branch Info</Text>
+      <View style={styles.topContainer}>
+        <Text style={styles.screenTitle}>Branch Info</Text>
+        <TouchableOpacity
+          style={styles.messageView}
+          onPress={() =>
+            navigation.navigate("ChatScreen", {
+              name: currentSellerDisplayName,
+              img: img,
+              sellerId: currentSellerId,
+              sellerBranch: branch,
+            })
+          }
+        >
+          <Iconify icon="tabler:message" size={35} color="#EC6F56" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.line} />
 
       <View style={{ width: "90%", alignSelf: "center", paddingBottom: 20 }}>
         <View style={styles.imgPharmacyNameView}>
           <View style={styles.pharmacyImageContainer}>
-            {img ? ( // Check if sellerData has an img property
+            {img ? (
               <Image
                 source={{ uri: img }}
                 style={{ width: "100%", height: "100%" }}
@@ -276,9 +295,7 @@ const BranchDetailsScreen = () => {
           </View>
         </View>
 
-        <View style={styles.pharmacyDetailsView}>
-          <Text style={styles.pharmacyDetailsText}>Pharmacy Details</Text>
-        </View>
+        <Text style={styles.pharmacyDetailsText}>Pharmacy Details :</Text>
         <View>
           <View style={styles.pharmacyView}>
             <Iconify

@@ -1,9 +1,9 @@
 import { View, Text, Image } from "react-native";
 import React from "react";
-import styles from "./termsCon";
+import styles from "./terms";
 import { ScrollView } from "react-native-gesture-handler";
 
-const TermsConditions = () => {
+const TermsAndConditionsScreen = () => {
   return (
     <ScrollView
       style={styles.container}
@@ -173,4 +173,4 @@ const TermsConditions = () => {
   );
 };
 
-export default TermsConditions;
+export default TermsAndConditionsScreen;

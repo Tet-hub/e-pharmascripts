@@ -88,8 +88,9 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginLeft: 5,
     color: "#333",
-    fontWeight: "500",
+    fontWeight: "600",
     fontSize: 10,
+    marginBottom: 2,
   },
   ratingsRowDiv: {
     flexDirection: "row",

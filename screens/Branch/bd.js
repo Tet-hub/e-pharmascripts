@@ -12,14 +12,13 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 18,
     fontWeight: 600,
-    marginTop: 20,
     marginLeft: 20,
   },
   line: {
     height: 0.5,
     width: "90%",
     backgroundColor: "#8E8E8E",
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 5,
     marginLeft: 20,
   },
@@ -56,23 +55,24 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
   },
-  pharmacyDetailsText: {
-    color: "white",
-    fontWeight: 500,
-    fontSize: 12,
-    textAlign: "center",
-    padding: 15,
+  topContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 15,
+    marginRight: 20,
   },
-  pharmacyDetailsView: {
-    width: "40%",
-    borderRadius: 20,
-    backgroundColor: "black",
-    marginTop: 25,
+  pharmacyDetailsText: {
+    color: "black",
+    fontWeight: 600,
+    fontSize: 15,
+    marginTop: 20,
+    marginLeft: 5,
   },
   pharmacyView: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 15,
   },
   pharmacyText: {
     fontSize: 14,
@@ -127,8 +127,10 @@ const styles = StyleSheet.create({
   ratingsStarView: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 40,
+    marginTop: 30,
+    paddingBottom: 10,
   },
+  messageView: {},
   averageStar: {
     marginLeft: 5,
     fontSize: 13,

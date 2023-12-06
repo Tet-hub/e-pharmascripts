@@ -46,6 +46,9 @@ import ChangePasswordScreen from "../screens/Account/ChangePasswordScreen";
 import ChangeEmailScreen from "../screens/Account/ChangeEmailScreen";
 import VerifyEmailScreen from "../screens/Account/VerifyEmailScreen";
 import ReportIssueScreen from "../screens/Settings/ReportIssueScreen";
+import CommunityRulesScreen from "../screens/Settings/CommunityRulesScreen";
+import AboutScreen from "../screens/Settings/AboutScreen";
+import TermsAndConditionsScreen from "../screens/Settings/TermsAndConditionsScreen";
 
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
@@ -388,6 +391,30 @@ const RootStack = () => {
           <Stack.Screen
             name="ReportIssueScreen"
             component={ReportIssueScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="CommunityRulesScreen"
+            component={CommunityRulesScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="AboutScreen"
+            component={AboutScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="TermsAndConditionsScreen"
+            component={TermsAndConditionsScreen}
             options={{
               headerTitle: () => <View></View>,
               headerTintColor: "black",
