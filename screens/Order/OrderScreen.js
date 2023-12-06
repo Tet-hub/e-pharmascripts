@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import OrderSwitchTabs from "../../components/OrderSwitchTabs";
@@ -55,6 +56,7 @@ const OrderScreen = ({ route }) => {
   const [orderLength, setOrderLength] = useState(true);
   const [customerName, setCustomerName] = useState(null);
   const [outerLoading, setOuterLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const isFocused = useIsFocused();
 
   const onSelectSwitch = (value) => {
@@ -217,7 +219,17 @@ const OrderScreen = ({ route }) => {
       setLoading(false);
     }
   };
+  const onRefresh = async () => {
+    setRefreshing(true); // Set refreshing to true to display the loading indicator
 
+    try {
+      await fetchOrdersRealTime(); // Call the function responsible for fetching orders
+    } catch (error) {
+      console.log("Error while refreshing orders:", error);
+    } finally {
+      setRefreshing(false); // Set refreshing back to false once the refresh is completed
+    }
+  };
   // Use fetchOrdersRealTime in the initial useEffect
   useEffect(() => {
     fetchOrdersRealTime();
@@ -323,6 +335,8 @@ const OrderScreen = ({ route }) => {
         orderData={orderData}
         filteredProductData={filteredProductData}
         handleViewOrderScreen={handleViewOrderScreen}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
 
       <ValidatedOrderList
@@ -331,6 +345,8 @@ const OrderScreen = ({ route }) => {
         orderData={orderData}
         filteredProductData={filteredProductData}
         handlePlaceOrderScreen={handlePlaceOrderScreen}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
 
       <ToReceiveOrderList
@@ -339,6 +355,8 @@ const OrderScreen = ({ route }) => {
         orderData={orderData}
         filteredProductData={filteredProductData}
         handleOrderPlacedScreen={handleOrderPlacedScreen}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
 
       <CancelledOrderList
@@ -347,6 +365,8 @@ const OrderScreen = ({ route }) => {
         orderData={orderData}
         filteredProductData={filteredProductData}
         handleViewCancelledOrders={handleViewCancelledOrders}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
 
       <CompletedOrderList
@@ -356,6 +376,8 @@ const OrderScreen = ({ route }) => {
         filteredProductData={filteredProductData}
         handleOrderPlacedScreen={handleOrderPlacedScreen}
         handleRateScreen={handleRateScreen}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
       <TouchableOpacity
         style={styles.homeButton}

@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -31,6 +32,8 @@ const CompletedOrderList = ({
   filteredProductData,
   handleOrderPlacedScreen,
   handleRateScreen,
+  refreshing,
+  onRefresh,
 }) => {
   return (
     trackerTab === 5 && (
@@ -55,6 +58,13 @@ const CompletedOrderList = ({
           <FlatList
             showsVerticalScrollIndicator={false}
             data={orderData}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                scrollEnabled={false}
+              />
+            }
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               if (
