@@ -141,11 +141,7 @@ const HomeScreen = () => {
     return (
       <TouchableOpacity
         style={styles.searchButtonIcon}
-        onPress={() => {
-          if (searchKeyword.trim() !== "") {
-            handleSearchProducts();
-          }
-        }}
+        onPress={handlePressAddress}
       >
         <Iconify icon="iconoir:search" size={22} color="gray" />
       </TouchableOpacity>

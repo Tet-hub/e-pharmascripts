@@ -78,7 +78,7 @@ const BranchesScreen = ({ navigation, route }) => {
       setIsLoading(true);
       const Branches6KM = [];
       const dbSeller = collection(db, "sellers");
-      const ratingsRef = collection(db, "rateAndReview"); // Reference to ratings collection
+      const ratingsRef = collection(db, "rateAndReview");
 
       const activeSellersSnapshot = await getDocs(
         query(
@@ -165,7 +165,7 @@ const BranchesScreen = ({ navigation, route }) => {
       }
 
       if (shouldLog) {
-        // console.log("Branches within 6km:", Branches6KM);
+        Branches6KM.sort((a, b) => b.averageRating - a.averageRating);
         setBranches(Branches6KM);
         setIsLoading(false);
       }
@@ -202,23 +202,7 @@ const BranchesScreen = ({ navigation, route }) => {
       const sortedBranchesWithDistances = branchesWithDistances.concat(
         branchesCopy.filter((branch) => branch.distance === undefined)
       );
-
       setSortedBranches(sortedBranchesWithDistances);
-    } else {
-      branchesCopy.sort((a, b) => {
-        const ratingA = parseFloat(a.averageRating);
-        const ratingB = parseFloat(b.averageRating);
-
-        if (ratingA > ratingB) {
-          return -1;
-        } else if (ratingA < ratingB) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
-
-      setSortedBranches(branchesCopy);
     }
     setShowModal(false);
   };

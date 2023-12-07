@@ -132,154 +132,119 @@ export default function NotificationScreen() {
     if (loading) {
       return <ActivityIndicator size="large" color="#EC6F56" />;
     }
-    if (notifications.length > 0) {
-      return notifications.map((notification, index) => (
-        <View key={index} style={{ flexDirection: "row" }}>
-          {showCheckboxes && (
-            <CheckBox
-              checked={selectedNotifications.includes(notification.id)}
-              onPress={() => {
-                setSelectedNotifications((oldSelectedNotifications) => {
-                  if (oldSelectedNotifications.includes(notification.id)) {
-                    return oldSelectedNotifications.filter(
-                      (id) => id !== notification.id
-                    );
-                  } else {
-                    return [...oldSelectedNotifications, notification.id];
-                  }
-                });
-              }}
-            />
-          )}
-          <TouchableOpacity
-            style={[
-              styles.notificationContainer,
-              { backgroundColor: notification.read ? "white" : "#f8f8f8" },
-            ]}
-            onLongPress={() => {
-              if (showCheckboxes) {
-                setSelectedNotifications([]);
-                setShowCheckboxes(false);
-              } else {
-                setShowCheckboxes(true);
-              }
-            }}
-            onPress={async () => {
-              switch (notification.title) {
-                case "Account Verified":
-                  navigation.navigate("ProfileScreen");
-                  break;
-                case "Account Rejected":
-                  navigation.navigate("ProfileScreen");
-                  break;
-                case "Order Processing":
-                  navigation.navigate("OrderScreen", { tabIndex: 3 });
-                  break;
-                case "Order Out for Delivery":
-                  navigation.navigate("OrderScreen", { tabIndex: 3 });
-                  break;
-                case "Order Delivered":
-                  navigation.navigate("OrderScreen", { tabIndex: 5 });
-                  break;
-                case "Order Validated":
-                  navigation.navigate("OrderScreen", { tabIndex: 2 });
-                  break;
-                case "Order Cancelled":
-                  navigation.navigate("OrderScreen", { tabIndex: 4 });
-                  break;
-                default:
-                  break;
-              }
-              await updateDoc(doc(db, "notifications", notification.id), {
-                read: true,
+    return notifications.map((notification, index) => (
+      <View key={index} style={{ flexDirection: "row", alignItems: "center" }}>
+        {showCheckboxes && (
+          <CheckBox
+            checked={selectedNotifications.includes(notification.id)}
+            onPress={() => {
+              setSelectedNotifications((oldSelectedNotifications) => {
+                if (oldSelectedNotifications.includes(notification.id)) {
+                  return oldSelectedNotifications.filter(
+                    (id) => id !== notification.id
+                  );
+                } else {
+                  return [...oldSelectedNotifications, notification.id];
+                }
               });
             }}
-          >
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <Image
-                  source={
-                    notification.title === "Order Processing"
-                      ? imagePath.processing
-                      : notification.title === "Order Out for Delivery"
-                      ? imagePath.delivering
-                      : notification.title === "Order Delivered"
-                      ? imagePath.delivered
-                      : notification.title === "Order Validated"
-                      ? imagePath.validated
-                      : notification.title === "Order Cancelled"
-                      ? imagePath.cancelled
-                      : notification.title === "Account Verified"
-                      ? imagePath.verified
-                      : notification.title === "Account Rejected"
-                      ? imagePath.rejected
-                      : imagePath.defaultImg
-                  }
-                  style={{ width: 70, height: 70, marginRight: 20 }}
-                />
-              </View>
-              <View>
-                <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-                  {notification && notification.title}
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: "300",
-                    fontSize: 14,
-                    marginLeft: 5,
-                    marginTop: 5,
-                  }}
-                >
-                  {notification && notification.body}
-                </Text>
-              </View>
+            checkedColor="#EC6F56"
+            containerStyle={{ marginBottom: 35, marginRight: -10 }}
+          />
+        )}
+        <TouchableOpacity
+          style={[
+            styles.notificationContainer,
+            { backgroundColor: notification.read ? "white" : "#f8f8f8" },
+          ]}
+          onLongPress={() => {
+            if (showCheckboxes) {
+              setSelectedNotifications([]);
+              setShowCheckboxes(false);
+            } else {
+              setShowCheckboxes(true);
+            }
+          }}
+          onPress={async () => {
+            switch (notification.title) {
+              case "Account Verified":
+                navigation.navigate("ProfileScreen");
+                break;
+              case "Account Rejected":
+                navigation.navigate("ProfileScreen");
+                break;
+              case "Order Processing":
+                navigation.navigate("OrderScreen", { tabIndex: 3 });
+                break;
+              case "Order Out for Delivery":
+                navigation.navigate("OrderScreen", { tabIndex: 3 });
+                break;
+              case "Order Delivered":
+                navigation.navigate("OrderScreen", { tabIndex: 5 });
+                break;
+              case "Order Validated":
+                navigation.navigate("OrderScreen", { tabIndex: 2 });
+                break;
+              case "Order Cancelled":
+                navigation.navigate("OrderScreen", { tabIndex: 4 });
+                break;
+              default:
+                break;
+            }
+            await updateDoc(doc(db, "notifications", notification.id), {
+              read: true,
+            });
+          }}
+        >
+          <View style={{ flexDirection: "row" }}>
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+              <Image
+                source={
+                  notification.title === "Order Processing"
+                    ? imagePath.processing
+                    : notification.title === "Order Out for Delivery"
+                    ? imagePath.delivering
+                    : notification.title === "Order Delivered"
+                    ? imagePath.delivered
+                    : notification.title === "Order Validated"
+                    ? imagePath.validated
+                    : notification.title === "Order Cancelled"
+                    ? imagePath.cancelled
+                    : notification.title === "Account Verified"
+                    ? imagePath.verified
+                    : notification.title === "Account Rejected"
+                    ? imagePath.rejected
+                    : imagePath.defaultImg
+                }
+                style={{ width: 45, height: 45, marginRight: 15 }}
+              />
             </View>
-            <Divider
-              width={0.5}
-              orientation="horizontal"
-              style={{ paddingTop: 20, borderColor: "#8E8E8E" }}
-            />
-          </TouchableOpacity>
-        </View>
-      ));
-    } else {
-      return (
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "300",
-              padding: 15,
-              paddingLeft: 10,
-              color: "#4E4E4E",
-            }}
-          >
-            Empty Notification
-          </Text>
-        </View>
-      );
-    }
+            <View style={{ width: "85%" }}>
+              <Text style={{ fontWeight: "500", fontSize: 15 }}>
+                {notification && notification.title}
+              </Text>
+              <Text
+                style={{
+                  fontWeight: "300",
+                  fontSize: 14,
+                  marginTop: 5,
+                }}
+              >
+                {notification && notification.body}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.line2} />
+        </TouchableOpacity>
+      </View>
+    ));
   };
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.text}>Notifications</Text>
-        <Divider
-          width={0.5}
-          orientation="horizontal"
-          style={{ paddingTop: 20, borderColor: "#8E8E8E" }}
-        />
-        <Text
-          style={{
-            fontSize: 15,
-            fontWeight: "300",
-            padding: 20,
-            paddingLeft: 10,
-          }}
-        >
-          Today
-        </Text>
+        <View style={styles.line} />
         <View
           style={[
             styles.buttonContainer,
@@ -336,7 +301,7 @@ export default function NotificationScreen() {
                 <Iconify
                   icon="material-symbols:delete"
                   size={30}
-                  color={"red"}
+                  color={"#DC3642"}
                 />
               )}
             </TouchableOpacity>
@@ -352,7 +317,20 @@ export default function NotificationScreen() {
             </TouchableOpacity>
           )}
         </View>
-        <Text>{renderNotifications()}</Text>
+        {notifications.length > 0 ? (
+          <View>{renderNotifications()}</View>
+        ) : (
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 18,
+              color: "#8E8E8E",
+              marginVertical: "50%",
+            }}
+          >
+            Empty Notifications
+          </Text>
+        )}
       </ScrollView>
       {notifications.length > 0 ? (
         <TouchableOpacity
@@ -468,9 +446,9 @@ export const registerForPushNotificationsAsync = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
-    borderTopRightRadius: 40,
-    borderTopLeftRadius: 40,
+    padding: 20,
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
     backgroundColor: "white",
   },
 
@@ -483,9 +461,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f8f8",
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 5,
     height: "auto",
-    width: 320,
+    width: "100%",
   },
 
   readButton: {
@@ -493,20 +471,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#EC6F56",
     width: 335,
-    height: 59,
+    height: 55,
     borderRadius: 30,
+    marginLeft: 8,
   },
 
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 10,
   },
 
   selectButton: {
     height: 30,
     width: 100,
-    backgroundColor: "#2196F3",
+    backgroundColor: "#EC6F56",
     justifyContent: "center",
     alignItems: "center",
+  },
+  line: {
+    height: 0.5,
+    width: "100%",
+    backgroundColor: "#8E8E8E",
+    marginTop: 20,
+  },
+  line2: {
+    height: 0.3,
+    width: "120%",
+    backgroundColor: "#8E8E8E",
+    marginTop: 20,
+    marginBottom: 5,
+    marginLeft: -5,
   },
 });

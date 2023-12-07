@@ -274,6 +274,7 @@ const UpdateDiaryMaintenance = () => {
   };
 
   const handleUpdateButtonPress = () => {
+    const { medicineStock } = diaryMaintenanceData;
     if (
       !diaryMaintenanceData.reminderName ||
       !diaryMaintenanceData.reminderDescription ||
@@ -282,6 +283,8 @@ const UpdateDiaryMaintenance = () => {
       !diaryMaintenanceData.medicineStock
     ) {
       ToastAndroid.show("All fields are required.", ToastAndroid.LONG);
+    } else if (parseInt(medicineStock) <= 0) {
+      ToastAndroid.show("Stocks should not be 0.", ToastAndroid.LONG);
     } else {
       updateDiary();
     }

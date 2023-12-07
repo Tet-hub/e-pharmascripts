@@ -30,6 +30,9 @@ const SettingsScreen = () => {
   const handleTerms = () => {
     navigation.navigate("TermsAndConditionsScreen");
   };
+  const handlePolicies = () => {
+    navigation.navigate("PoliciesScreen");
+  };
 
   return (
     <View style={styles.container}>
@@ -72,6 +75,19 @@ const SettingsScreen = () => {
         <TouchableOpacity onPress={handleTerms}>
           <View style={styles.touchableCont}>
             <Text style={styles.touchableText}>Terms & Conditions</Text>
+            <View style={styles.arrowIcon}>
+              <Iconify
+                icon="iconoir:nav-arrow-right"
+                size={22}
+                color="#3A3A3A"
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handlePolicies}>
+          <View style={styles.touchableCont}>
+            <Text style={styles.touchableText}>E-PharmaScripts Policies</Text>
             <View style={styles.arrowIcon}>
               <Iconify
                 icon="iconoir:nav-arrow-right"
