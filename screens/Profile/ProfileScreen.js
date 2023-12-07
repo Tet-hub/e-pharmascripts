@@ -43,6 +43,7 @@ const ProfileScreen = () => {
             if (doc.exists()) {
               const data = doc.data();
               setUser(data);
+              setLoading(false);
 
               if (data.profileImage) {
                 setProfileImage(data.profileImage);
@@ -57,7 +58,6 @@ const ProfileScreen = () => {
         }
       } catch (error) {
         console.log("Error fetching user data:", error);
-      } finally {
         setLoading(false);
       }
     };
@@ -150,7 +150,7 @@ const ProfileScreen = () => {
             )}
           </View>
           <View style={styles.nameGmailButton}>
-            {user && !isLoading ? (
+            {user ? (
               <>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   {fetchedStatus === "Verified" && (
@@ -175,10 +175,10 @@ const ProfileScreen = () => {
               <Text>User data not available</Text>
             )}
             <View style={styles.statusView}>
-              {fetchedStatus !== "Verified" && (
-                <Text style={styles.statusText}>
-                  {fetchedStatus ? fetchedStatus : "Unverified"}
-                </Text>
+              {fetchedStatus !== "Verified" ? (
+                <Text style={styles.statusText}>{fetchedStatus}</Text>
+              ) : (
+                ""
               )}
             </View>
             <TouchableOpacity onPress={handleEditProfileScreen}>

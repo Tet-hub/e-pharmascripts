@@ -6,6 +6,7 @@ import {
   Dimensions,
   FlatList,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Iconify } from "react-native-iconify";
@@ -31,8 +32,10 @@ const FavoritesScreen = ({ navigation, route }) => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [userFavorites, setUserFavorites] = useState([]);
   const [productData, setProductData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     const FetchFavorites = async () => {
       const authToken = await getAuthToken();
       const userId = authToken.userId;
@@ -56,6 +59,7 @@ const FavoritesScreen = ({ navigation, route }) => {
           onSnapshot(productQuery, (productSnapshot) => {
             const productData = productSnapshot.docs.map((doc) => doc.data());
             setProductData(productData);
+            setLoading(false);
           });
           2;
         }
@@ -204,16 +208,22 @@ const FavoritesScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.screenTitle}>Favorites</Text>
       <View style={styles.line} />
-      {productData.length === 0 ? (
-        <Text style={styles.noFavoritesText}>No products added</Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#EC6F56" />
+        </View>
       ) : (
         <View style={styles.cardContainer}>
-          <FlatList
-            data={productData}
-            renderItem={renderItem}
-            numColumns={2}
-            keyExtractor={(item) => item.productId}
-          />
+          {productData.length === 0 ? (
+            <Text style={styles.noFavoritesText}>No products added</Text>
+          ) : (
+            <FlatList
+              data={productData}
+              renderItem={renderItem}
+              numColumns={2}
+              keyExtractor={(item) => item.productId}
+            />
+          )}
         </View>
       )}
     </View>
