@@ -156,17 +156,19 @@ const BranchesScreen = ({ navigation, route }) => {
             }
           } else {
             console.error("Invalid distance data received:", data);
+            setIsLoading(false);
           }
         } catch (error) {
           console.error("Error fetching distance:", error);
+          setIsLoading(false);
         }
       }
 
       if (shouldLog) {
         // console.log("Branches within 6km:", Branches6KM);
         setBranches(Branches6KM);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchBranches();
   }, [branchCompany, customerAddress]);

@@ -109,6 +109,14 @@ const styles = StyleSheet.create({
     color: "#8E8E8E",
     marginTop: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: "50%",
+
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+  },
 });
 
 export default styles;
