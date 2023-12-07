@@ -47,7 +47,7 @@ const RateScreen = () => {
   const [email, setEmail] = useState(null);
   const [averageRating, setAverageRating] = useState(0);
   const [btnLoading, setBtnLoading] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   console.log("sdf: ", customerId);
 
   const handleStarPress = (selectedRating, type) => {
@@ -96,7 +96,6 @@ const RateScreen = () => {
           }
         }
       };
-
       fetchOrderData();
     }
   }, [orderId, customerId]);
@@ -140,8 +139,10 @@ const RateScreen = () => {
             setIsRated(true);
           }
         }
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching user rating and review: ", error);
+        setLoading(false);
       }
     };
 
@@ -188,9 +189,12 @@ const RateScreen = () => {
         const data = doc.data();
         pharmacyRatings.push(data.pharmacyRating);
       });
+      setLoading(false);
+
       //console.log("Pharmacy Ratings:", pharmacyRatings);
     } catch (error) {
       console.error("Error fetching pharmacy ratings:", error);
+      setLoading(false);
     }
   };
 
@@ -202,70 +206,76 @@ const RateScreen = () => {
   console.log("ProductName:", productName);
   return (
     <View style={[styles.container, { height: deviceHeight - 55 }]}>
-      <View style={styles.containerRate}>
-        <Text style={styles.pharmacyBranch}>{pharmacyBranch}</Text>
-        <Text style={styles.rateInstruction}>
-          Give an overall rating of your experience
-        </Text>
-        <View style={styles.separator} />
-
-        <View style={styles.starContainer}>
-          <Text style={styles.rateText}>Rate pharmacy:</Text>
-          <View style={styles.starRating}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <TouchableOpacity
-                key={star}
-                onPress={() => handleStarPress(star, "pharmacy")}
-                style={styles.star}
-                disabled={isRated}
-              >
-                <Icon
-                  name="star"
-                  size={25}
-                  color={star <= pharmacyRating ? "#FAC63E" : "grey"}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#EC6F56" />
         </View>
+      ) : (
+        <View style={styles.containerRate}>
+          <Text style={styles.pharmacyBranch}>{pharmacyBranch}</Text>
+          <Text style={styles.rateInstruction}>
+            Give an overall rating of your experience
+          </Text>
+          <View style={styles.separator} />
 
-        <View style={styles.reviewView}>
-          <Text style={styles.reviewText}>Review</Text>
-          <View style={styles.reviewInputView}>
-            <View style={styles.inputReview}>
-              <TextInput
-                placeholder="Describe your experience (optional)"
-                maxLength={150}
-                multiline
-                style={[isRated ? styles.disabledTextInput : null]}
-                value={reviewDescription}
-                editable={!isRated}
-                onChangeText={handleReviewChange}
-              />
+          <View style={styles.starContainer}>
+            <Text style={styles.rateText}>Rate pharmacy:</Text>
+            <View style={styles.starRating}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity
+                  key={star}
+                  onPress={() => handleStarPress(star, "pharmacy")}
+                  style={styles.star}
+                  disabled={isRated}
+                >
+                  <Icon
+                    name="star"
+                    size={25}
+                    color={star <= pharmacyRating ? "#FAC63E" : "grey"}
+                  />
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
+
+          <View style={styles.reviewView}>
+            <Text style={styles.reviewText}>Review</Text>
+            <View style={styles.reviewInputView}>
+              <View style={styles.inputReview}>
+                <TextInput
+                  placeholder="Describe your experience (optional)"
+                  maxLength={150}
+                  multiline
+                  style={[isRated ? styles.disabledTextInput : null]}
+                  value={reviewDescription}
+                  editable={!isRated}
+                  onChangeText={handleReviewChange}
+                />
+              </View>
+            </View>
+            {!isRated && (
+              <Text style={styles.countCharactersInput}>
+                {" "}
+                {characterCount}/150
+              </Text>
+            )}
+          </View>
+
           {!isRated && (
-            <Text style={styles.countCharactersInput}>
-              {" "}
-              {characterCount}/150
-            </Text>
+            <TouchableOpacity
+              style={styles.submitContainer}
+              onPress={submitRatingReview}
+              disabled={btnLoading}
+            >
+              {btnLoading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Text style={styles.submitText}>SUBMIT</Text>
+              )}
+            </TouchableOpacity>
           )}
         </View>
-
-        {!isRated && (
-          <TouchableOpacity
-            style={styles.submitContainer}
-            onPress={submitRatingReview}
-            disabled={btnLoading}
-          >
-            {btnLoading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : (
-              <Text style={styles.submitText}>SUBMIT</Text>
-            )}
-          </TouchableOpacity>
-        )}
-      </View>
+      )}
     </View>
   );
 };

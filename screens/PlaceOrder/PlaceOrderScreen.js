@@ -149,7 +149,7 @@ const PlaceOrderScreen = ({ navigation, route }) => {
     }
     Alert.alert(
       "Confirm Order",
-      "Would you like to proceed with placing this order?",
+      "Please ensure that you carefully place your order as it cannot be cancelled after. \n\nWould you like to proceed with placing this order?",
       [
         {
           text: "Cancel",

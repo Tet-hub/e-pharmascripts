@@ -96,6 +96,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: 5,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "rgba(0, 0, 0, 0.1)", // Semi-transparent background
+    height: "100%",
+  },
 });
 
 export default styles;

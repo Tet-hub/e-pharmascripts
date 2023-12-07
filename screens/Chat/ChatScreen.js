@@ -323,11 +323,6 @@ const ChatScreen = ({ route, navigation }) => {
       >
         <View style={styles.inputContainer}>
           <Iconify
-            icon="fluent:emoji-48-regular"
-            size={22}
-            style={styles.icons}
-          />
-          <Iconify
             icon="mdi:image-outline"
             size={22}
             style={styles.icons}

@@ -49,7 +49,6 @@ import ReportIssueScreen from "../screens/Settings/ReportIssueScreen";
 import CommunityRulesScreen from "../screens/Settings/CommunityRulesScreen";
 import AboutScreen from "../screens/Settings/AboutScreen";
 import TermsAndConditionsScreen from "../screens/Settings/TermsAndConditionsScreen";
-
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
   saveButton: {
@@ -76,10 +75,15 @@ const styles = StyleSheet.create({
 const Stack = createStackNavigator();
 
 const RootStack = () => {
+  const DefaultImage = require("../assets/img/default-image.jpg");
+  const navigation = useNavigation();
   useEffect(() => {
     registerForPushNotificationsAsync();
   }, []);
 
+  const handleNavigateToHome = () => {
+    navigation.navigate("HomeScreen");
+  };
   return (
     <TailwindProvider>
       <MessageProvider>
@@ -297,7 +301,6 @@ const RootStack = () => {
             name="ChatScreen"
             component={ChatScreen}
             options={({ route }) => ({
-              title: route.params.sellerBranch,
               headerStyle: {
                 backgroundColor: "#EC6F56",
               },
@@ -307,18 +310,56 @@ const RootStack = () => {
                 fontSize: 18,
               },
               headerTintColor: "white",
-
-              headerRight: () => (
+              headerTitle: () => (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Image
-                    source={{ uri: route.params.img }}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      marginRight: 10,
-                    }}
-                  />
+                  {route.params.img ? (
+                    <>
+                      <Image
+                        source={{ uri: route.params.img }}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          marginRight: 13,
+                          marginLeft: -10,
+                        }}
+                      />
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 18,
+                        }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {route.params.sellerBranch}
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Image
+                        source={DefaultImage}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 20,
+                          marginRight: 13,
+                          marginLeft: -10,
+                        }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      />
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 18,
+                        }}
+                      >
+                        {route.params.sellerBranch}
+                      </Text>
+                    </>
+                  )}
                 </View>
               ),
             })}

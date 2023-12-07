@@ -49,7 +49,8 @@ const FavoritesScreen = ({ navigation, route }) => {
         if (productIds.length > 0) {
           const productQuery = query(
             collection(db, "products"),
-            where("productId", "in", productIds)
+            where("productId", "in", productIds),
+            where("productStatus", "==", "Display")
           );
 
           onSnapshot(productQuery, (productSnapshot) => {

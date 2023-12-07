@@ -42,7 +42,17 @@ const PendingOrderList = ({
             <ActivityIndicator size="large" color="#EC6F56" />
           </View>
         ) : orderData.length === 0 ? (
-          <View style={styles.noOrdersCont}>
+          <ScrollView
+            contentContainerStyle={styles.noOrdersCont}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                scrollEnabled={false}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.noOrders}>
               <Iconify
                 icon="fluent-mdl2:deactivate-orders"
@@ -52,7 +62,7 @@ const PendingOrderList = ({
               />
               <Text>No Orders Yet</Text>
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <FlatList
             showsVerticalScrollIndicator={false}
