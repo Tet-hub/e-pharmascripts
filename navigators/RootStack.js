@@ -49,6 +49,7 @@ import ReportIssueScreen from "../screens/Settings/ReportIssueScreen";
 import CommunityRulesScreen from "../screens/Settings/CommunityRulesScreen";
 import AboutScreen from "../screens/Settings/AboutScreen";
 import TermsAndConditionsScreen from "../screens/Settings/TermsAndConditionsScreen";
+import PoliciesScreen from "../screens/Settings/PoliciesScreen";
 const { tertiary, white, red, bodyGray } = Colors;
 const styles = StyleSheet.create({
   saveButton: {
@@ -456,6 +457,14 @@ const RootStack = () => {
           <Stack.Screen
             name="TermsAndConditionsScreen"
             component={TermsAndConditionsScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="PoliciesScreen"
+            component={PoliciesScreen}
             options={{
               headerTitle: () => <View></View>,
               headerTintColor: "black",

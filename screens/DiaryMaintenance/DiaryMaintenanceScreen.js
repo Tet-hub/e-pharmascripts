@@ -138,8 +138,25 @@ const DiaryMaintenanceScreen = () => {
 
   const handleXButtonPress = (diaryMaintenanceId) => {
     setSelectedDiaryMaintenanceId(diaryMaintenanceId);
-    openDeleteModal();
-    setIsXButtonVisible(false); // Hide the X button when modal is opened
+
+    // Show an alert when 'X' button is pressed
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this diary maintenance?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => handleDeleteConfirm(),
+          style: "destructive",
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const renderXButton = (diaryMaintenanceId) => {

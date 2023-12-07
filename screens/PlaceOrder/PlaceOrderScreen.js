@@ -573,10 +573,6 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                           {"\u20B1"}
                           {item.totalPrice || ""}
                         </Text>
-                        <Text>
-                          or {"\u0024"}
-                          {amountInUSD.toFixed(2)}
-                        </Text>
                       </View>
                     </View>
                   </View>
