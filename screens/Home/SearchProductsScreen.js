@@ -352,7 +352,11 @@ const SearchProductsScreen = ({ navigation }) => {
                       )}
                     </View>
                     <View style={{ width: "52%" }}>
-                      <Text style={styles.productNameText}>
+                      <Text
+                        style={styles.productNameText}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
                         {product.productName}
                       </Text>
                       <Text style={styles.locationTextDisplay}>

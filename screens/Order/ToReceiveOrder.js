@@ -9,7 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -42,7 +42,17 @@ const ToReceiveOrderList = ({
             <ActivityIndicator size="large" color="#EC6F56" />
           </View>
         ) : orderData.length === 0 ? (
-          <View style={styles.noOrdersCont}>
+          <ScrollView
+            contentContainerStyle={styles.noOrdersCont}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                scrollEnabled={false}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.noOrders}>
               <Iconify
                 icon="fluent-mdl2:deactivate-orders"
@@ -52,7 +62,7 @@ const ToReceiveOrderList = ({
               />
               <Text>No Orders Yet</Text>
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <FlatList
             showsVerticalScrollIndicator={false}

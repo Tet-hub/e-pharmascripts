@@ -178,20 +178,32 @@ const styles = StyleSheet.create({
     width: "100%", // Make the image take the entire container width
     resizeMode: "contain",
   },
-  homeButton: {
-    backgroundColor: "#4CAF50",
-    padding: 10,
-    margin: 10,
-    borderRadius: 5,
+  footer: {
+    flexDirection: "row",
     position: "absolute",
-    bottom: 10,
-    left: 10,
-    right: 10,
+    bottom: 28,
+    left: 0,
+    right: 20,
+    zIndex: 2, // Ensure the footer is on top
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+  },
+  homeButtonCont: {
+    backgroundColor: "white",
+    padding: 15,
+    borderRadius: 50,
+    alignContent: "center",
+    elevation: 9,
+    borderWidth: 1,
+    borderColor: "#EC6F56",
+    alignItems: "center", // Center items horizontally
+    justifyContent: "center", // Center items vertical
   },
   homeButtonText: {
     color: "white",
     textAlign: "center",
     fontWeight: "bold",
+    alignContent: "center",
   },
   loadingContainer: {
     flex: 1,

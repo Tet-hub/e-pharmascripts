@@ -379,12 +379,21 @@ const OrderScreen = ({ route }) => {
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
-      <TouchableOpacity
-        style={styles.homeButton}
-        onPress={handleNavigateToHome}
-      >
-        <Text style={styles.homeButtonText}>Go to Home</Text>
-      </TouchableOpacity>
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.homeButtonCont}
+          onPress={handleNavigateToHome}
+        >
+          <Text style={styles.homeButtonText}>
+            <Iconify
+              icon="ant-design:home-filled"
+              size={35}
+              color="#EC6F56"
+              style={styles.noOrdersIcon}
+            />
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
