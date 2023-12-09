@@ -167,6 +167,12 @@ export default function NotificationScreen() {
           }}
           onPress={async () => {
             switch (notification.title) {
+              case "Message Received":
+                navigation.navigate("HomeScreen", {
+                  screen: "Messages",
+                  params: { screen: "MessageScreen" },
+                });
+                break;
               case "Account Verified":
                 navigation.navigate("ProfileScreen");
                 break;
@@ -214,6 +220,8 @@ export default function NotificationScreen() {
                     ? imagePath.verified
                     : notification.title === "Account Rejected"
                     ? imagePath.rejected
+                    : notification.title === "Message Received"
+                    ? imagePath.message
                     : imagePath.defaultImg
                 }
                 style={{ width: 45, height: 45, marginRight: 15 }}

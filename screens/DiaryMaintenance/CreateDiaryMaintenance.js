@@ -66,10 +66,13 @@ const CreateDiaryMaintenance = () => {
       setShowDatePicker(Platform.OS === "ios"); // Close the picker on iOS
 
       if (selectedDate) {
-        setSelectedReminderTime(selectedDate); // Store the selected alarm time
+        const updatedDate = new Date(selectedDate);
+        updatedDate.setSeconds(0);
+
+        setSelectedReminderTime(updatedDate); // Store the selected alarm time
         setReminderTimes((prevReminderTimes) => [
           ...prevReminderTimes,
-          selectedDate,
+          updatedDate,
         ]);
       }
     }

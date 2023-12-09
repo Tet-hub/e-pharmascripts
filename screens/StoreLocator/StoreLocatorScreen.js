@@ -42,7 +42,32 @@ const screen = Dimensions.get("window");
 const ASPECT_RATIO = screen.width / screen.height;
 const LATITUDE_DELTA = 0.04;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
 
+console.warn = (...args) => {
+  if (
+    args.length > 0 &&
+    typeof args[0] === "string" &&
+    args[0].includes("Possible Unhandled Promise Rejection")
+  ) {
+    console.log("Filtered warning:", args[0]);
+  } else {
+    originalConsoleWarn.apply(console, args);
+  }
+};
+
+console.error = (...args) => {
+  if (
+    args.length > 0 &&
+    typeof args[0] === "string" &&
+    args[0].includes("Error getting current location")
+  ) {
+    console.log("Filtered warning:", args[0]);
+  } else {
+    originalConsoleError.apply(console, args);
+  }
+};
 const StoreLocatorScreen = ({ route }) => {
   const navigation = useNavigation();
   const mapRef = useRef();
@@ -53,6 +78,7 @@ const StoreLocatorScreen = ({ route }) => {
   );
   const [isBottomCardExpanded, setIsBottomCardExpanded] = useState(false);
   const [selectedPharmacyDetails, setSelectedPharmacyDetails] = useState(null);
+
   const onArrowPress = () => {
     const expandedHeight = 500;
     const isExpanded = bottomCardHeight._value === expandedHeight;
@@ -80,13 +106,84 @@ const StoreLocatorScreen = ({ route }) => {
       );
       const data = await response.json();
 
+      const firebaseResponse = await fetchFirebasePharmacies();
+
+      const combinedPharmacies = [...data.results, ...firebaseResponse];
+
       if (data.status === "OK") {
-        setPharmacies(data.results);
+        setPharmacies(combinedPharmacies);
       } else {
         console.error("Failed to fetch pharmacies:", data.status);
       }
     } catch (error) {
       console.error("Error fetching pharmacies:", error);
+    }
+  };
+
+  const fetchFirebasePharmacies = async () => {
+    try {
+      // Fetch data from Firestore "sellers" collection
+      const response = await fetch(
+        "https://firestore.googleapis.com/v1/projects/e-pharmascripts/databases/(default)/documents/sellers"
+      );
+
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch Firestore pharmacies. Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Convert Firestore data to match the structure of the data you get from the Google Places API
+      const firebasePharmacies = await Promise.all(
+        data.documents.map(async (document) => {
+          const seller = document.fields;
+          const address = seller.exactAddress?.stringValue;
+
+          try {
+            // Fetch latitude and longitude from Geocoding API
+            const geocodingResponse = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+                address
+              )}&key=${GOOGLE_MAP_KEY}`
+            );
+
+            const geocodingData = await geocodingResponse.json();
+
+            if (geocodingData.status === "OK") {
+              const location = geocodingData.results[0].geometry.location;
+              const placeId = geocodingData.results[0].place_id;
+
+              return {
+                place_id: placeId,
+                geometry: {
+                  location: {
+                    lat: location.lat,
+                    lng: location.lng,
+                  },
+                },
+                name: seller.branch.stringValue,
+                vicinity: seller.formattedAddress.stringValue,
+                isFirebaseMarker: true,
+              };
+            } else {
+              console.error("Geocoding API failed:", geocodingData.status);
+              return null;
+            }
+          } catch (error) {
+            console.error("Error fetching Geocoding API:", error);
+            return null;
+          }
+        })
+      );
+
+      // Filter out null values (failed geocoding)
+      return firebasePharmacies.filter((pharmacy) => pharmacy !== null);
+    } catch (error) {
+      console.error("Error fetching Firestore pharmacies:", error);
+      return [];
     }
   };
 
@@ -168,29 +265,6 @@ const StoreLocatorScreen = ({ route }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // const onPressLocation = () => {
-  //   navigation.navigate("ChooseLocation", {
-  //     getCordinates: (data) => fetchValue(data),
-  //   });
-  // };
-
-  // const fetchValue = useCallback(
-  //   (data) => {
-  //     console.log("this is data", data);
-
-  //     const fullAddress = data.fullAddress;
-  //     console.log("Full Address: ", fullAddress);
-  //     updateState({
-  //       destinationCords: {
-  //         latitude: data.destinationCords.latitude,
-  //         longitude: data.destinationCords.longitude,
-  //       },
-  //       fullAddress: fullAddress,
-  //     });
-  //   },
-  //   [updateState]
-  // );
-
   const animate = (latitude, longitude) => {
     const newCoordinate = { latitude, longitude };
     if (Platform.OS == "android") {
@@ -220,31 +294,68 @@ const StoreLocatorScreen = ({ route }) => {
 
   const onMarkerLongPress = async (pharmacy) => {
     console.log("Marker long press data:", pharmacy);
-    const { place_id } = pharmacy;
+    if (pharmacy.isFirebaseMarker) {
+      // Handle Firestore marker
+      const { place_id } = pharmacy;
+      const { lat, lng } = pharmacy.geometry.location;
+      const fullAddress = pharmacy.vicinity; // Assuming the vicinity contains the address
 
-    const { lat, lng } = pharmacy.geometry.location;
-    const fullAddress = pharmacy.vicinity; // Assuming the vicinity contains the address
-    console.log("Marker coordinates:", lat, lng);
-    console.log("Marker full address:", fullAddress);
+      console.log(fullAddress);
+      try {
+        const detailsResponse = await fetch(
+          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&key=${GOOGLE_MAP_KEY}`
+        );
 
-    try {
-      const detailsResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&key=${GOOGLE_MAP_KEY}`
-      );
+        const detailsData = await detailsResponse.json();
 
-      const detailsData = await detailsResponse.json();
-
-      if (detailsData.status === "OK") {
-        setSelectedPharmacyDetails(detailsData.result);
-      } else {
-        console.error("Failed to fetch pharmacy details:", detailsData.status);
+        console.log("WEEEEE", detailsData);
+        if (detailsData.status === "OK") {
+          setSelectedPharmacyDetails(detailsData.result);
+          console.log(setSelectedPharmacyDetails);
+        } else {
+          console.error(
+            "Failed to fetch pharmacy details:",
+            detailsData.status
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching pharmacy details:", error);
       }
-    } catch (error) {
-      console.error("Error fetching pharmacy details:", error);
-    }
 
-    // Set the fetched data as fetchDestinationCords
-    fetchDestinationCords(lat, lng, null, null, fullAddress);
+      // Set the fetched data as fetchDestinationCords
+      fetchDestinationCords(lat, lng, null, null, fullAddress);
+    } else {
+      // Handle Google Places API marker
+      console.log("This marker is from Google Places API");
+      const { place_id } = pharmacy;
+
+      const { lat, lng } = pharmacy.geometry.location;
+      const fullAddress = pharmacy.vicinity; // Assuming the vicinity contains the address
+      console.log("Marker coordinates:", lat, lng);
+      console.log("Marker full address:", fullAddress);
+
+      try {
+        const detailsResponse = await fetch(
+          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&key=${GOOGLE_MAP_KEY}`
+        );
+
+        const detailsData = await detailsResponse.json();
+
+        if (detailsData.status === "OK") {
+          setSelectedPharmacyDetails(detailsData.result);
+        } else {
+          console.error(
+            "Failed to fetch pharmacy details:",
+            detailsData.status
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching pharmacy details:", error);
+      }
+
+      // Set the fetched data as fetchDestinationCords
+      fetchDestinationCords(lat, lng, null, null, fullAddress);
+    }
   };
 
   const onDirectionsPress = () => {
@@ -271,45 +382,6 @@ const StoreLocatorScreen = ({ route }) => {
     }));
   };
 
-  // const checkValid = () => {
-  //   if (Object.keys(destinationCords).length === 0) {
-  //     showError("Please enter your destination location");
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
-  // const onDone = async () => {
-  //   // Check if the user has selected a location from the suggestions
-  //   const isLocationSelected = Object.keys(destinationCords).length > 0;
-
-  //   // Check if the user has directly entered a place without selecting a suggestion
-  //   const isNewLocationEntered = fullAddress !== "";
-
-  //   if (isLocationSelected || isNewLocationEntered) {
-  //     try {
-  //       // Save destinationCords and fullAddress to AsyncStorage
-  //       const dataToSave = {
-  //         destinationCords: isNewLocationEntered
-  //           ? {} // If directly entered, clear previous destinationCords
-  //           : destinationCords,
-  //         fullAddress: fullAddress || "", // Use an empty string if placeholderText is undefined
-  //       };
-
-  //       // Save to AsyncStorage
-  //       await AsyncStorage.setItem("destinationData", JSON.stringify(dataToSave));
-
-  //       // Go back to the previous screen
-  //       // navigation.goBack();
-  //     } catch (error) {
-  //       console.error("Error saving destinationCords:", error);
-  //     }
-  //   } else {
-  //     // Notify the user that they need to select or enter a location
-  //     showError("Please enter or select your destination location");
-  //   }
-  // };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -323,9 +395,9 @@ const StoreLocatorScreen = ({ route }) => {
             longitudeDelta: LONGITUDE_DELTA,
           }}
         >
-          {pharmacies.map((pharmacy) => (
+          {pharmacies.map((pharmacy, index) => (
             <Marker
-              key={pharmacy.place_id}
+              key={`${pharmacy.place_id}_${index}`}
               coordinate={{
                 latitude: pharmacy.geometry.location.lat,
                 longitude: pharmacy.geometry.location.lng,
@@ -334,7 +406,11 @@ const StoreLocatorScreen = ({ route }) => {
               onPress={() => onMarkerLongPress(pharmacy)}
             >
               <Image
-                source={imagePath.pharmacy}
+                source={
+                  pharmacy.isFirebaseMarker
+                    ? imagePath.pharmacy
+                    : imagePath.icRedMarker
+                }
                 style={{ width: 40, height: 40 }}
               />
             </Marker>
@@ -401,21 +477,11 @@ const StoreLocatorScreen = ({ route }) => {
               fetchAddress={fetchDestinationCords}
             />
           </ScrollView>
-          {/* <View style={styles.button}>
-            <TouchableOpacity onPress={onDone}>
-              <Iconify icon="iconamoon:search-fill" size={25}/>
-            </TouchableOpacity>
-          </View> */}
         </View>
         <View style={styles.buttonHeader}>
           <View style={styles.headerStyle}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Iconify icon="ep:back" size={30} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.button}>
-            <TouchableOpacity>
-              <Iconify icon="ph:x" size={25} />
             </TouchableOpacity>
           </View>
         </View>
@@ -488,6 +554,32 @@ const StoreLocatorScreen = ({ route }) => {
                 ? "Choose New Location"
                 : "Choose your Location"}</Text>
             </TouchableOpacity> */}
+            {/* {selectedPharmacyDatabase && (
+              <View style={{ marginTop: 30 }}>
+                <Text style={styles.pharmacyName}>
+                  {selectedPharmacyDatabase.name}
+                </Text>
+                <View style={{ flexWrap: "wrap", flexDirection: "row" }}>
+                  {selectedPharmacyDatabase.photos &&
+                    selectedPharmacyDatabase.photos.length > 0 && (
+                      <Image
+                        source={{
+                          uri: pharmacy.img.stringValue,
+                        }}
+                        style={{ width: 150, height: 150, marginRight: 10 }}
+                      />
+                    )}
+                  <View>
+                    <Text style={styles.rating}>
+                      Status: {selectedPharmacyDatabase.status.stringValue}
+                    </Text>
+                    <Text style={styles.rating}>
+                      Email:{selectedPharmacyDatabase.email.stringValue}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )} */}
             {selectedPharmacyDetails && (
               <View style={{ marginTop: 30 }}>
                 <Text style={styles.pharmacyName}>

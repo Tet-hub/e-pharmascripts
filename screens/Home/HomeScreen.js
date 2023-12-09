@@ -237,7 +237,7 @@ const HomeScreen = () => {
                 marginRight: 5,
               }}
               scrollEnabled={false} // Disable swiping
-              data={[{ image: adsImage }, { image: cycy }]}
+              data={[{ image: adsImage }]}
               renderItem={({ item }) => (
                 <Image
                   source={item.image}

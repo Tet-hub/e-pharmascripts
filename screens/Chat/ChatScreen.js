@@ -25,6 +25,7 @@ import {
   getDocs,
   where,
   onSnapshot,
+  getDoc,
 } from "firebase/firestore";
 import { db, storage } from "../../firebase/firebase";
 import {
@@ -35,6 +36,8 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { getDownloadURL, uploadBytes, ref } from "@firebase/storage";
 import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
+import { BASE_URL2 } from "../../utilities/backendURL";
 
 const ChatScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
@@ -224,6 +227,63 @@ const ChatScreen = ({ route, navigation }) => {
 
       if (imageUri) {
         message.messageImg = imageUri;
+      }
+
+      try {
+        const customerName = message.userFullName;
+        const messageData = message.message;
+        const sellerId = message.sellerId;
+        const custId = message.senderId;
+        const docRef = doc(db, "sellers", sellerId);
+        const docSnapshot = await getDoc(docRef);
+
+        if (docSnapshot.exists()) {
+          const sellerData = docSnapshot.data();
+          console.log(sellerData.fcmToken);
+          const sellerFcmToken = sellerData.fcmToken;
+          if (!sellerFcmToken || sellerFcmToken === "null") {
+            // Save the notification to the 'notifications' collection in Firestore
+            await addDoc(collection(db, "notifications"), {
+              title: "Message Received",
+              body: imageUri
+                ? `${customerName} sent a photo.`
+                : `${customerName}: ${messageData}`,
+              receiverId: sellerId,
+              senderId: custId,
+              read: false,
+              createdAt: serverTimestamp(),
+            });
+          } else if (sellerFcmToken) {
+            try {
+              const response = await axios.post(`${BASE_URL2}/post/sendToFCM`, {
+                title: "Message Received",
+                body: imageUri
+                  ? `${customerName} sent a photo.`
+                  : `${customerName}: ${messageData}`,
+                fcmToken: sellerFcmToken,
+              });
+              console.log("Notification sent to FCM:", response.data);
+            } catch (error) {
+              console.error("Error sending notification:", error);
+            }
+
+            // Save the notification to the 'notifications' collection in Firestore
+            await addDoc(collection(db, "notifications"), {
+              title: "Message Received",
+              body: imageUri
+                ? `${customerName} sent a photo.`
+                : `${customerName}: ${messageData}`,
+              receiverId: sellerId,
+              senderId: custId,
+              read: false,
+              createdAt: serverTimestamp(),
+            });
+          }
+        } else {
+          console.error("Customer not found");
+        }
+      } catch (error) {
+        //
       }
 
       await addDoc(messagesCollection, message);
