@@ -433,7 +433,7 @@ const DiaryMaintenanceScreen = () => {
           const notificationId = await Notifications.scheduleNotificationAsync({
             content: {
               title: "Reminder",
-              body: `Time to take Medicine at `,
+              body: `Time to take your Medicine ${item.reminderName}`,
               sound: true,
               categoryIdentifier: "alarm",
               vibrate: [0, 1000, 500, 1000],

@@ -13,4 +13,5 @@ export default {
   delivered: require("../assets/img/notification/delivered.png"),
   verified: require("../assets/img/notification/alter-verified.png"),
   rejected: require("../assets/img/notification/rejected.png"),
+  message: require("../assets/img/notification/email.png"),
 };

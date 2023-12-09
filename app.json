@@ -14,7 +14,6 @@
     },
     "android": {
       "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": true,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyAPPybZW_L6JP2zzz2t3DMbPPSbs9rSxpc"
@@ -43,7 +42,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "4908418d-b286-4faa-935d-4f712f2f41a9"
+        "projectId": "7819c82d-04ad-444f-8fe3-47bb67856809"
       }
     }
   }
