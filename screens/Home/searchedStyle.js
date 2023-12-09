@@ -102,7 +102,13 @@ const styles = StyleSheet.create({
   },
   locationTextDisplay: {
     fontWeight: 400,
-    fontSize: 9,
+    fontSize: 13,
+    marginTop: 5,
+    color: "#8E8E8E",
+  },
+  addressDisplay: {
+    fontWeight: 400,
+    fontSize: 13,
     marginTop: 5,
     color: "#8E8E8E",
   },
@@ -114,10 +120,10 @@ const styles = StyleSheet.create({
   },
   distanceDisplayText: {
     color: "#DC3642",
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 500,
     fontStyle: "italic",
-    marginTop: 1,
+    marginTop: 5,
   },
   //MODAL
   modalContainer: {

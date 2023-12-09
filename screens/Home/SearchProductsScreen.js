@@ -86,25 +86,6 @@ const SearchProductsScreen = ({ navigation }) => {
       return product.productName.toLowerCase().includes(trimmedSearchKeyword);
     });
 
-    // Apply distance sorting if location button is clicked
-    if (isLocationButtonClicked) {
-      filteredProducts = filteredProducts.sort((a, b) => {
-        return a.distance - b.distance;
-      });
-
-      // Update filtered products to display distance only when location button is clicked
-      filteredProducts = filteredProducts.map((product) => ({
-        ...product,
-        shouldDisplayDistance: true,
-      }));
-    } else {
-      // Update filtered products to not display distance when location button is not clicked
-      filteredProducts = filteredProducts.map((product) => ({
-        ...product,
-        shouldDisplayDistance: false,
-      }));
-    }
-
     setFilteredProducts(filteredProducts);
     setShowModal(false);
   };
@@ -224,8 +205,13 @@ const SearchProductsScreen = ({ navigation }) => {
               productDataArray.push(productDetails);
             }
           });
-          //console.log("Product Data Array:", productDataArray);
-          setDisplayAllProducts(productDataArray);
+          const sortedByDistance = productDataArray
+            .slice()
+            .sort((a, b) => a.distance - b.distance);
+          sortedByDistance.forEach((product) => {
+            product.shouldDisplayDistance = true;
+          });
+          setDisplayAllProducts(sortedByDistance);
           setIsLoading(false);
         }
       } catch (error) {
@@ -359,9 +345,20 @@ const SearchProductsScreen = ({ navigation }) => {
                       >
                         {product.productName}
                       </Text>
-                      <Text style={styles.locationTextDisplay}>
+                      <Text
+                        style={styles.locationTextDisplay}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
                         {product.company}
                         {product.branch ? ` (${product.branch} Branch)` : ""}
+                      </Text>
+                      <Text
+                        style={styles.addressDisplay}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {product.address}
                       </Text>
 
                       {product.shouldDisplayDistance && product.distance && (
@@ -415,36 +412,6 @@ const SearchProductsScreen = ({ navigation }) => {
                       </Picker>
                     </View>
                   </View>
-                  <View style={styles.separator} />
-
-                  <View style={styles.locationView}>
-                    <Text style={styles.locationText}>By Location</Text>
-
-                    <TouchableOpacity
-                      style={{
-                        ...styles.locationTO,
-                        borderColor: isLocationButtonClicked
-                          ? "#EC6F56"
-                          : "#D9D9D9",
-                      }}
-                      onPress={() => {
-                        if (isLowToHighSelected || isHighToLowSelected) {
-                          ToastAndroid.show(
-                            "Select either location or price",
-                            ToastAndroid.SHORT
-                          );
-                          return;
-                        }
-
-                        setLocationButtonClicked(!isLocationButtonClicked);
-                      }}
-                    >
-                      <Text style={styles.searchlocationText}>
-                        Search by location
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
                   <View style={styles.separator} />
 
                   <View style={styles.priceView}>
