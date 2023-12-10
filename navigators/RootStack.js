@@ -46,6 +46,7 @@ import ChangePasswordScreen from "../screens/Account/ChangePasswordScreen";
 import ChangeEmailScreen from "../screens/Account/ChangeEmailScreen";
 import VerifyEmailScreen from "../screens/Account/VerifyEmailScreen";
 import ReportIssueScreen from "../screens/Settings/ReportIssueScreen";
+import TransactionHistoryScreen from "../screens/Order/TransactionHistoryScreen";
 import CommunityRulesScreen from "../screens/Settings/CommunityRulesScreen";
 import AboutScreen from "../screens/Settings/AboutScreen";
 import TermsAndConditionsScreen from "../screens/Settings/TermsAndConditionsScreen";
@@ -465,6 +466,14 @@ const RootStack = () => {
           <Stack.Screen
             name="PoliciesScreen"
             component={PoliciesScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+            }}
+          />
+          <Stack.Screen
+            name="TransactionHistoryScreen"
+            component={TransactionHistoryScreen}
             options={{
               headerTitle: () => <View></View>,
               headerTintColor: "black",
