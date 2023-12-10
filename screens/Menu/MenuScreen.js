@@ -53,6 +53,11 @@ const MenuScreen = () => {
     navigation.navigate("OrderScreen");
   };
 
+  const handleTransactionScreen = () => {
+    // Navigate to my order screen
+    navigation.navigate("TransactionHistoryScreen");
+  };
+
   const handleFavoritesScreen = () => {
     // Navigate to favorites screen
     navigation.navigate("FavoritesScreen");
@@ -132,6 +137,27 @@ const MenuScreen = () => {
                 />
               </View>
               <Text style={styles.viewContText}>My Orders</Text>
+              <View style={styles.arrowIcon}>
+                <Iconify
+                  style={{ marginLeft: 155 }}
+                  icon="iconoir:nav-arrow-right"
+                  size={22}
+                  color="black"
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleTransactionScreen}>
+            <View style={styles.viewCont}>
+              <View style={styles.iconsBG}>
+                <Iconify
+                  icon="grommet-icons:transaction"
+                  size={22}
+                  color="#EC6F56"
+                />
+              </View>
+              <Text style={styles.viewContText}>Transactions</Text>
               <View style={styles.arrowIcon}>
                 <Iconify
                   style={{ marginLeft: 155 }}
