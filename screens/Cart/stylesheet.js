@@ -288,6 +288,21 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginLeft: 15,
   },
+  disabledbuynowView: {
+    flexDirection: "row",
+    backgroundColor: "#D1D1D1",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 15,
+    borderRadius: 30,
+    width: "60%",
+  },
+  disabledBuynowText: {
+    color: "black",
+    fontSize: 14,
+    fontWeight: 700,
+    marginLeft: 5,
+  },
 });
 
 export default styles;

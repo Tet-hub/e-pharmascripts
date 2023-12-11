@@ -64,6 +64,13 @@ const styles = StyleSheet.create({
     marginTop: 3,
     color: "red",
   },
+  separator0: {
+    marginTop: 10,
+    height: 1,
+    width: "90%",
+    backgroundColor: "#D9D9D9",
+    alignSelf: "center",
+  },
   separator: {
     marginTop: 20,
     height: 1,
@@ -307,6 +314,18 @@ const styles = StyleSheet.create({
   },
   xButtonWrapper: {
     marginRight: 15,
+  },
+  orderGroupContainer: {
+    margin: 10,
+    padding: 10,
+    borderWidth: 0.1,
+    borderColor: "rgba(0, 0, 0, 0.02)",
+    elevation: 1,
+  },
+  groupTitle: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 500,
   },
 });
 
