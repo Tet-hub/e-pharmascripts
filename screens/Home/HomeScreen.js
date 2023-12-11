@@ -105,37 +105,6 @@ const HomeScreen = () => {
     navigation.navigate("SearchProductsScreen");
   };
 
-  const handleSearchProducts = async () => {
-    try {
-      const productsCollection = collection(db, "products");
-      const productQuery = query(productsCollection);
-      const productDocs = await getDocs(productQuery);
-
-      const matchedProductIds = [];
-      const searchKeywordTrimmed = searchKeyword.trim().toLowerCase();
-
-      productDocs.forEach((doc) => {
-        const productId = doc.id;
-        const productName = doc.data().productName;
-        const productStatus = doc.data().productStatus;
-
-        if (productStatus === "Display") {
-          const productNameLower = productName.toLowerCase();
-          if (productNameLower.includes(searchKeywordTrimmed)) {
-            matchedProductIds.push(productId);
-          }
-        }
-      });
-
-      navigation.navigate("SearchProductsScreen", {
-        searchKeyword: searchKeywordTrimmed,
-      });
-      setSearchKeyword("");
-    } catch (error) {
-      console.error("Error searching products:", error);
-    }
-  };
-
   //
   const renderSearchIcon = () => {
     return (

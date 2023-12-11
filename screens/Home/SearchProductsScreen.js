@@ -350,8 +350,9 @@ const SearchProductsScreen = ({ navigation }) => {
                         numberOfLines={1}
                         ellipsizeMode="tail"
                       >
-                        {product.company}
-                        {product.branch ? ` (${product.branch} Branch)` : ""}
+                        {product.branch
+                          ? `${product.branch} (${product.company})`
+                          : product.company}
                       </Text>
                       <Text
                         style={styles.addressDisplay}

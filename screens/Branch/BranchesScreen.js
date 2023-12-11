@@ -24,6 +24,7 @@ import {
   getDocs,
   query,
   where,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { GOOGLE_MAPS_API_KEY } from "../../src/api/googleApiKey";
@@ -43,8 +44,6 @@ const BranchesScreen = ({ navigation, route }) => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const apiKey = GOOGLE_MAPS_API_KEY;
-  const [ratingsAndReviews, setRatingsAndReviews] = useState([]);
-  const [aveRating, setAveRating] = useState(0);
   //
   const handleFilterClick = () => {
     setShowModal(true);
@@ -132,6 +131,16 @@ const BranchesScreen = ({ navigation, route }) => {
                   totalRating += rating.pharmacyRating;
                 });
                 const averageRating = totalRating / sellerRatings.length;
+
+                const sellerRef = doc(db, "sellers", branch.sellerId);
+
+                try {
+                  await updateDoc(sellerRef, {
+                    averageRating: averageRating.toFixed(1),
+                  });
+                } catch (error) {
+                  console.error("Error updating seller document:", error);
+                }
                 Branches6KM.push({
                   branchesId: branch.sellerId,
                   distance: distance,
