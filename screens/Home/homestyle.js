@@ -56,8 +56,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 10,
   },
+  ratingsRowDiv: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ratingText: {
+    textAlign: "left",
+    marginLeft: 5,
+    color: "#333",
+    fontWeight: "600",
+    fontSize: 10,
+  },
   pharmacyCard: {
-    height: 205,
+    height: 215,
     borderRadius: 15,
     backgroundColor: "white",
     padding: 8,
