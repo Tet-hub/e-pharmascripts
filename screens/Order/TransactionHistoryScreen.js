@@ -4,13 +4,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Iconify } from 'react-native-iconify'
 import { db } from '../../firebase/firebase';
 import { getCurrentUserId } from '../../src/authToken';
-import { collection, onSnapshot, query, where, serverTimestamp, orderBy} from 'firebase/firestore'
+import { collection, onSnapshot, query, where, serverTimestamp, orderBy, getDocs} from 'firebase/firestore'
 import DropDownPicker from 'react-native-dropdown-picker';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const TransactionHistoryScreen = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
   const [items, setItems] = useState([
     { label: 'All', value: 'all' },
     { label: 'Today', value: 'today' },
@@ -19,11 +19,20 @@ const TransactionHistoryScreen = () => {
   const [people, setPeople] = useState([])
   const inputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true); // New loading state variable
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [modalData, setModalData] = useState([]);
+  const [showAll, setShowAll] = useState(false);
+  const [height, setHeight] = useState(false);
 
+  const toggleShowAll = () => {
+    setShowAll(!showAll);
+    setHeight(!height)
+  };
+
+  const maxLines = showAll ? undefined : 2;
+  const maxHeight = height ? 95 : 40;
   const handleContainerPress = () => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -66,10 +75,15 @@ const TransactionHistoryScreen = () => {
             const currentYear = currentDate.getFullYear();
   
             filteredOrders = filteredOrders.filter((order) => {
-              const orderDate = order.completedAt.toDate();
-              const orderMonth = orderDate.getMonth() + 1;
-              const orderYear = orderDate.getFullYear();
-              return orderMonth === currentMonth && orderYear === currentYear;
+              if (order.completedAt) {
+                const orderDate = order.completedAt.toDate();
+                const orderMonth = orderDate.getMonth() + 1;
+                const orderYear = orderDate.getFullYear();
+                return orderMonth === currentMonth && orderYear === currentYear;
+              }
+          
+              // Handle cases where completedAt is undefined
+              return false;
             });
           } else if (selectedFilter === 'today') {
             const currentDate = new Date();
@@ -78,12 +92,17 @@ const TransactionHistoryScreen = () => {
             const currentDay = currentDate.getDate();
   
             filteredOrders = filteredOrders.filter((order) => {
-              const orderDate = order.completedAt.toDate();
-              const orderYear = orderDate.getFullYear();
-              const orderMonth = orderDate.getMonth() + 1;
-              const orderDay = orderDate.getDate();
-  
-              return orderYear === currentYear && orderMonth === currentMonth && orderDay === currentDay;
+              // Check if order has completedAt property
+              if (order.completedAt) {
+                const orderDate = order.completedAt.toDate();
+                const orderYear = orderDate.getFullYear();
+                const orderMonth = orderDate.getMonth() + 1;
+                const orderDay = orderDate.getDate();
+                return orderYear === currentYear && orderMonth === currentMonth && orderDay === currentDay;
+              }
+
+              // Handle cases where completedAt is undefined
+              return false;
             });
           }
   
@@ -105,32 +124,46 @@ const TransactionHistoryScreen = () => {
       isMounted = false;
     };
   }, [searchQuery, selectedFilter]);
-  
-  
-  
-  
+
   const renderItem = ({ item }) => {
     const completedAt = item.completedAt ? item.completedAt.toDate() : null;
     return (
       <View style={styles.details}>
-        <View style={{marginLeft: 6, flex: 1}}>
-          <Text style={{fontWeight: '700', fontSize: 14, marginBottom: 6}}>{item.branchName}</Text>
-          {/* <Text style={{fontWeight: '300', fontSize: 11, marginBottom: 10}}>Address: {item.deliveryAddress}</Text> */}
-          <Text style={{fontWeight: '300', fontSize: 11,marginBottom: 3, color: "#3C3C3C"}}>Order ID: {item.id.toUpperCase()}</Text>
-
+        <View style={{ marginLeft: 6, flex: 1 }}>
+          <Text style={{ fontWeight: '700', fontSize: 14, marginBottom: 6 }}>{item.branchName}</Text>
+          <Text style={{ fontWeight: '300', fontSize: 11, marginBottom: 3, color: "#3C3C3C" }}>Order ID: {item.id.toUpperCase()}</Text>
         </View>
         <TouchableOpacity
           style={{ justifyContent: 'center', marginRight: 5 }}
-          onPress={() => {
+          onPress={async () => {
             setSelectedItem(item);
-            setModalVisible(true);
+            setSelectedOrderId(item.id); // Set the selected order ID
+
+            // Fetch product list data
+            const productListQuery = query(
+              collection(db, 'productList'),
+              where('orderId', '==', item.id)
+            );
+
+            try {
+              const productListSnapshot = await getDocs(productListQuery);
+              const productListData = [];
+              
+              productListSnapshot.forEach((doc) => {
+                productListData.push({ ...doc.data(), id: doc.id });
+              });
+
+              setModalData(productListData);
+              setModalVisible(true);
+            } catch (error) {
+              console.error("Error fetching product list:", error);
+            }
           }}
         >
           <Iconify icon="mi:options-horizontal" size={30} color={'#3C3C3C'} />
         </TouchableOpacity>
       </View>
-
-    )
+    );
   }
   return (
     <View style={styles.container}>
@@ -207,7 +240,7 @@ const TransactionHistoryScreen = () => {
         />
         
         <Modal visible={isModalVisible} animationType="none" transparent={true}>
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          
             <View style={styles.modalContainer}>
               <View style={styles.modalContent}>
                 {/* Render your selected item details here */}
@@ -220,7 +253,7 @@ const TransactionHistoryScreen = () => {
                     </View> 
                     <Text style={{marginBottom: 25, fontSize: 14, fontWeight: '600', color: '#4e4e4e'}}>{selectedItem.branchName}</Text>
                     <View style={styles.modalDets}>
-                      <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#8E8E8E'}}>status</Text>
+                      <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#8E8E8E'}}>Status</Text>
                       <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#4e4e4e'}}>{selectedItem.status}</Text>
                     </View>
                     <View style={styles.modalDets}>
@@ -242,7 +275,35 @@ const TransactionHistoryScreen = () => {
                       <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#4e4e4e'}}>- {selectedItem.paymentMethod} -</Text>
                     </View>
                     <View style={styles.modalDets}>
-                      <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#8E8E8E'}}>Item Quantity</Text>
+                      <Text style={{ marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#8E8E8E' }}>Product/s</Text>
+                     
+                      <View style={{ width: '48%', paddingBottom: 10, height: maxHeight}}>
+                        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                        {modalData.map((product) => (
+                          <Text key={product.id} style={{ fontSize: 12, fontStyle: 'italic', fontWeight: '500', color: '#4e4e4e', textAlign: 'right' }} numberOfLines={maxLines}>
+                            {product.productName + '\n'}
+                          </Text>
+                        ))}
+                        </ScrollView>
+                        
+                      </View>
+        
+                    </View>
+                    <View style={styles.contentView}>
+                      {modalData.length > 1 && !showAll ? (
+                        <TouchableOpacity onPress={toggleShowAll}>
+                          <Text style={{ marginBottom: 20, color: 'blue' }}>See All...</Text>
+                        </TouchableOpacity>
+                      ) : null}
+                      {showAll && (
+                        <TouchableOpacity onPress={toggleShowAll}>
+                          <Text style={{ marginBottom: 20, color: 'blue' }}>Hide</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    
+                    <View style={styles.modalDets}>
+                      <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#8E8E8E'}}>Quantity</Text>
                       <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#4e4e4e'}}>x{selectedItem.totalQuantity}</Text>
                     </View>
                     <View style={styles.modalDets}>
@@ -254,7 +315,7 @@ const TransactionHistoryScreen = () => {
                       <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#8E8E8E'}}>Rider Contact #.</Text>
                       <Text style={{marginBottom: 20, fontSize: 12, fontWeight: '500', color: '#4e4e4e'}}>{selectedItem.riderPhoneNumber}</Text>
                     </View>
-                    {/* Add more details here */}
+                   
                   </View>
                 )}
                 <TouchableOpacity style={[{backgroundColor: '#DC3642'}, styles.buttons]} onPress={() => setModalVisible(false)}>
@@ -262,7 +323,7 @@ const TransactionHistoryScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          </TouchableWithoutFeedback>
+          
         </Modal>
     </View>
   )
@@ -330,6 +391,10 @@ const styles = StyleSheet.create({
   modalDets: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  contentView: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end'
   },
   input: {
     flex: 1,
