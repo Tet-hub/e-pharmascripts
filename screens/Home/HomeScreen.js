@@ -43,6 +43,7 @@ const HomeScreen = () => {
   const [mainPharmacy, setPharmacy] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [shuffledPharmacy, setShuffledPharmacy] = useState([]);
   // const [filteredProducts, setFilteredProducts] = useState([]);
   //const [searchKeyword, setSearchKeyword] = useState("");
 
@@ -97,9 +98,30 @@ const HomeScreen = () => {
     }
   }, []);
 
+  const shufflePharmacy = (array) => {
+    let currentIndex = array.length;
+    let temporaryValue, randomIndex;
+
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  };
+
   useEffect(() => {
     fetchPharmacyData(); // Initial data fetch when component mounts
   }, []);
+
+  useEffect(() => {
+    // Shuffle the mainPharmacy array whenever it changes
+    setShuffledPharmacy(shufflePharmacy(mainPharmacy));
+  }, [mainPharmacy]);
 
   const handlePressAddress = () => {
     navigation.navigate("SearchProductsScreen");
