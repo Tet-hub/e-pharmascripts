@@ -561,10 +561,11 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                       </Text>
                     </View>
                     <View style={styles.psSubtotalContainer}>
+                      <Text style={styles.psSubtotalText}>Delivery Fee</Text>
                       <Text style={styles.psSubtotalText}>
-                        Shipping Subtotal
+                        {"\u20B1"}
+                        {item.deliveryFee || "50.00"}
                       </Text>
-                      <Text style={styles.psSubtotalText}>₱50.00</Text>
                     </View>
                     <View style={styles.pdTotalContainer}>
                       <Text style={styles.pdTotalText}>Total</Text>

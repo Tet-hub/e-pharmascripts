@@ -24,6 +24,7 @@ import { db } from "../../firebase/firebase";
 import { BASE_URL2 } from "../../utilities/backendURL";
 import axios from "axios";
 import { getAuthToken, getCurrentUserId } from "../../src/authToken";
+import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
 
 const ViewCancelledOrderScreen = ({ navigation, route }) => {
   const deviceHeight = Dimensions.get("window").height;
@@ -341,8 +342,11 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
                     </Text>
                   </View>
                   <View style={styles.psSubtotalContainer}>
-                    <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
-                    <Text style={styles.psSubtotalText}>₱50.00</Text>
+                    <Text style={styles.psSubtotalText}>Delivery Fee</Text>
+                    <Text style={styles.psSubtotalText}>
+                      {"\u20B1"}
+                      {item.deliveryFee || "50.00"}
+                    </Text>
                   </View>
                 </View>
               </View>

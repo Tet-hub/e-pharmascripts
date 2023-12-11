@@ -272,8 +272,11 @@ const ViewCompletedOrderScreen = () => {
                     </Text>
                   </View>
                   <View style={styles.psSubtotalContainer}>
-                    <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
-                    <Text style={styles.psSubtotalText}>₱50.00</Text>
+                    <Text style={styles.psSubtotalText}>Delivery Fee</Text>
+                    <Text style={styles.psSubtotalText}>
+                      {"\u20B1"}
+                      {item.deliveryFee || "50.00"}
+                    </Text>
                   </View>
                 </View>
               </View>

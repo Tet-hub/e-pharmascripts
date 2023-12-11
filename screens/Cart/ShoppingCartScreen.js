@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   ToastAndroid,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useToast } from "react-native-toast-notifications";
 import { Iconify } from "react-native-iconify";
@@ -35,6 +36,7 @@ const ShoppingCartScreen = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const toast = useToast();
+  const [customer, setCustomer] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
   const [refreshing, setRefreshing] = useState(false);
@@ -46,9 +48,20 @@ const ShoppingCartScreen = () => {
       setLoading(true);
       const authToken = await getAuthToken();
       const customerId = authToken.userId;
-      if (!customerId) {
-        console.log("User ID is undefined or null.");
-        return;
+      if (customerId) {
+        const customerDocRef = doc(db, "customers", customerId);
+        const customerDocSnap = await getDoc(customerDocRef);
+
+        if (customerDocSnap.exists()) {
+          const customerData = customerDocSnap.data();
+          setCustomer(customerData);
+          console.log("Customer document found for customerId:", customerData);
+        } else {
+          console.log(
+            "Customer document not found for customerId:",
+            customerId
+          );
+        }
       }
 
       const cartConditions = [
@@ -190,40 +203,21 @@ const ShoppingCartScreen = () => {
       console.log("Error removing item from the database:", error);
     }
   };
-  const handleToValidateScreen = () => {
-    const selectedSellerId = new Set();
-    let selectedCartIds = [];
+  const handleToValidateCartScreen = () => {
+    const selectedCartIds = [];
     for (const cartItemId in selectedItems) {
       if (selectedItems[cartItemId]) {
-        const cartItem = cartItems.find((item) => item.id === cartItemId);
-        if (cartItem) {
-          selectedSellerId.add(cartItem.sellerInfo.sellerId);
-          selectedCartIds.push(cartItem.id);
-        }
+        selectedCartIds.push(cartItemId);
       }
     }
-    console.log("cart id:", selectedCartIds);
-    if (selectedCartIds.length == 0) {
+
+    if (selectedCartIds.length === 0) {
       ToastAndroid.show(
-        "Item/s to be checked out is empty!",
+        "Please select items to check out!",
         ToastAndroid.SHORT
       );
-    }
-    if (selectedSellerId.size === 1 && selectedCartIds.length > 0) {
-      // Proceed to the checkout screen
-      navigation.navigate("ToValidateScreen", { cartId: selectedCartIds });
-    } else if (selectedSellerId.size > 1 && selectedCartIds.length > 0) {
-      ToastAndroid.show(
-        "Please select items from the same seller to proceed!",
-        ToastAndroid.SHORT
-      );  
-      // toast.show("Please select items from the same seller to proceed!", {
-      //   type: "normal",
-      //   placement: "bottom",
-      //   duration: 3000,
-      //   offset: 10,
-      //   animationType: "slide-in",
-      // });
+    } else {
+      navigation.navigate("ToValidateCartScreen", { cartId: selectedCartIds });
     }
   };
 
@@ -424,12 +418,35 @@ const ShoppingCartScreen = () => {
                 {"\u20B1"}
                 {calculateTotalPrice()}
               </Text>
-              <TouchableOpacity
-                style={styles.ordernowButton}
-                onPress={handleToValidateScreen}
-              >
-                <Text style={styles.ordernowText}>CHECKOUT</Text>
-              </TouchableOpacity>
+              {customer.status !== "Verified" ? (
+                <>
+                  <TouchableOpacity
+                    style={styles.disabledbuynowView}
+                    onPress={() => {
+                      Alert.alert(
+                        "Verify Account",
+                        "Please verify your account first.",
+                        [
+                          {
+                            text: "OK",
+                            onPress: () => console.log("OK Pressed"),
+                          },
+                        ]
+                      );
+                    }}
+                  >
+                    <Iconify icon="ooui:cancel" size={23} color="#DC3642" />
+                    <Text style={styles.disabledBuynowText}>CHECKOUT</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <TouchableOpacity
+                  style={styles.ordernowButton}
+                  onPress={handleToValidateCartScreen}
+                >
+                  <Text style={styles.ordernowText}>CHECKOUT</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>

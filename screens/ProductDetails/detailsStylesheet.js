@@ -163,6 +163,22 @@ const styles = StyleSheet.create({
     padding: 10,
     width: "40%",
   },
+  disabledbuynowView: {
+    flexDirection: "row",
+    backgroundColor: "#D1D1D1",
+    borderRadius: 15,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    width: "40%",
+  },
+  disabledBuynowText: {
+    color: "black",
+    fontSize: 14,
+    fontWeight: 700,
+    marginLeft: 5,
+  },
   buynowText: {
     color: "white",
     fontSize: 14,

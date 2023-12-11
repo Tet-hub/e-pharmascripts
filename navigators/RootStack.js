@@ -25,6 +25,7 @@ import ViewCompletedOrderScreen from "../screens/ViewOrder/ViewCompletedOrderScr
 import ViewOrderScreen from "../screens/ViewOrder/ViewOrderScreen";
 import ViewCancelledOrderScreen from "../screens/ViewOrder/ViewCancelledOrderScreen";
 import ToValidateScreen from "../screens/ToValidate/ToValidateScreen";
+import ToValidateCartScreen from "../screens/ToValidate/ToValidateCartScreen";
 import PlaceOrderScreen from "../screens/PlaceOrder/PlaceOrderScreen";
 import ProductDetailScreen from "../screens/ProductDetails/ProductDetailScreen";
 import ApprovedProductDetailScreen from "../screens/ProductDetails/ApprovedProductDetailScreen";
@@ -238,6 +239,15 @@ const RootStack = () => {
           <Stack.Screen
             name="ToValidateScreen"
             component={ToValidateScreen}
+            options={{
+              headerTitle: () => <View></View>,
+              headerTintColor: "black",
+              headerRight: () => <CartNavigatorHeader />,
+            }}
+          />
+          <Stack.Screen
+            name="ToValidateCartScreen"
+            component={ToValidateCartScreen}
             options={{
               headerTitle: () => <View></View>,
               headerTintColor: "black",

@@ -57,7 +57,8 @@ const ToValidateScreen = ({ navigation, route }) => {
   const [sellerData, setSellerData] = useState(null);
   const [prescription, setPrescriptionRequired] = useState();
   const [btnLoading, setBtnLoading] = useState(false);
-
+  const [shippingFeeData, setShippingFeeData] = useState(null);
+  const [deliveryFee, setDeliveryFee] = useState(null);
   const productId = route.params?.productId;
   // const quantity = route.params?.quantity;
   const { cartId } = route.params;
@@ -72,6 +73,16 @@ const ToValidateScreen = ({ navigation, route }) => {
         const customerId = authToken.userId; // Get customerId from AsyncStorage
         const userData = await fetchSingleDocumentById(customerId, "customers");
         console.log("users:", userData.id);
+        const shippingFee = await fetchSingleDocumentById(
+          "orderSf",
+          "shippingFee"
+        );
+        if (shippingFee) {
+          setShippingFeeData(shippingFee);
+          setDeliveryFee(shippingFee.shippingFee);
+        } else {
+          setDeliveryFee("50.00");
+        }
 
         //fetching data from "ProductDetailsScreen"
         if (productId) {
@@ -166,7 +177,7 @@ const ToValidateScreen = ({ navigation, route }) => {
       }
 
       setProductSubtotal(subtotal);
-      const shippingFee = 50.0; // temp SF
+      const shippingFee = Number(deliveryFee); // temp SF
       const total = subtotal + shippingFee;
       setTotalPrice(total);
     }
@@ -212,16 +223,6 @@ const ToValidateScreen = ({ navigation, route }) => {
               }
               if (user.address == null) {
                 toast.show(`Please set your delivery address correctly`, {
-                  type: "normal ",
-                  placement: "bottom",
-                  duration: 3000,
-                  offset: 10,
-                  animationType: "slide-in",
-                });
-                return;
-              }
-              if (user.status !== "Verified") {
-                toast.show(`Please verify your account first`, {
                   type: "normal ",
                   placement: "bottom",
                   duration: 3000,
@@ -294,6 +295,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                 totalQuantity: totalQuantity,
                 paymentMethod: null,
                 orderSubTotalPrice: productSubtotal.toFixed(2),
+                deliveryFee: deliveryFee,
               };
               const orderId = await storeProductData("orders", data);
 
@@ -763,8 +765,11 @@ const ToValidateScreen = ({ navigation, route }) => {
                   </Text>
                 </View>
                 <View style={styles.psSubtotalContainer}>
-                  <Text style={styles.psSubtotalText}>Shipping Subtotal</Text>
-                  <Text style={styles.psSubtotalText}>₱50.00</Text>
+                  <Text style={styles.psSubtotalText}>Delivery Fee</Text>
+                  <Text style={styles.psSubtotalText}>
+                    {"\u20B1"}
+                    {deliveryFee}
+                  </Text>
                 </View>
                 <View style={styles.pdTotalContainer}>
                   <Text style={styles.pdTotalText}>Total</Text>

@@ -39,6 +39,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [item, setProductData] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [branches, setBranches] = useState([]);
+  const [customer, setCustomer] = useState([]);
   const productId = route.params?.productId;
   const toast = useToast();
   const [sellerId, setSellerId] = useState(null); // Initialize sellerId state
@@ -57,6 +58,26 @@ const ProductDetailScreen = ({ navigation, route }) => {
             const productData = await response.json();
             setProductData(productData);
 
+            const authToken = await getAuthToken();
+            const customerId = authToken.userId;
+            if (customerId) {
+              const customerDocRef = doc(db, "customers", customerId);
+              const customerDocSnap = await getDoc(customerDocRef);
+
+              if (customerDocSnap.exists()) {
+                const customerData = customerDocSnap.data();
+                setCustomer(customerData);
+                console.log(
+                  "Customer document found for customerId:",
+                  customerData
+                );
+              } else {
+                console.log(
+                  "Customer document not found for customerId:",
+                  customerId
+                );
+              }
+            }
             // Set the sellerId value obtained from productData
             const sellerId = productData.sellerId;
             setSellerId(sellerId);
@@ -114,7 +135,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [productId]);
 
@@ -399,17 +419,35 @@ const ProductDetailScreen = ({ navigation, route }) => {
               <Iconify icon="uil:cart" size={19} color="#EC6F56" />
               <Text style={styles.addtocartText}>Add to cart</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.buynowView}
-              onPress={() => {
-                navigation.navigate("ToValidateScreen", {
-                  productId: item.productId,
-                  quantity: quantity,
-                });
-              }}
-            >
-              <Text style={styles.buynowText}>BUY NOW</Text>
-            </TouchableOpacity>
+            {customer.status !== "Verified" ? (
+              <>
+                <TouchableOpacity
+                  style={styles.disabledbuynowView}
+                  onPress={() => {
+                    Alert.alert(
+                      "Verify Account",
+                      "Please verify your account first.",
+                      [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+                    );
+                  }}
+                >
+                  <Iconify icon="ooui:cancel" size={25} color="#DC3642" />
+                  <Text style={styles.disabledBuynowText}>BUY NOW</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity
+                style={styles.buynowView}
+                onPress={() => {
+                  navigation.navigate("ToValidateScreen", {
+                    productId: item.productId,
+                    quantity: quantity,
+                  });
+                }}
+              >
+                <Text style={styles.buynowText}>BUY NOW</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>
