@@ -1,16 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Switch,
-  Dimensions,
-  Image,
-  Button,
-  FlatList,
-  ActivityIndicator,
-  ScrollView,
-  RefreshControl,
-} from "react-native";
+import { View, Text } from "react-native";
 import { Iconify } from "react-native-iconify";
 import OrderSwitchTabs from "../../components/OrderSwitchTabs";
 import { Checkbox } from "expo-checkbox";
@@ -57,25 +45,140 @@ const OrderScreen = ({ route }) => {
   const [customerName, setCustomerName] = useState(null);
   const [outerLoading, setOuterLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [shouldLoadOrders, setShouldLoadOrders] = useState(true);
   const isFocused = useIsFocused();
 
-  const onSelectSwitch = (value) => {
-    setTrackerTab(value);
-  };
-  const { width, height } = Dimensions.get("window");
-  const formatDate = (timestamp) => {
-    const date = timestamp.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    return date; // Returns formatted date string
+  const getTrackerTabFromPlaceOrder = route.params?.tabIndexFromPlaceOrder;
+
+  console.log(
+    `Trackertab from placeOrder screen: ${getTrackerTabFromPlaceOrder}`
+  );
+
+  useEffect(() => {
+    if (getTrackerTabFromPlaceOrder === 2) {
+      fetchValidatedOrdersRealTime();
+    }
+  }, [isFocused, getTrackerTabFromPlaceOrder]);
+
+  //Focused Realtime for after puchasing place order
+  const fetchValidatedOrdersRealTime = async () => {
+    try {
+      setLoading(true);
+      console.log("Loading started...");
+
+      const authToken = await getAuthToken();
+      const currentUserId = authToken.userId;
+      console.log("Auth token and user ID fetched...");
+
+      const ordersRef = collection(db, "orders");
+
+      const q = query(
+        ordersRef,
+        where("customerId", "==", currentUserId),
+        where("status", "in", ["Validated"])
+      );
+
+      console.log("Query constructed:", q);
+
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        try {
+          console.log("Snapshot received...");
+
+          const ordersData = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          console.log("Orders data mapped from snapshot...");
+
+          const promises = ordersData.map(async (order) => {
+            try {
+              const conditions = [
+                {
+                  fieldName: "orderId",
+                  operator: "==",
+                  value: order.id,
+                },
+              ];
+
+              const apiUrl = buildQueryUrl("productList", conditions);
+              console.log("API URL:", apiUrl);
+
+              const response = await fetch(apiUrl, { method: "GET" });
+
+              if (response.ok) {
+                const products = await response.json();
+
+                const rateAndReviewRef = collection(db, "rateAndReview");
+                const ratedSnapshot = await getDocs(
+                  query(rateAndReviewRef, where("orderId", "==", order.id))
+                );
+                const isOrderRated = !ratedSnapshot.empty;
+
+                console.log("Order products and rating data fetched...");
+                return { products, isOrderRated };
+              } else {
+                console.log("API request failed with status:", response.status);
+                setLoading(false);
+              }
+            } catch (error) {
+              console.error("Error fetching order data:", error);
+              setLoading(false);
+            }
+          });
+
+          const results = await Promise.all(promises);
+          console.log("Promises resolved...");
+
+          const filteredResults = results.filter(Boolean);
+
+          const orderData = ordersData.map((order, index) => ({
+            ...order,
+            isRated: filteredResults[index]?.isOrderRated || false,
+          }));
+          const orderFieldPriority = ["completedAt", "orderedAt", "createdAt"];
+
+          const orderByField = orderFieldPriority.find((field) =>
+            orderData.some((order) => order[field])
+          );
+
+          const orderBy = orderByField || "createdAt"; // If none of the fields exist, default to "createdAt"
+
+          const orderDataSorted = orderData.sort((a, b) => {
+            const dateA = a[orderBy] || 0; // Using 0 if the field doesn't exist for comparison
+            const dateB = b[orderBy] || 0;
+
+            return dateB - dateA; // Descending order
+          });
+          console.log("Final order data processed...");
+          setOrderData(orderDataSorted);
+          setfilteredProductData(
+            filteredResults.map((result) => result.products)
+          );
+        } catch (error) {
+          console.log("Error processing fetched data: ", error);
+          setLoading(false);
+        } finally {
+          setLoading(false);
+          console.log("Loading completed...");
+        }
+      });
+
+      return () => {
+        unsubscribe();
+        setLoading(false);
+        console.log("Unsubscribed from snapshot updates...");
+      };
+    } catch (error) {
+      console.log("Error fetching orders: ", error);
+      setLoading(false);
+    }
   };
 
   // Define the fetchOrdersRealTime function
   const fetchOrdersRealTime = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       console.log("Loading started...");
 
       const authToken = await getAuthToken();
@@ -220,26 +323,29 @@ const OrderScreen = ({ route }) => {
     }
   };
   const onRefresh = async () => {
-    setRefreshing(true); // Set refreshing to true to display the loading indicator
+    setRefreshing(true);
 
     try {
-      await fetchOrdersRealTime(); // Call the function responsible for fetching orders
+      await fetchOrdersRealTime();
     } catch (error) {
       console.log("Error while refreshing orders:", error);
     } finally {
-      setRefreshing(false); // Set refreshing back to false once the refresh is completed
+      setRefreshing(false);
     }
   };
   // Use fetchOrdersRealTime in the initial useEffect
   useEffect(() => {
-    fetchOrdersRealTime();
-  }, [trackerTab, isFocused]);
-
-  useEffect(() => {
-    if (isFocused) {
-      setLoading(true);
+    if (shouldLoadOrders) {
+      fetchOrdersRealTime();
+      setShouldLoadOrders(false);
     }
-  }, [isFocused]);
+  }, [shouldLoadOrders, trackerTab]);
+
+  const onSelectSwitch = (value) => {
+    setTrackerTab(value);
+    setShouldLoadOrders(true);
+    setLoading(true);
+  };
 
   const handleNavigateToHome = () => {
     navigation.navigate("HomeScreen");
