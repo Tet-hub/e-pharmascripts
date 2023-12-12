@@ -18,7 +18,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useToast } from "react-native-toast-notifications";
 import { ScrollView } from "react-native-gesture-handler";
-import { Timestamp } from "firebase/firestore";
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
 import { storeProductData } from "../../database/storing/storeData";
 import { getAuthToken } from "../../src/authToken";
 import { updateById } from "../../database/update/updateDataById";
@@ -26,6 +31,9 @@ import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
 import styles from "./stylesheet";
 import * as ImagePicker from "expo-image-picker";
 import renderOrderItems from "./orderItem";
+import { BASE_URL2 } from "../../utilities/backendURL";
+import { db } from "../../firebase/firebase";
+import axios from "axios";
 const ToValidateScreen = ({ navigation, route }) => {
   const toast = useToast();
   const [itemSelectedImages, setItemSelectedImages] = useState([]);
@@ -319,6 +327,51 @@ const ToValidateScreen = ({ navigation, route }) => {
                     deliveryFee: deliveryFee,
                   };
                   const orderId = await storeProductData("orders", data);
+
+                  const userToken = data.customerId;
+
+                  const sellerResponse = await axios.get(
+                    `${BASE_URL2}/get/getSeller/${sellerId}`
+                  );
+                  const sellerFcmData = sellerResponse.data;
+                  const sellerFcmToken = sellerFcmData.fcmToken;
+
+                  // Send notification to seller
+                  if (!sellerFcmToken || sellerFcmToken.length === 0) {
+                    // Save the notification to the 'notifications' collection in Firestore
+                    await addDoc(collection(db, "notifications"), {
+                      title: "New Order Validation",
+                      body: `Please validate the newly arrived Order ${orderId}.`,
+                      receiverId: sellerId,
+                      senderId: userToken,
+                      read: false,
+                      createdAt: serverTimestamp(),
+                    });
+                  } else if (sellerFcmToken) {
+                    try {
+                      const response = await axios.post(
+                        `${BASE_URL2}/post/sendToFCM`,
+                        {
+                          title: "New Order Validation",
+                          body: `Please validate the newly arrived Order ${orderId}.`,
+                          fcmToken: sellerFcmToken,
+                        }
+                      );
+                      console.log("Notification sent to FCM:", response.data);
+                    } catch (error) {
+                      console.error("Error sending notification:", error);
+                    }
+
+                    // Save the notification to the 'notifications' collection in Firestore
+                    await addDoc(collection(db, "notifications"), {
+                      title: "New Order Validation",
+                      body: `Please validate the newly arrived Order ${orderId}.`,
+                      receiverId: sellerId,
+                      senderId: userToken,
+                      read: false,
+                      createdAt: serverTimestamp(),
+                    });
+                  }
 
                   for (const product of products) {
                     const pImage = product.img

@@ -136,9 +136,14 @@ const ViewCancelledOrderScreen = ({ navigation, route }) => {
             try {
               const userToken = item.customerId;
               const sellerId = item.sellerId;
-              const sellerFcmToken = item.sellerFcmToken;
 
-              if (!sellerFcmToken || sellerFcmToken === "null") {
+              const sellerResponse = await axios.get(
+                `${BASE_URL2}/get/getSeller/${sellerId}`
+              );
+              const sellerData = sellerResponse.data;
+              const sellerFcmToken = sellerData.fcmToken;
+
+              if (!sellerFcmToken || sellerFcmToken.length === 0) {
                 // Save the notification to the 'notifications' collection in Firestore
                 await addDoc(collection(db, "notifications"), {
                   title: "Order Cancelled",

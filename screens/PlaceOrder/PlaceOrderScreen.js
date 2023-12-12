@@ -60,8 +60,6 @@ const PlaceOrderScreen = ({ navigation, route }) => {
   console.log(`Amount in Dollars : ${amountInUSD.toFixed(2)}`);
 
   const customerId = item.customerId;
-  const customerExpoToken = item.customerExpoToken;
-  const sellerFcmToken = item.sellerFcmToken;
   const sellerId = item.sellerId;
 
   useEffect(() => {
@@ -204,7 +202,13 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                     { merge: true }
                   );
 
-                  if (!sellerFcmToken || sellerFcmToken === "null") {
+                  const sellerResponse = await axios.get(
+                    `${BASE_URL2}/get/getSeller/${sellerId}`
+                  );
+                  const sellerData = sellerResponse.data;
+                  const sellerFcmToken = sellerData.fcmToken;
+
+                  if (!sellerFcmToken || sellerFcmToken.length === 0) {
                     // Save the notification to the 'notifications' collection in Firestore
                     await addDoc(collection(db, "notifications"), {
                       title: "New Order Arrived",
@@ -271,7 +275,13 @@ const PlaceOrderScreen = ({ navigation, route }) => {
                   { merge: true }
                 );
 
-                if (!sellerFcmToken || sellerFcmToken === "null") {
+                const sellerResponse = await axios.get(
+                  `${BASE_URL2}/get/getSeller/${sellerId}`
+                );
+                const sellerData = sellerResponse.data;
+                const sellerFcmToken = sellerData.fcmToken;
+
+                if (!sellerFcmToken || sellerFcmToken.length === 0) {
                   // Save the notification to the 'notifications' collection in Firestore
                   await addDoc(collection(db, "notifications"), {
                     title: "New Order Arrived",
