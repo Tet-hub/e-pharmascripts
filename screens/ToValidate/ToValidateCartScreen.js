@@ -2,23 +2,17 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Image,
   ActivityIndicator,
   FlatList,
   Alert,
 } from "react-native";
 import { Iconify } from "react-native-iconify";
-// import ImagePicker from "react-native-image-picker";
-// import * as ImagePicker from "react-native-image-picker";
-import { storage } from "@react-native-firebase/storage";
 import {
   getStorage,
   ref,
   uploadBytes,
-  uploadFile,
   getDownloadURL,
 } from "@firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -36,8 +30,10 @@ import { updateById } from "../../database/update/updateDataById";
 import { fetchSingleDocumentById } from "../../database/fetchSingleDocById";
 import styles from "./stylesheet";
 import * as ImagePicker from "expo-image-picker";
-import { db } from "../../firebase/firebase";
 import renderOrderItems from "./orderItem";
+import { BASE_URL2 } from "../../utilities/backendURL";
+import { db } from "../../firebase/firebase";
+import axios from "axios";
 const ToValidateScreen = ({ navigation, route }) => {
   const toast = useToast();
   const [itemSelectedImages, setItemSelectedImages] = useState([]);
@@ -51,7 +47,6 @@ const ToValidateScreen = ({ navigation, route }) => {
   const [deliveryFee, setDeliveryFee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sellerData, setSellerData] = useState(null);
-  const [prescription, setPrescriptionRequired] = useState();
   const [btnLoading, setBtnLoading] = useState(false);
 
   const productId = route.params?.productId;
@@ -79,7 +74,7 @@ const ToValidateScreen = ({ navigation, route }) => {
           setDeliveryFee("50.00");
         }
         console.log("sf:", shippingFee);
-        console.log("delivery fee", deliveryFee); //how to save this in a usestae or const so i can use it anywhere in my screen to calculate
+        console.log("delivery fee", deliveryFee);
 
         //fetching data from "ProductDetailsScreen"
         if (productId) {
@@ -153,11 +148,11 @@ const ToValidateScreen = ({ navigation, route }) => {
               fetchedProductData.map((data) => data.id)
             );
           } catch (error) {
-            console.error("Error fetching data:", error);
+            console.log("Error fetching data:", error);
           }
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
         setLoading(false); // Set Loading to false on error
       } finally {
         setLoading(false);
@@ -189,14 +184,20 @@ const ToValidateScreen = ({ navigation, route }) => {
   }, [item, cartId, quantity]);
 
   const handlePlaceOrderScreen = async () => {
-    for (const sellerGroup of Object.values(groupedProducts)) {
-      const { products } = sellerGroup;
+    const attachmentsBySeller = {};
 
-      if (!user || !products || !sellerData) {
-        console.error("User data, product data, or seller data is missing.");
-        continue;
+    for (const image of itemSelectedImages) {
+      const { sellerId } = image;
+      if (!attachmentsBySeller[sellerId]) {
+        attachmentsBySeller[sellerId] = [];
       }
+      attachmentsBySeller[sellerId].push(image);
+    }
+    for (const sellerGroup of Object.values(groupedProducts)) {
+      const { products, sellerId } = sellerGroup;
       let requiresPrescription = false;
+
+      // Check if any product from this seller requires a prescription
       for (const product of products) {
         if (product.requiresPrescription === "Yes") {
           requiresPrescription = true;
@@ -204,15 +205,25 @@ const ToValidateScreen = ({ navigation, route }) => {
         }
       }
 
-      if (requiresPrescription && itemSelectedImages.length === 0) {
-        toast.show(`Please add your prescription image first`, {
-          type: "normal",
-          placement: "bottom",
-          duration: 3000,
-          offset: 10,
-          animationType: "slide-in",
-        });
-        return;
+      if (requiresPrescription) {
+        // Check if any image has been added for each seller
+        const sellerImages = itemSelectedImages.filter(
+          (image) => image.sellerId === sellerId
+        );
+        //display toast message
+        if (sellerImages.length === 0) {
+          const sellerName =
+            sellerData.find((seller) => seller.id === sellerId)?.branch ||
+            "Seller";
+          toast.show(`Please add your prescription image/s for ${sellerName}`, {
+            type: "normal",
+            placement: "bottom",
+            duration: 3000,
+            offset: 10,
+            animationType: "slide-in",
+          });
+          return;
+        }
       }
     }
     Alert.alert(
@@ -232,7 +243,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                 const { products, sellerId } = sellerGroup;
 
                 if (!user || !products || !sellerData) {
-                  console.error(
+                  console.log(
                     "User data, product data, or seller data is missing."
                   );
                   continue;
@@ -262,7 +273,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                     "sellers"
                   );
                   if (!seller) {
-                    console.error("Seller data is missing.");
+                    console.log("Seller data is missing.");
                     continue;
                   }
                   const sellerBranchName = seller.branch;
@@ -317,27 +328,51 @@ const ToValidateScreen = ({ navigation, route }) => {
                   };
                   const orderId = await storeProductData("orders", data);
 
-                  // Upload prescription images if required
-                  if (requiresPrescription) {
-                    for (const image of itemSelectedImages) {
-                      try {
-                        const downloadUrl = await uploadImageAsync(image.uri);
-                        const attachmentData = {
-                          orderId: orderId,
-                          sellerId: sellerId,
-                          img: downloadUrl,
-                        };
-                        const attachmentId = await storeProductData(
-                          "attachmentList",
-                          attachmentData
-                        );
-                      } catch (error) {
-                        console.error("Error uploading image:", error);
-                      }
+                  const userToken = data.customerId;
+
+                  const sellerResponse = await axios.get(
+                    `${BASE_URL2}/get/getSeller/${sellerId}`
+                  );
+                  const sellerFcmData = sellerResponse.data;
+                  const sellerFcmToken = sellerFcmData.fcmToken;
+
+                  // Send notification to seller
+                  if (!sellerFcmToken || sellerFcmToken.length === 0) {
+                    // Save the notification to the 'notifications' collection in Firestore
+                    await addDoc(collection(db, "notifications"), {
+                      title: "New Order Validation",
+                      body: `Please validate the newly arrived Order ${orderId}.`,
+                      receiverId: sellerId,
+                      senderId: userToken,
+                      read: false,
+                      createdAt: serverTimestamp(),
+                    });
+                  } else if (sellerFcmToken) {
+                    try {
+                      const response = await axios.post(
+                        `${BASE_URL2}/post/sendToFCM`,
+                        {
+                          title: "New Order Validation",
+                          body: `Please validate the newly arrived Order ${orderId}.`,
+                          fcmToken: sellerFcmToken,
+                        }
+                      );
+                      console.log("Notification sent to FCM:", response.data);
+                    } catch (error) {
+                      console.error("Error sending notification:", error);
                     }
+
+                    // Save the notification to the 'notifications' collection in Firestore
+                    await addDoc(collection(db, "notifications"), {
+                      title: "New Order Validation",
+                      body: `Please validate the newly arrived Order ${orderId}.`,
+                      receiverId: sellerId,
+                      senderId: userToken,
+                      read: false,
+                      createdAt: serverTimestamp(),
+                    });
                   }
 
-                  // Store order details
                   for (const product of products) {
                     const pImage = product.img
                       ? product.img
@@ -360,7 +395,30 @@ const ToValidateScreen = ({ navigation, route }) => {
                     );
                   }
 
-                  // Update product stock
+                  const sellerAttachments = attachmentsBySeller[sellerId];
+                  if (
+                    requiresPrescription &&
+                    sellerAttachments &&
+                    sellerAttachments.length > 0
+                  ) {
+                    for (const image of sellerAttachments) {
+                      try {
+                        const downloadUrl = await uploadImageAsync(image.uri);
+                        const attachmentData = {
+                          orderId: orderId,
+                          sellerId: image.sellerId,
+                          img: downloadUrl,
+                        };
+                        const attachmentId = await storeProductData(
+                          "attachmentList",
+                          attachmentData
+                        );
+                      } catch (error) {
+                        console.log("Error uploading image:", error);
+                      }
+                    }
+                  }
+
                   for (const product of products) {
                     const updatedStock = product.stock - product.quantity;
                     await updateById(
@@ -383,12 +441,12 @@ const ToValidateScreen = ({ navigation, route }) => {
                     }
                   }
                 }
-
-                navigation.navigate("OrderScreen");
               }
             } catch (error) {
-              console.error("Error placing the order:", error);
+              console.log("Error placing the order:", error);
+              setBtnLoading(false);
             } finally {
+              navigation.navigate("OrderScreen");
               setBtnLoading(false);
             }
           },
@@ -414,56 +472,67 @@ const ToValidateScreen = ({ navigation, route }) => {
       console.log("Download URL:", url);
       return url;
     } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
+      console.log("Error uploading image:", error);
     }
   };
 
-  const handleItemSelection = async () => {
-    let results = await ImagePicker.launchImageLibraryAsync({
-      quality: 1,
-      // aspect: [4, 3],
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-    });
+  const handleItemSelection = async (sellerGroup) => {
+    try {
+      let results = await ImagePicker.launchImageLibraryAsync({
+        quality: 1,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+      });
 
-    if (!results.canceled) {
-      const selectedAssets = results.assets;
-      const newSelectedImages = [
-        ...itemSelectedImages,
-        ...selectedAssets.map((asset) => ({ uri: asset.uri })),
-      ];
-      setItemSelectedImages(newSelectedImages);
+      if (!results.canceled) {
+        const sellerId = sellerGroup.sellerId;
+        const selectedAssets = results.assets;
+        // Store selected images with their respective seller IDs
+        const newSelectedImages = selectedAssets.map((asset) => ({
+          uri: asset.uri,
+          sellerId: sellerId,
+        }));
+        setItemSelectedImages((prevImages) => [
+          ...prevImages,
+          ...newSelectedImages,
+        ]);
 
-      const newSelectedImageNames = selectedAssets.map((asset) =>
-        asset.uri.split("/").pop()
-      );
-      const updatedImageNames = [
-        ...itemSelectedImageNames,
-        ...newSelectedImageNames,
-      ];
-      setItemSelectedImageNames(updatedImageNames);
+        const newSelectedImageNames = selectedAssets.map((asset) =>
+          asset.uri.split("/").pop()
+        );
+        const updatedImageNames = [
+          ...itemSelectedImageNames,
+          ...newSelectedImageNames,
+        ];
+        setItemSelectedImageNames(updatedImageNames);
 
-      console.log("Selected Images:", newSelectedImages);
-      console.log("Selected Image Names:", updatedImageNames);
+        console.log("Selected Images:", newSelectedImages);
+        console.log("Selected Image Names:", updatedImageNames);
+      }
+    } catch (error) {
+      console.log("Error selecting image:", error);
     }
   };
-  const removePrescImage = async (imageUri, imageName) => {
+
+  const removePrescImage = async (imageUri, sellerId, imageName) => {
     try {
       // Filter out the selected image and its name from the state
       const updatedImages = itemSelectedImages.filter(
-        (image) => image.uri !== imageUri
+        (image) => image.uri !== imageUri || image.sellerId !== sellerId
       );
       setItemSelectedImages(updatedImages);
 
       const updatedImageNames = itemSelectedImageNames.filter(
-        (name) => name !== imageName
+        (name, index) =>
+          itemSelectedImages[index].uri !== imageUri ||
+          itemSelectedImages[index].sellerId !== sellerId ||
+          name !== imageName
       );
       setItemSelectedImageNames(updatedImageNames);
 
       console.log("Image removed successfully.");
     } catch (error) {
-      console.error("Error removing the image:", error);
+      console.log("Error removing the image:", error);
     }
   };
 
@@ -610,7 +679,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                             <View style={styles.uploadContainer}>
                               <TouchableOpacity
                                 style={styles.uploadButton}
-                                onPress={handleItemSelection}
+                                onPress={() => handleItemSelection(sellerGroup)}
                               >
                                 <Iconify
                                   icon="zondicons:add-outline"
@@ -636,7 +705,7 @@ const ToValidateScreen = ({ navigation, route }) => {
                         <View style={styles.uploadContainer}>
                           <TouchableOpacity
                             style={styles.uploadButton}
-                            onPress={handleItemSelection}
+                            onPress={() => handleItemSelection(sellerGroup)}
                           >
                             <Iconify
                               icon="zondicons:add-outline"
@@ -655,63 +724,65 @@ const ToValidateScreen = ({ navigation, route }) => {
                       {sellerGroup.products.some(
                         (product) => product.requiresPrescription === "Yes"
                       ) &&
-                        itemSelectedImages.map((image, index) => {
-                          if (image.uri) {
-                            return (
-                              <View
-                                key={index}
-                                style={styles.imageAndNameContainer}
-                              >
-                                <View style={styles.xButtonWrapper}>
-                                  <TouchableOpacity
-                                    onPress={() =>
-                                      removePrescImage(
-                                        itemSelectedImages[index].uri,
-                                        itemSelectedImageNames[index]
-                                      )
-                                    }
-                                  >
-                                    <Iconify
-                                      icon="clarity:remove-solid"
-                                      size={25}
-                                      color="#FF6666"
-                                    />
-                                  </TouchableOpacity>
-                                </View>
-                                <View style={styles.selectedImageCont}>
-                                  <Image
-                                    source={{
-                                      uri: itemSelectedImages[index].uri,
-                                    }}
-                                    style={styles.selectedImage}
-                                    onError={() =>
-                                      console.log("Error loading image")
-                                    }
-                                  />
-                                </View>
-                                <Text
-                                  numberOfLines={1}
-                                  style={styles.selectedImageName}
+                        itemSelectedImages
+                          .filter(
+                            (image) => image.sellerId === sellerGroup.sellerId
+                          )
+                          .map((image, index) => {
+                            if (image.uri) {
+                              return (
+                                <View
+                                  key={index}
+                                  style={styles.imageAndNameContainer}
                                 >
-                                  {itemSelectedImageNames[index]}
-                                </Text>
-                              </View>
-                            );
-                          } else {
-                            // Handle the case when the 'uri' property is not present
-                            return (
-                              <View key={index}>
-                                <Text style={styles.errorMessage}>
-                                  Image URI not found
-                                </Text>
-                              </View>
-                            );
-                          }
-                        })}
+                                  <View style={styles.xButtonWrapper}>
+                                    <TouchableOpacity
+                                      onPress={() =>
+                                        removePrescImage(
+                                          image.uri,
+                                          image.sellerId,
+                                          itemSelectedImageNames[index]
+                                        )
+                                      }
+                                    >
+                                      <Iconify
+                                        icon="clarity:remove-solid"
+                                        size={25}
+                                        color="#FF6666"
+                                      />
+                                    </TouchableOpacity>
+                                  </View>
+                                  <View style={styles.selectedImageCont}>
+                                    <Image
+                                      source={{ uri: image.uri }}
+                                      style={styles.selectedImage}
+                                      onError={() =>
+                                        console.log("Error loading image")
+                                      }
+                                    />
+                                  </View>
+                                  <Text
+                                    numberOfLines={1}
+                                    style={styles.selectedImageName}
+                                  >
+                                    {itemSelectedImageNames[index]}
+                                  </Text>
+                                </View>
+                              );
+                            } else {
+                              return (
+                                <View key={index}>
+                                  <Text style={styles.errorMessage}>
+                                    Image URI not found
+                                  </Text>
+                                </View>
+                              );
+                            }
+                          })}
                     </View>
                   </View>
-                  <View style={styles.separator0} />
 
+                  <View style={styles.separator0} />
                   {/* Payment Details Section */}
                   <View style={styles.pmentDetailsContainer}>
                     <Text style={styles.pmentDetailsText}>

@@ -272,13 +272,7 @@ const ToValidateScreen = ({ navigation, route }) => {
               } else if (quantity) {
                 totalQuantity = quantity;
               }
-              const sellerFcmToken = sellerData.fcmToken
-                ? sellerData.fcmToken
-                : "null";
 
-              const customerExpoToken = user.expoPushToken
-                ? user.expoPushToken
-                : "null";
               //"orders" collection
               const data = {
                 customerId: user.id,
@@ -289,8 +283,6 @@ const ToValidateScreen = ({ navigation, route }) => {
                 sellerId: sellerData.id,
                 status: "Pending Validation",
                 createdAt: orderCreatedTimestamp,
-                sellerFcmToken: sellerFcmToken,
-                customerExpoToken: customerExpoToken,
                 branchName: sellerData.branch,
                 totalQuantity: totalQuantity,
                 paymentMethod: null,
@@ -302,8 +294,14 @@ const ToValidateScreen = ({ navigation, route }) => {
               const sellerId = data.sellerId;
               const userToken = data.customerId;
 
+              const sellerResponse = await axios.get(
+                `${BASE_URL2}/get/getSeller/${sellerId}`
+              );
+              const sellerFcmData = sellerResponse.data;
+              const sellerFcmToken = sellerFcmData.fcmToken;
+
               // Send notification to seller
-              if (!sellerFcmToken || sellerFcmToken === "null") {
+              if (!sellerFcmToken || sellerFcmToken.length === 0) {
                 // Save the notification to the 'notifications' collection in Firestore
                 await addDoc(collection(db, "notifications"), {
                   title: "New Order Validation",

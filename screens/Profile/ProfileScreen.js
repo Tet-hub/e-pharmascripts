@@ -18,6 +18,7 @@ import styles from "./stylesheet";
 import { AuthContext } from "../../src/context";
 import { BASE_URL2 } from "../../utilities/backendURL";
 import axios from "axios";
+import { registerForPushNotificationsAsync } from "../Notification/NotificationScreen";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -28,6 +29,17 @@ const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [fetchedStatus, setFetchedStatus] = useState(null);
+  const [expoPushToken, setExpoPushToken] = useState(null);
+
+  useEffect(() => {
+    // Fetch the Expo push token during component mount
+    const fetchExpoPushToken = async () => {
+      const token = await registerForPushNotificationsAsync();
+      setExpoPushToken(token);
+    };
+
+    fetchExpoPushToken();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,9 +111,12 @@ const ProfileScreen = () => {
             const authToken = await getAuthToken();
             const userId = authToken.userId;
 
-            await axios.patch(`${BASE_URL2}/patch/logout/${userId}`, {
-              expoPushToken: "null",
-            });
+            await axios.post(
+              `${BASE_URL2}/post/customers/removeExpoPushToken/${userId}`,
+              {
+                expoPushToken: expoPushToken,
+              }
+            );
             // Call the signOut function to clear the token
             signOut();
           },
